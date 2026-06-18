@@ -8,6 +8,8 @@ on:
 jobs:
   monorepo:
     runs-on: ubuntu-latest
+    env:
+      NX_DAEMON: false
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
