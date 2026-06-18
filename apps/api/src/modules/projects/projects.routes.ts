@@ -15,9 +15,13 @@ export const projectsRoutes = new Elysia({ prefix: '/projects', tags: ['projects
       }),
     { query: ListProjectsQuery },
   )
-  .get('/:slug', async ({ params, status }) => {
-    const project = await projectsService.getBySlug(params.slug)
-    if (!project) return status(404, { message: 'Project not found' })
-    return project
-  }, { params: t.Object({ slug: t.String() }) })
+  .get(
+    '/:slug',
+    async ({ params, status }) => {
+      const project = await projectsService.getBySlug(params.slug)
+      if (!project) return status(404, { message: 'Project not found' })
+      return project
+    },
+    { params: t.Object({ slug: t.String() }) },
+  )
   .post('/', ({ body }) => projectsService.create(body), { body: CreateProjectBody })

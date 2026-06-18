@@ -3,7 +3,9 @@
   "compilerOptions": {
     "noEmit": false,
     "outDir": "dist",
-    "declaration": false
+    "declaration": false,
+    "rootDir": "src"
   },
-  "exclude": ["src/**/*.test.ts"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "vitest.config.ts"]
 }

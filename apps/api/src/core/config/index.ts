@@ -7,7 +7,10 @@ const required = (key: string, fallback?: string): string => {
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
-  databaseUrl: required('DATABASE_URL', 'postgres://postgres:postgres@localhost:5432/crypto_watcher'),
+  databaseUrl: required(
+    'DATABASE_URL',
+    'postgres://postgres:postgres@localhost:5432/crypto_watcher',
+  ),
   logLevel: process.env.LOG_LEVEL ?? 'info',
   rpcUrl: process.env.RPC_URL ?? 'http://localhost:8545',
 } as const

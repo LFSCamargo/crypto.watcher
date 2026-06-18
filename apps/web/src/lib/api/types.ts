@@ -1,11 +1,6 @@
 // Domain types mirror docs/BACKEND.mdc. Keep in sync with the API OpenAPI schema.
 
-export type ProjectState =
-  | 'in_analysis'
-  | 'ready'
-  | 'voting'
-  | 'closed'
-  | 'analyzed'
+export type ProjectState = 'in_analysis' | 'ready' | 'voting' | 'closed' | 'analyzed'
 
 export interface Project {
   id: string

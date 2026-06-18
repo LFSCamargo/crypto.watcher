@@ -2,12 +2,7 @@ import type { Generated } from 'kysely'
 
 // DB types mirror docs/BACKEND.mdc "SQL Data Modeling". Keep in sync.
 
-export type ProjectState =
-  | 'in_analysis'
-  | 'ready'
-  | 'voting'
-  | 'closed'
-  | 'analyzed'
+export type ProjectState = 'in_analysis' | 'ready' | 'voting' | 'closed' | 'analyzed'
 
 export interface UsersTable {
   id: Generated<string>

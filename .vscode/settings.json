@@ -1,0 +1,25 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [
+    { "directory": "apps/api", "changeProcessCWD": true },
+    { "directory": "apps/web", "changeProcessCWD": true }
+  ],
+  "solidity.packageDefaultDependenciesDirectory": "contracts/lib",
+  "solidity.remappings": [
+    "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
+    "forge-std/=contracts/lib/forge-std/src/"
+  ],
+  "solidity.compileUsingRemoteVersion": "v0.8.26",
+  "files.associations": {
+    "*.mdc": "markdown"
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.nx": true,
+    "contracts/out": true,
+    "contracts/cache": true
+  }
+}

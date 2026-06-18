@@ -30,7 +30,11 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('updated_at', 'timestamptz')
     .execute()
 
-  await db.schema.createIndex('projects_state_idx').on('projects').column('state').execute()
+  await db.schema
+    .createIndex('projects_state_idx')
+    .on('projects')
+    .column('state')
+    .execute()
 
   await db.schema
     .createTable('comments')
