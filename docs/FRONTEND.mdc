@@ -1,0 +1,275 @@
+---
+alwaysApply: true
+---
+
+# Crypto Watcher — Frontend
+
+> Phase tags (`MVP`, `Phase 1`, `Phase 2`, `Phase 3`, `Final`) cite
+> [ROADMAP](./ROADMAP.mdc). The UI consumes the API in [BACKEND](./BACKEND.mdc)
+> and reads on-chain data/contracts in [CONTRACTS](./CONTRACTS.mdc). Keep this
+> file in sync with the actual `apps/web/` implementation (see the docs-sync rule
+> in `.cursor/rules/`).
+
+## Tech Stack
+
+From the [README](../README.md): Vite + React + TypeScript + TailwindCSS,
+Shadcn/UI, Zustand, React Hook Form, React Router, Sonner, Phosphor Icons.
+Web3: RainbowKit, Wagmi, Viem (+ viem-react). Tests: Vitest + Testing Library
+(unit/integration) and Playwright (e2e). Monorepo via Nx + Bun.
+
+## Modular Folder Structure
+
+The web app is feature-modular. Each feature owns its components, hooks, store
+slice, API client and tests. Shared primitives live under `components/ui`
+(Shadcn) and `lib/`.
+
+```
+apps/
+└── web/
+    ├── index.html
+    ├── vite.config.ts
+    ├── src/
+    │   ├── main.tsx                 # App bootstrap + providers
+    │   ├── app/
+    │   │   ├── router.tsx           # React Router routes
+    │   │   ├── providers.tsx        # Wagmi/RainbowKit/Query/Theme providers
+    │   │   └── layout/              # App shell, nav, footer
+    │   ├── components/
+    │   │   └── ui/                  # Shadcn/UI primitives (shared)
+    │   ├── lib/                     # api client, wagmi/viem config, utils
+    │   │   ├── api/                 # typed API client (maps to BACKEND)
+    │   │   ├── web3/                # wagmi config, contract ABIs/hooks
+    │   │   └── utils/
+    │   ├── store/                   # Zustand root store + shared slices
+    │   ├── features/                # Feature modules
+    │   │   ├── projects/            # Catalog + project detail        [MVP]
+    │   │   │   ├── components/
+    │   │   │   ├── hooks/
+    │   │   │   ├── api/
+    │   │   │   ├── store.ts         # Zustand slice
+    │   │   │   ├── routes.tsx
+    │   │   │   └── __tests__/
+    │   │   ├── comments/            # Public commenting               [MVP]
+    │   │   ├── auth/                # Wallet connect + SIWE login      [MVP]
+    │   │   ├── voting/              # On-chain voting UI               [MVP]
+    │   │   ├── scoring/             # Score display/visualization      [MVP]
+    │   │   ├── governance/         # Proposals, vote, results          [MVP]
+    │   │   ├── reputation/         # Reputation profile/eligibility    [MVP→Phase 1]
+    │   │   ├── rewards/            # Voter rewards UI                  [Phase 1]
+    │   │   └── notifications/      # In-app notification center        [Phase 1]
+    │   └── styles/                  # Tailwind base + theme
+    ├── e2e/                         # Playwright tests
+    └── package.json
+```
+
+> Each feature is self-contained: components/hooks/api/store/tests. Cross-feature
+> sharing goes through `lib/`, `components/ui/` or `store/`, never by importing
+> another feature's internals.
+
+## Features by Phase
+
+### projects `[MVP]`
+- Project catalog (list + filters) and project detail page.
+- Lifecycle status badges (`In analysis → Ready → Voting → Closed → Analyzed`).
+- Score visualization on the detail page.
+- Community submission form. `[Phase 2]`
+
+### comments `[MVP]`
+- Public comment thread (read by all, post when authenticated).
+
+### auth `[MVP]`
+- Wallet connect via RainbowKit, SIWE-style login, session-aware UI.
+
+### voting `[MVP]`
+- Cast votes on a project's contract via Wagmi/Viem.
+- Eligibility-aware UI (disable/explain when not eligible).
+- Tiered vote-weight display. `[Phase 1]`
+
+### scoring `[MVP]`
+- Score breakdown + charts.
+- Enriched external-signal display. `[Phase 3]`
+
+### governance — launch requirement
+- View proposals, cast governance votes, see results (Governor + token). `[MVP]`
+- Community proposal creation UI. `[Phase 1]`
+- Vote delegation UX (`ERC20Votes`). `[Phase 2]`
+- Full DAO/treasury dashboards. `[Final]`
+
+### reputation `[MVP → Phase 1]`
+- Show eligibility + basic reputation. `[MVP]`
+- Detailed multi-factor reputation profile. `[Phase 1]`
+
+### rewards `[Phase 1]`
+- Display earned rewards and slashing history.
+
+### notifications `[Phase 1]`
+- In-app notification center for lifecycle + governance events.
+
+### Platform & UX
+- Toasts via Sonner, icons via Phosphor, forms via React Hook Form. `[MVP]`
+- Error reporting via Sentry. `[MVP]`
+- Embeddable score widgets/badges. `[Phase 3]`
+- PWA / mobile experience. `[Phase 3]`
+
+## Functional Requirements (by feature & phase)
+
+### projects `[MVP]`
+- R1: Browse a paginated, filterable catalog (by state/chain/search).
+- R2: View a project detail page with lifecycle status and score.
+- R3: Team UI to create/update/transition projects. `[MVP]` (role-gated `[Phase 2]`)
+- R4: Community submission form. `[Phase 2]`
+
+### comments `[MVP]`
+- R1: Read comment threads without auth; post/delete-own when authenticated.
+
+### auth `[MVP]`
+- R1: Connect wallet (RainbowKit), SIWE login, session-aware UI, logout.
+
+### voting `[MVP]`
+- R1: Show eligibility; enable voting only for eligible wallets.
+- R2: Cast votes through the project's contract (Wagmi/Viem) with tx feedback (Sonner).
+- R3: Display live tallies + reputation-weighted results.
+
+### scoring `[MVP]`
+- R1: Visualize the score and its breakdown; show per-round history.
+
+### governance `[MVP]` — launch requirement
+- R1: List proposals, view detail, cast governance votes, see results.
+- R2: Create proposals. `[Phase 1]` Delegate votes. `[Phase 2]`
+
+### reputation `[MVP → Phase 1]`
+- R1: Show eligibility + basic reputation `[MVP]`; full factor breakdown `[Phase 1]`.
+
+### rewards / notifications `[Phase 1]`
+- R1: Show earned rewards/slashing; in-app notification center.
+
+## Application Routes (React Router)
+
+| path | feature | access | phase |
+| --- | --- | --- | --- |
+| `/` | projects (catalog) | public | `MVP` |
+| `/projects/:slug` | projects (detail) | public | `MVP` |
+| `/projects/:slug/vote` | voting | 🔒 eligible | `MVP` |
+| `/projects/submit` | projects | 🔒 | `Phase 2` |
+| `/governance` | governance (list) | public | `MVP` |
+| `/governance/:onchainId` | governance (detail) | public | `MVP` |
+| `/governance/new` | governance | 🔒 | `Phase 1` |
+| `/u/:address` | reputation/profile | public | `MVP` |
+| `/me` | users (own profile) | 🔒 | `MVP` |
+| `/rewards` | rewards | 🔒 | `Phase 1` |
+| `/notifications` | notifications | 🔒 | `Phase 1` |
+| `/admin` | admin console | 👑 | `Phase 2` |
+
+## Consumed API Endpoints (maps to BACKEND)
+
+> Calls go through the typed client in `lib/api/` (see [BACKEND](./BACKEND.mdc)
+> for the authoritative contract). On-chain actions go through `lib/web3/`.
+
+| feature | endpoints / on-chain | phase |
+| --- | --- | --- |
+| auth | `POST /auth/nonce`, `POST /auth/verify`, `POST /auth/logout`, `GET /auth/me` | `MVP` |
+| users | `GET /users/:address`, `PATCH /users/me` | `MVP` |
+| projects | `GET /projects`, `GET /projects/:slug`, `POST /projects` 👑, `PATCH /projects/:id` 👑, `POST /projects/:id/transition` 👑 | `MVP` |
+| projects | `POST /projects/submit` | `Phase 2` |
+| comments | `GET /projects/:id/comments`, `POST /projects/:id/comments`, `DELETE /comments/:id` | `MVP` |
+| voting | `GET /projects/:id/votes`, `GET /projects/:id/votes/eligibility`; on-chain `castVote` via `ProjectVoting` | `MVP` |
+| scoring | `GET /projects/:id/score`, `GET /projects/:id/score/history` | `MVP` |
+| governance | `GET /governance/proposals`, `GET /governance/proposals/:onchainId`; on-chain `propose`/`castVote` via Governor | `MVP` |
+| reputation | `GET /reputation/:address` | `MVP → Phase 1` |
+| rewards/notifications | `GET /rewards/:address`, `GET /notifications`, `POST /notifications/:id/read` | `Phase 1` |
+
+## Client Data Model & Schemas
+
+> API response types are generated from the backend OpenAPI schema and live in
+> `lib/api/`. Form/input validation uses Zod with React Hook Form. Server-cache
+> state is held by the data layer; UI/session state lives in Zustand (`store/`).
+
+### Domain types (mirror backend, in `lib/api/types.ts`) `[MVP]`
+
+```ts
+export type ProjectState =
+  | 'in_analysis' | 'ready' | 'voting' | 'closed' | 'analyzed'
+
+export interface Project {
+  id: string
+  slug: string
+  name: string
+  description?: string
+  chainId: number
+  tokenAddress?: string
+  state: ProjectState
+  votingContractAddress?: string
+  score?: number
+  createdAt: string
+}
+
+export interface Comment {
+  id: string; projectId: string; authorAddress: string
+  body: string; createdAt: string
+}
+
+export interface Proposal {
+  onchainId: string; proposerAddress: string; title: string
+  description?: string
+  state: 'pending' | 'active' | 'succeeded' | 'defeated' | 'executed'
+}
+
+export interface Reputation {
+  walletAddress: string; eligible: boolean; weight: number
+}
+```
+
+### Form schemas (Zod + React Hook Form) `[MVP]`
+
+```ts
+// features/projects/api/schemas.ts
+export const createProjectSchema = z.object({
+  name: z.string().min(1).max(120),
+  description: z.string().optional(),
+  chainId: z.number().int(),
+  tokenAddress: z.string().optional(),
+})
+
+// features/comments/api/schemas.ts
+export const createCommentSchema = z.object({
+  body: z.string().min(1).max(5000),
+})
+
+// features/governance/api/schemas.ts  [Phase 1]
+export const createProposalSchema = z.object({
+  title: z.string().min(1).max(160),
+  description: z.string().min(1),
+})
+```
+
+### Zustand store slices (`store/`) `[MVP]`
+
+```ts
+// store/session.ts
+interface SessionState {
+  user?: { id: string; walletAddress: string; role: 'user'|'team'|'admin' }
+  setUser: (u?: SessionState['user']) => void
+}
+
+// features/voting/store.ts
+interface VotingState {
+  pendingTxHash?: string
+  selectedChoice?: number
+  setChoice: (c: number) => void
+}
+```
+
+> Frontend persistence note: the frontend has no SQL store of its own; persistent
+> data is modeled in PostgreSQL on the backend (see the SQL Data Modeling section
+> of [BACKEND](./BACKEND.mdc)). The client only keeps cached server data + UI state.
+
+## Conventions
+
+- One feature = one folder under `features/`, owning `components/`, `hooks/`,
+  `api/`, `store.ts`, `routes.tsx` and `__tests__/`.
+- Use Shadcn/UI primitives from `components/ui/`; do not fork them per feature.
+- Global/shared state in Zustand (`store/`); feature state in the feature's slice.
+- All network calls through the typed client in `lib/api/`; on-chain calls through
+  `lib/web3/`.
+- Tests: Vitest + Testing Library co-located in `__tests__/`; Playwright e2e in
+  `e2e/`. `[MVP]`

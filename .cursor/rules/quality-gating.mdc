@@ -1,0 +1,34 @@
+---
+description: Quality gates that must pass before any change is considered done
+alwaysApply: true
+---
+
+# Quality Gating Rule
+
+No change is "done" until all quality gates are green. Run them before declaring a
+task complete and before committing.
+
+## Gates (all must pass)
+
+1. **Lint** — `pnpm run lint` (ESLint + Prettier). No errors; fix warnings you introduced.
+2. **Typecheck** — `pnpm run typecheck` (`tsc --noEmit`). Zero type errors.
+3. **Tests** — `pnpm run test`. All unit/integration tests pass; see
+   `.cursor/rules/test-driven.mdc` for coverage expectations.
+4. **Build** — `pnpm run build`. Apps build successfully.
+5. **Contracts** (when `contracts/` changed) — `forge build` and `forge test` pass.
+6. **Docs sync** — `docs/` updated per `.cursor/rules/docs-sync.mdc` with correct
+   phase citations.
+
+## Rules
+
+- Never disable a lint rule or use `// @ts-ignore` / `any` to bypass a gate; fix the
+  root cause. If a suppression is truly required, justify it in a comment.
+- Never skip or delete a failing test to make the suite pass; fix the code or the test.
+- Do not commit commented-out code, debug logs, or secrets.
+- Keep changes scoped; unrelated refactors go in separate changes.
+- CI (GitHub Actions) runs the same gates — local green should mean CI green.
+
+## Definition of done
+
+Code + tests + docs updated, all six gates above pass locally, and the change
+follows the modular structure described in `docs/`.

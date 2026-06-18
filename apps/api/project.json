@@ -1,0 +1,16 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/api/src",
+  "projectType": "application",
+  "targets": {
+    "dev": { "command": "tsx watch src/main.ts", "options": { "cwd": "apps/api" } },
+    "build": {
+      "command": "tsc --project tsconfig.build.json",
+      "options": { "cwd": "apps/api" }
+    },
+    "test": { "command": "vitest run", "options": { "cwd": "apps/api" } },
+    "lint": { "command": "eslint src", "options": { "cwd": "apps/api" } },
+    "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "apps/api" } }
+  }
+}

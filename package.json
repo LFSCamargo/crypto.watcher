@@ -1,0 +1,30 @@
+{
+  "name": "crypto-watcher",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "NX_DAEMON=false nx run-many -t dev --parallel=2 --projects=api,web",
+    "build": "NX_DAEMON=false nx run-many -t build",
+    "test": "NX_DAEMON=false nx run-many -t test",
+    "lint": "NX_DAEMON=false nx run-many -t lint",
+    "typecheck": "NX_DAEMON=false nx run-many -t typecheck",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@eslint/js": "^9.5.0",
+    "@nx/js": "19.8.4",
+    "eslint": "^9.5.0",
+    "husky": "^9.0.11",
+    "nx": "19.8.4",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

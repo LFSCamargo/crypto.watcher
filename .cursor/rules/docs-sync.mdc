@@ -1,0 +1,44 @@
+---
+description: Keep docs/ in sync whenever implementation changes are not already described in the documentation
+alwaysApply: true
+---
+
+# Documentation Sync Rule
+
+The `docs/` folder is the source of truth for Crypto Watcher's design:
+
+- [docs/ROADMAP.mdc](mdc:docs/ROADMAP.mdc) — phases (`MVP`, `Phase 1`, `Phase 2`, `Phase 3`, `Final`) and what ships when.
+- [docs/CONTRACTS.mdc](mdc:docs/CONTRACTS.mdc) — smart contracts (modular `contracts/` layout).
+- [docs/BACKEND.mdc](mdc:docs/BACKEND.mdc) — API (modular `apps/api/` layout).
+- [docs/FRONTEND.mdc](mdc:docs/FRONTEND.mdc) — web app (modular `apps/web/` layout).
+
+## When to apply
+
+Whenever you make an implementation change (add/remove/rename a feature, module,
+contract, endpoint, route, folder, or behavior) that is **not already described**
+in `docs/`, you MUST update the relevant doc(s) in the same change.
+
+## Rules
+
+1. **Docs-first for scope changes.** If the change introduces or moves a feature
+   between phases, update [docs/ROADMAP.mdc](mdc:docs/ROADMAP.mdc) first, then the
+   dependent doc (`CONTRACTS`, `BACKEND`, or `FRONTEND`).
+2. **Always cite the phase.** Every feature/module entry in the dependent docs must
+   carry a phase tag (`[MVP]`, `[Phase 1]`, `[Phase 2]`, `[Phase 3]`, `[Final]`)
+   that matches [docs/ROADMAP.mdc](mdc:docs/ROADMAP.mdc).
+3. **Keep folder structures accurate.** When you add/rename/remove a module or
+   folder, update the modular folder-structure tree in the matching doc so it
+   reflects reality.
+4. **Keep cross-references valid.** Backend endpoints referenced by the frontend,
+   and contracts referenced by the backend, must stay consistent across docs.
+5. **Governance is a launch requirement.** Do not move governance features out of
+   `MVP`; governance must remain present from launch and only be deepened in later
+   phases.
+6. **No silent drift.** If you cannot fully document a change, leave a clearly
+   marked `TODO(docs):` note in the relevant doc rather than skipping it.
+
+## Definition of done
+
+A change is not complete until: the code change and the matching `docs/` update are
+both made, phase citations are correct, and the folder-structure trees match the
+actual implementation.

@@ -1,0 +1,104 @@
+---
+alwaysApply: true
+---
+
+# Crypto Watcher — Smart Contracts
+
+> Phase tags (`MVP`, `Phase 1`, `Phase 2`, `Phase 3`, `Final`) cite
+> [ROADMAP](./ROADMAP.mdc). Keep this file in sync with the roadmap and with the
+> actual `contracts/` implementation (see the docs-sync rule in `.cursor/rules/`).
+
+## Tech Stack
+
+- Solidity + Foundry (`forge`, `cast`, `anvil`) — see [README](../README.md).
+- OpenZeppelin contracts for `ERC20Votes`, `Governor`, `TimelockController`,
+  `AccessControl`.
+- Consumed on the frontend via Viem + Wagmi.
+
+## Modular Folder Structure
+
+The contracts package is organized by domain module. Each module owns its
+contracts, interfaces, tests and deploy scripts.
+
+```
+contracts/
+├── foundry.toml
+├── remappings.txt
+├── lib/                          # forge dependencies (OpenZeppelin, forge-std)
+├── src/
+│   ├── governance/               # Governance module
+│   │   ├── GovernanceToken.sol   # ERC20Votes governance token  [MVP]
+│   │   ├── CryptoWatcherGovernor.sol  # Governor (proposals/voting)  [MVP→Final]
+│   │   ├── Timelock.sol          # TimelockController             [MVP]
+│   │   └── interfaces/
+│   ├── voting/                   # Per-project voting module
+│   │   ├── ProjectVoting.sol     # Per-project vote/tally/close   [MVP]
+│   │   ├── ProjectVotingFactory.sol  # Deploys per-project contracts  [MVP]
+│   │   └── interfaces/
+│   ├── reputation/               # Reputation & eligibility module
+│   │   ├── ReputationRegistry.sol # Eligibility + weight source   [MVP→Phase 1]
+│   │   └── interfaces/
+│   ├── rewards/                  # Voter rewards module
+│   │   ├── RewardDistributor.sol # Reward + slashing              [Phase 1]
+│   │   └── interfaces/
+│   ├── access/                   # Shared access control / roles
+│   │   └── Roles.sol
+│   └── libraries/                # Shared libraries (math, scoring)
+├── script/                       # forge deploy scripts (per module)
+├── test/                         # mirrors src/ module layout
+│   ├── governance/
+│   ├── voting/
+│   └── reputation/
+└── deployments/                  # per-chain deployed addresses (json)
+```
+
+## Modules by Phase
+
+### Governance module — launch requirement
+- `GovernanceToken` (`ERC20Votes`): token + delegation support. `[MVP]`
+- Seed distribution to trustworthy users. `[MVP]`
+- `Timelock` (`TimelockController`) owned by team multisig at launch. `[MVP]`
+- `CryptoWatcherGovernor`: minimal proposals for protocol params (voting duration,
+  reputation threshold). `[MVP]`
+- Community token-weighted proposals, quorum + voting delay. `[Phase 1]`
+- Vote delegation UX support. `[Phase 2]`
+- Full DAO: treasury + upgrade control governed on-chain. `[Final]`
+
+### Voting module
+- `ProjectVoting`: cast vote, close, tally; lifecycle states matching the
+  README flow (`Ready → Voting → Closed → Analyzed`). `[MVP]`
+- `ProjectVotingFactory`: deploys one voting contract per project. `[MVP]`
+- Reputation-gated voting (only eligible wallets). `[MVP]`
+- Reputation-weighted vote power (basic, single-factor). `[MVP]`
+- Tiered vote weight by reputation. `[Phase 1]`
+- Multi-chain deployment of voting contracts. `[Phase 2]`
+
+### Reputation module
+- `ReputationRegistry`: eligibility allow-list + basic weight. `[MVP]`
+- Multi-factor reputation (accuracy, tenure, staking, decay). `[Phase 1]`
+- On-chain reputation portability. `[Phase 2]`
+- Decentralized reputation / verifiable credentials. `[Final]`
+
+### Rewards module
+- `RewardDistributor`: distribute governance tokens for accurate votes. `[Phase 1]`
+- Slashing / penalties for malicious voting. `[Phase 1]`
+- Sustainable reward tokenomics + treasury funding. `[Final]`
+
+## Scoring
+
+- Project score computed from on-chain tallies; weighting by reputation. `[MVP]`
+- Score factors enriched with external risk signals (data providers). `[Phase 3]`
+- Advanced automated + community hybrid risk model. `[Phase 3]`
+
+## Security & Testing
+
+- Foundry unit + fuzz tests per module, CI security scanning. `[MVP]`
+- External audits scaling with phase. `[Phase 2 → Final]`
+- Formal verification of core contracts. `[Final]`
+
+## Conventions
+
+- One module = one folder under `src/`, with matching `test/` and `script/` folders.
+- Interfaces live in each module's `interfaces/` folder.
+- Deployed addresses tracked per chain in `deployments/`.
+- Use `AccessControl` roles (from `access/Roles.sol`) instead of bare `onlyOwner`.

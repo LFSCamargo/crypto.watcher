@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.nx
+coverage
+contracts/out
+contracts/cache
+contracts/lib
+bun.lockb

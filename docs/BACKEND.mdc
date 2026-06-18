@@ -1,0 +1,389 @@
+---
+alwaysApply: true
+---
+
+# Crypto Watcher — Backend
+
+> Phase tags (`MVP`, `Phase 1`, `Phase 2`, `Phase 3`, `Final`) cite
+> [ROADMAP](./ROADMAP.mdc). On-chain logic lives in [CONTRACTS](./CONTRACTS.mdc);
+> the API consumed by the UI is in [FRONTEND](./FRONTEND.mdc). Keep this file in
+> sync with the actual `apps/api/` implementation (see the docs-sync rule in
+> `.cursor/rules/`).
+
+## Tech Stack
+
+From the [README](../README.md): Elysia + Typebox, Kysely + PostgreSQL, Bun runtime,
+Elysia testing framework, Docker, Pino + Pino-pretty, `@elysia/openapi` for API docs,
+React Email + Nodemailer/SMTP (MailHog locally). Monorepo via Nx + Bun.
+
+## Modular Folder Structure
+
+The API is organized into self-contained feature modules. Each module owns its
+routes, service, repository (Kysely), Typebox schemas and tests. Shared concerns
+live under `core/` and `shared/`.
+
+```
+apps/
+└── api/
+    ├── src/
+    │   ├── main.ts                  # Elysia app bootstrap + plugin wiring
+    │   ├── core/                    # Cross-cutting infrastructure
+    │   │   ├── db/                  # Kysely instance, types, migrations
+    │   │   │   ├── migrations/
+    │   │   │   └── schema.ts
+    │   │   ├── config/              # env loading + validation
+    │   │   ├── logger/              # Pino + pino-pretty
+    │   │   ├── auth/                # SIWE/session auth middleware  [MVP]
+    │   │   ├── openapi/             # @elysia/openapi setup         [MVP]
+    │   │   ├── chain/               # Viem clients, contract reads  [MVP]
+    │   │   └── errors/              # error types + handler
+    │   ├── modules/                 # Feature modules
+    │   │   ├── projects/            # Project catalog + lifecycle   [MVP]
+    │   │   │   ├── projects.routes.ts
+    │   │   │   ├── projects.service.ts
+    │   │   │   ├── projects.repository.ts
+    │   │   │   ├── projects.schema.ts   # Typebox
+    │   │   │   └── projects.test.ts
+    │   │   ├── comments/            # Off-chain public comments     [MVP]
+    │   │   ├── auth/                # Wallet auth, sessions         [MVP]
+    │   │   ├── users/              # Accounts + profiles           [MVP]
+    │   │   ├── voting/             # Vote orchestration/indexing   [MVP]
+    │   │   ├── scoring/            # Score computation/read         [MVP]
+    │   │   ├── governance/        # Governance proposals/events    [MVP]
+    │   │   ├── reputation/        # Reputation read/compute         [MVP→Phase 1]
+    │   │   ├── rewards/           # Reward accounting               [Phase 1]
+    │   │   ├── notifications/     # In-app + email notifications    [Phase 1]
+    │   │   └── webhooks/          # Outbound webhooks               [Phase 3]
+    │   ├── shared/                # Shared utils, types, guards
+    │   └── emails/                # React Email templates           [MVP]
+    ├── test/                      # integration/e2e (Elysia testing framework)
+    ├── Dockerfile
+    └── package.json
+```
+
+> Each module is independent: routes → service → repository. Modules never import
+> another module's repository directly; they call the other module's service.
+
+## Modules by Phase
+
+### projects `[MVP]`
+- CRUD + lifecycle state machine matching the README flow
+  (`In analysis → Ready → Voting → Closed → Analyzed`).
+- Read project score for display.
+- Community submission queue. `[Phase 2]`
+
+### comments `[MVP]`
+- Public off-chain comments (read all, post when authenticated).
+
+### auth + users `[MVP]`
+- Wallet connect + SIWE-style verification, session issuance.
+- Profile management.
+- Role-based access control + admin console. `[Phase 2]`
+
+### voting `[MVP]`
+- Index/track on-chain votes from per-project contracts (via `core/chain`).
+- Eligibility checks surfaced from the reputation module.
+- Subgraph/indexer ingestion replacing direct RPC reads. `[Phase 2]`
+
+### scoring `[MVP]`
+- Compute/serve project scores from on-chain tallies + reputation weight.
+- Enrich with external risk-data providers. `[Phase 3]`
+
+### governance — launch requirement
+- Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`
+- Index governance lifecycle events for the UI + notifications. `[MVP]`
+- Community proposal support metadata. `[Phase 1]`
+- Delegation data. `[Phase 2]`
+- Full DAO/treasury data surfaces. `[Final]`
+
+### reputation `[MVP → Phase 1]`
+- Serve eligibility + basic weight. `[MVP]`
+- Multi-factor computation + decay jobs. `[Phase 1]`
+
+### rewards `[Phase 1]`
+- Reward accounting and slashing records, synced with on-chain distributor.
+
+### notifications `[Phase 1]`
+- In-app + email (React Email/Nodemailer) for lifecycle + governance events.
+
+### Platform & scaling
+- API docs via `@elysia/openapi`. `[MVP]`
+- Observability: Sentry + Better Stack, structured Pino logs. `[MVP]`
+- Caching + rate limiting + read scaling. `[Phase 2]`
+- Public API, API keys. `[Phase 3]`
+- Outbound webhooks. `[Phase 3]`
+- Multi-region HA. `[Final]`
+
+## Functional Requirements (by module & phase)
+
+### projects `[MVP]`
+- R1: Team can create/update a project and transition its lifecycle state.
+- R2: Anyone can list/read projects, filter by state/chain, paginate.
+- R3: Each project exposes a computed score once `Analyzed`.
+- R4: Community submission queue with team review. `[Phase 2]`
+
+### comments `[MVP]`
+- R1: Anyone can read comments for a project.
+- R2: Authenticated users can create comments; authors can soft-delete their own.
+- R3: Rate limiting + basic spam protection. `[Phase 2]`
+
+### auth + users `[MVP]`
+- R1: Wallet connect with SIWE-style nonce → signature → session.
+- R2: Sessions are httpOnly-cookie based and revocable.
+- R3: Users have a profile (display name, avatar, bio).
+- R4: Role-based access control (admin/team/user). `[Phase 2]`
+
+### voting `[MVP]`
+- R1: Only reputation-eligible wallets may vote (enforced on-chain, mirrored off-chain).
+- R2: Backend indexes on-chain votes per project and serves tallies.
+- R3: Vote weight reflects reputation. `[MVP]` Tiered weights `[Phase 1]`.
+
+### scoring `[MVP]`
+- R1: Compute score from on-chain tally + reputation weight once voting closes.
+- R2: Score is immutable per voting round and versioned.
+- R3: Enrich with external risk signals. `[Phase 3]`
+
+### governance `[MVP]` — launch requirement
+- R1: Index governance proposals, votes and outcomes from the Governor.
+- R2: Serve proposal detail + status to the UI.
+- R3: Emit notifications on governance lifecycle events. `[Phase 1]`
+
+### reputation `[MVP → Phase 1]`
+- R1: Serve eligibility + weight for a wallet. `[MVP]`
+- R2: Recompute multi-factor reputation on a schedule. `[Phase 1]`
+
+### rewards `[Phase 1]` / notifications `[Phase 1]`
+- R1: Record reward/slashing events synced with on-chain distributor.
+- R2: Deliver in-app + email notifications for lifecycle/governance events.
+
+## SQL Data Modeling (PostgreSQL via Kysely)
+
+> Migrations live in `core/db/migrations`; types are generated into
+> `core/db/schema.ts`. All ids are `uuid` (default `gen_random_uuid()`), all tables
+> carry `created_at timestamptz not null default now()` and (where mutable)
+> `updated_at timestamptz`. Addresses are stored lowercase `text` (checksummed in UI).
+
+### `users` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| wallet_address | text unique not null | lowercase |
+| display_name | text | |
+| avatar_url | text | |
+| bio | text | |
+| role | text not null default 'user' | `user` \| `team` \| `admin` `[Phase 2]` |
+
+### `sessions` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| user_id | uuid fk → users(id) on delete cascade | |
+| nonce | text not null | SIWE nonce |
+| expires_at | timestamptz not null | |
+| revoked_at | timestamptz | nullable |
+
+### `projects` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| slug | text unique not null | |
+| name | text not null | |
+| description | text | |
+| chain_id | integer not null | |
+| token_address | text | nullable |
+| state | text not null default 'in_analysis' | `in_analysis` \| `ready` \| `voting` \| `closed` \| `analyzed` |
+| voting_contract_address | text | set when deployed |
+| submitted_by | uuid fk → users(id) | nullable `[Phase 2]` |
+
+Index: `projects(state)`, `projects(chain_id)`.
+
+### `comments` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| project_id | uuid fk → projects(id) on delete cascade | |
+| author_id | uuid fk → users(id) | |
+| body | text not null | |
+| deleted_at | timestamptz | soft delete |
+
+Index: `comments(project_id, created_at desc)`.
+
+### `votes` `[MVP]` (off-chain index of on-chain votes)
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| project_id | uuid fk → projects(id) | |
+| voter_address | text not null | lowercase |
+| choice | smallint not null | encoded risk/reward choice |
+| weight | numeric not null | reputation weight applied |
+| tx_hash | text unique not null | on-chain reference |
+| block_number | bigint not null | |
+
+Index: unique `(project_id, voter_address, round)`; `votes(project_id)`.
+
+### `scores` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| project_id | uuid fk → projects(id) | |
+| round | integer not null | |
+| value | numeric not null | final score |
+| breakdown | jsonb not null | factor breakdown |
+
+Unique: `(project_id, round)`.
+
+### `reputation` `[MVP → Phase 1]`
+| column | type | notes |
+| --- | --- | --- |
+| wallet_address | text pk | lowercase |
+| eligible | boolean not null default false | gating `[MVP]` |
+| weight | numeric not null default 0 | |
+| factors | jsonb | multi-factor inputs `[Phase 1]` |
+
+### `governance_proposals` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| onchain_id | text unique not null | Governor proposal id |
+| proposer_address | text not null | |
+| title | text not null | |
+| description | text | |
+| state | text not null | `pending` \| `active` \| `succeeded` \| `defeated` \| `executed` |
+| start_block | bigint | |
+| end_block | bigint | |
+
+### `rewards` `[Phase 1]` / `notifications` `[Phase 1]`
+- `rewards(id, wallet_address, project_id, amount, type ['reward'|'slash'], tx_hash)`.
+- `notifications(id, user_id, type, payload jsonb, read_at)`.
+
+## REST API Endpoints
+
+> All routes are validated with Typebox; shapes feed `@elysia/openapi`. Base path
+> `/api`. `🔒` = authenticated, `👑` = team/admin role `[Phase 2]`.
+
+### auth `[MVP]`
+- `POST /auth/nonce` → `{ nonce }` for a wallet address.
+- `POST /auth/verify` → verify SIWE signature, set session cookie.
+- `POST /auth/logout` 🔒 → revoke session.
+- `GET  /auth/me` 🔒 → current user.
+
+### users `[MVP]`
+- `GET   /users/:address` → public profile.
+- `PATCH /users/me` 🔒 → update own profile.
+
+### projects `[MVP]`
+- `GET  /projects` → list (filters: `state`, `chainId`, `q`, `page`, `limit`).
+- `GET  /projects/:slug` → project detail (+ latest score).
+- `POST /projects` 👑 → create project.
+- `PATCH /projects/:id` 👑 → update.
+- `POST /projects/:id/transition` 👑 → change lifecycle state.
+- `POST /projects/submit` 🔒 → community submission. `[Phase 2]`
+
+### comments `[MVP]`
+- `GET    /projects/:id/comments` → list (paginated).
+- `POST   /projects/:id/comments` 🔒 → create.
+- `DELETE /comments/:id` 🔒 → soft-delete own.
+
+### voting `[MVP]`
+- `GET /projects/:id/votes` → tally + per-choice weights.
+- `GET /projects/:id/votes/eligibility?address=` → eligibility for a wallet.
+
+### scoring `[MVP]`
+- `GET /projects/:id/score` → current score + breakdown.
+- `GET /projects/:id/score/history` → per-round scores.
+
+### governance `[MVP]`
+- `GET /governance/proposals` → list (filter `state`).
+- `GET /governance/proposals/:onchainId` → detail + votes.
+
+### reputation `[MVP → Phase 1]`
+- `GET /reputation/:address` → eligibility + weight (+ factors `[Phase 1]`).
+
+### rewards / notifications `[Phase 1]`
+- `GET /rewards/:address`, `GET /notifications` 🔒, `POST /notifications/:id/read` 🔒.
+
+### platform
+- `GET /openapi.json` + Swagger UI via `@elysia/openapi`. `[MVP]`
+- `GET /health` → liveness/readiness. `[MVP]`
+- `POST /webhooks/subscriptions` 🔒. `[Phase 3]`
+
+## Typebox Schemas (representative)
+
+> Schemas live in each module's `*.schema.ts` and are the single source for
+> validation + OpenAPI. Examples (TypeScript, Typebox):
+
+```ts
+// modules/projects/projects.schema.ts  [MVP]
+export const ProjectState = Type.Union([
+  Type.Literal('in_analysis'), Type.Literal('ready'), Type.Literal('voting'),
+  Type.Literal('closed'), Type.Literal('analyzed'),
+])
+
+export const Project = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  slug: Type.String(),
+  name: Type.String({ minLength: 1, maxLength: 120 }),
+  description: Type.Optional(Type.String()),
+  chainId: Type.Integer(),
+  tokenAddress: Type.Optional(Type.String()),
+  state: ProjectState,
+  votingContractAddress: Type.Optional(Type.String()),
+  score: Type.Optional(Type.Number()),
+  createdAt: Type.String({ format: 'date-time' }),
+})
+
+export const CreateProjectBody = Type.Object({
+  name: Type.String({ minLength: 1, maxLength: 120 }),
+  description: Type.Optional(Type.String()),
+  chainId: Type.Integer(),
+  tokenAddress: Type.Optional(Type.String()),
+})
+
+export const ListProjectsQuery = Type.Object({
+  state: Type.Optional(ProjectState),
+  chainId: Type.Optional(Type.Integer()),
+  q: Type.Optional(Type.String()),
+  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+})
+```
+
+```ts
+// modules/auth/auth.schema.ts  [MVP]
+export const NonceBody = Type.Object({ address: Type.String() })
+export const VerifyBody = Type.Object({
+  message: Type.String(),
+  signature: Type.String(),
+})
+export const SessionUser = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+  walletAddress: Type.String(),
+  role: Type.Union([Type.Literal('user'), Type.Literal('team'), Type.Literal('admin')]),
+})
+
+// modules/comments/comments.schema.ts  [MVP]
+export const CreateCommentBody = Type.Object({
+  body: Type.String({ minLength: 1, maxLength: 5000 }),
+})
+
+// modules/governance/governance.schema.ts  [MVP]
+export const Proposal = Type.Object({
+  onchainId: Type.String(),
+  proposerAddress: Type.String(),
+  title: Type.String(),
+  description: Type.Optional(Type.String()),
+  state: Type.Union([
+    Type.Literal('pending'), Type.Literal('active'), Type.Literal('succeeded'),
+    Type.Literal('defeated'), Type.Literal('executed'),
+  ]),
+})
+```
+
+## Conventions
+
+- One feature = one folder under `modules/`, with `*.routes.ts`, `*.service.ts`,
+  `*.repository.ts`, `*.schema.ts` (Typebox) and `*.test.ts`.
+- All request/response shapes validated with Typebox; schemas feed OpenAPI.
+- DB access only through Kysely repositories; migrations live in `core/db/migrations`.
+- On-chain reads only through `core/chain` (Viem); never read RPC from a module directly.
+- Tests with the Elysia testing framework + Bun, mirroring module layout. `[MVP]`
