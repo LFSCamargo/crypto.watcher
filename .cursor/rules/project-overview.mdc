@@ -1,0 +1,40 @@
+---
+description: Crypto Watcher product overview, purpose, and core mechanics
+alwaysApply: true
+---
+
+# Crypto Watcher — Project Overview
+
+Crypto Watcher is a risk-analysis tool for crypto assets/projects/protocols. It
+helps users decide whether a project is worth investing in, based on its risk and
+potential rewards. Source of truth: [README.md](../../README.md).
+
+## Purpose
+
+- Analyze projects by their risk and potential rewards.
+- Protect users from investing in projects that aren't worth it.
+- Surface a community-driven score so users make informed decisions.
+
+## Core mechanics
+
+- **Reputation-weighted voting.** Only trustworthy users may vote; the more
+  trustworthy a user, the more voting power they hold. Voters are rewarded with
+  tokens for participating.
+- **Governance token** distributed to users; powers protocol governance (a launch
+  requirement, present from MVP).
+- **Per-project smart contract.** Each project gets its own on-chain voting
+  contract that users interact with.
+- **Public off-chain comments.** While voting is closed, anyone can comment;
+  comments are public and used to help analyze the project.
+
+## Project lifecycle
+
+`Deploy contract → In analysis by team → Ready for voting → Voting starts →
+Voting ends → Project analyzed → Score calculated → Score shown to users`
+
+## Where to look next
+
+- Roadmap & phases (`MVP → Final`): [docs/ROADMAP.mdc](../../docs/ROADMAP.mdc)
+- Contracts: [docs/CONTRACTS.mdc](../../docs/CONTRACTS.mdc)
+- Backend/API: [docs/BACKEND.mdc](../../docs/BACKEND.mdc)
+- Frontend/web: [docs/FRONTEND.mdc](../../docs/FRONTEND.mdc)

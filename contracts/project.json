@@ -1,0 +1,14 @@
+{
+  "name": "contracts",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "contracts/src",
+  "projectType": "application",
+  "targets": {
+    "build": { "command": "forge build --root contracts" },
+    "test": { "command": "forge test --root contracts" },
+    "lint": { "command": "forge fmt --check --root contracts" },
+    "typecheck": { "command": "forge build --root contracts" },
+    "format": { "command": "forge fmt --root contracts" },
+    "deploy:testnet": { "command": "bash contracts/script/deploy-base-sepolia.sh" }
+  }
+}

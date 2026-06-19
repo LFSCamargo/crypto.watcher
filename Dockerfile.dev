@@ -1,0 +1,18 @@
+# Shared dev image for the web + api workspaces (HMR via mounted source).
+# Build context is the repo root. node_modules are installed here and preserved
+# at runtime via anonymous volumes in docker-compose.yml.
+FROM node:20-alpine
+
+RUN corepack enable
+WORKDIR /app
+
+# Install workspace dependencies using only the manifests for better layer caching.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+RUN pnpm install --frozen-lockfile
+
+# Source is bind-mounted at runtime; copy as a fallback for one-off runs.
+COPY . .
+
+EXPOSE 3000 5173
