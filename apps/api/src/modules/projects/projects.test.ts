@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { slugify } from './projects.service'
+import { canTransitionProject, slugify } from './projects.service'
 
 describe('projects.service slugify', () => {
   it('lowercases and hyphenates', () => {
@@ -12,5 +12,19 @@ describe('projects.service slugify', () => {
 
   it('collapses repeated separators', () => {
     expect(slugify('Lido---Finance')).toBe('lido-finance')
+  })
+})
+
+describe('project lifecycle transitions', () => {
+  it('allows the MVP project lifecycle in order', () => {
+    expect(canTransitionProject('in_analysis', 'ready')).toBe(true)
+    expect(canTransitionProject('ready', 'voting')).toBe(true)
+    expect(canTransitionProject('voting', 'closed')).toBe(true)
+    expect(canTransitionProject('closed', 'analyzed')).toBe(true)
+  })
+
+  it('rejects skipped lifecycle states', () => {
+    expect(canTransitionProject('in_analysis', 'voting')).toBe(false)
+    expect(canTransitionProject('analyzed', 'ready')).toBe(false)
   })
 })

@@ -6,11 +6,80 @@ export interface Project {
   id: string
   slug: string
   name: string
-  description?: string
+  description?: string | null
   chainId: number
-  tokenAddress?: string
+  tokenAddress?: string | null
   state: ProjectState
-  votingContractAddress?: string
+  votingContractAddress?: string | null
   score?: number
   createdAt: string
+}
+
+export interface User {
+  id: string
+  walletAddress: string
+  displayName: string | null
+  avatarUrl: string | null
+  bio: string | null
+  role: 'user' | 'team' | 'admin'
+  createdAt: string
+}
+
+export interface AuthUserResponse {
+  user: User
+}
+
+export interface NonceResponse {
+  nonce: string
+  message: string
+}
+
+export interface Comment {
+  id: string
+  projectId: string
+  authorId: string
+  body: string
+  createdAt: string
+}
+
+export interface VoteTally {
+  projectId: string
+  round: number
+  weightFor: string
+  weightAgainst: string
+}
+
+export interface VoteEligibility {
+  address: string
+  eligible: boolean
+  weight: string
+}
+
+export interface Score {
+  projectId: string
+  round: number
+  value: string
+  breakdown: {
+    weightFor: string
+    weightAgainst: string
+    totalWeight: string
+  }
+}
+
+export interface Reputation {
+  walletAddress: string
+  eligible: boolean
+  weight: string
+  factors: Record<string, unknown> | null
+}
+
+export interface GovernanceProposal {
+  id: string
+  onchainId: string
+  proposerAddress: string
+  title: string
+  description: string | null
+  state: 'pending' | 'active' | 'succeeded' | 'defeated' | 'executed'
+  startBlock: string | null
+  endBlock: string | null
 }

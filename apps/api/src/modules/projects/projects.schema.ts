@@ -1,36 +1,65 @@
-import { Type } from '@sinclair/typebox'
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
+import { z } from 'zod'
 
-export const ProjectState = Type.Union([
-  Type.Literal('in_analysis'),
-  Type.Literal('ready'),
-  Type.Literal('voting'),
-  Type.Literal('closed'),
-  Type.Literal('analyzed'),
-])
+extendZodWithOpenApi(z)
 
-export const Project = Type.Object({
-  id: Type.String({ format: 'uuid' }),
-  slug: Type.String(),
-  name: Type.String({ minLength: 1, maxLength: 120 }),
-  description: Type.Optional(Type.String()),
-  chainId: Type.Integer(),
-  tokenAddress: Type.Optional(Type.String()),
-  state: ProjectState,
-  votingContractAddress: Type.Optional(Type.String()),
-  createdAt: Type.String({ format: 'date-time' }),
+export const ProjectStateSchema = z
+  .enum(['in_analysis', 'ready', 'voting', 'closed', 'analyzed'])
+  .openapi('ProjectState')
+
+export type ProjectState = z.infer<typeof ProjectStateSchema>
+
+export const ProjectSchema = z
+  .object({
+    id: z.uuid(),
+    slug: z.string(),
+    name: z.string().min(1).max(120),
+    description: z.string().nullable().optional(),
+    chainId: z.number().int(),
+    tokenAddress: z.string().nullable().optional(),
+    state: ProjectStateSchema,
+    votingContractAddress: z.string().nullable().optional(),
+    createdAt: z.iso.datetime(),
+  })
+  .openapi('Project')
+
+export const CreateProjectBodySchema = z
+  .object({
+    name: z.string().min(1).max(120),
+    description: z.string().optional(),
+    chainId: z.number().int(),
+    tokenAddress: z.string().optional(),
+  })
+  .openapi('CreateProjectBody')
+
+export const UpdateProjectBodySchema =
+  CreateProjectBodySchema.partial().openapi('UpdateProjectBody')
+
+export const TransitionProjectBodySchema = z
+  .object({
+    state: ProjectStateSchema,
+    votingContractAddress: z.string().optional(),
+  })
+  .openapi('TransitionProjectBody')
+
+export const ListProjectsQuerySchema = z.object({
+  state: ProjectStateSchema.optional(),
+  chainId: z.coerce.number().int().optional(),
+  q: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 })
 
-export const CreateProjectBody = Type.Object({
-  name: Type.String({ minLength: 1, maxLength: 120 }),
-  description: Type.Optional(Type.String()),
-  chainId: Type.Integer(),
-  tokenAddress: Type.Optional(Type.String()),
+export const ProjectParamsSchema = z.object({
+  slug: z.string().min(1),
 })
 
-export const ListProjectsQuery = Type.Object({
-  state: Type.Optional(ProjectState),
-  chainId: Type.Optional(Type.Integer()),
-  q: Type.Optional(Type.String()),
-  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+export const ProjectIdParamsSchema = z.object({
+  id: z.uuid(),
 })
+
+export const ErrorResponseSchema = z
+  .object({
+    message: z.string(),
+  })
+  .openapi('ErrorResponse')

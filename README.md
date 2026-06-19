@@ -23,6 +23,25 @@ pnpm --filter api db:migrate  # run DB migrations
 pnpm run dev                  # web (5173) + api (3000)
 ```
 
+### Run everything in Docker (with HMR)
+
+Spin up Postgres, MailHog, the API and the web app in containers; source is
+bind-mounted so edits hot-reload (Vite HMR + `tsx watch`):
+
+```bash
+pnpm run docker:dev   # = docker compose up --build
+# web → http://localhost:5173, api → http://localhost:3000, MailHog → http://localhost:8025
+```
+
+### Deploy contracts to testnet (Base Sepolia)
+
+```bash
+cp contracts/.env.example contracts/.env   # set BASE_SEPOLIA_RPC_URL + DEPLOYER_PRIVATE_KEY
+pnpm run deploy:testnet
+```
+
+See [contracts/README.md](./contracts/README.md#deploy) for details.
+
 ## Quality gates
 
 ```bash
@@ -30,6 +49,7 @@ pnpm run lint
 pnpm run typecheck
 pnpm run test
 pnpm run build
+pnpm run format
 ```
 
 ## Tech Stack
@@ -66,12 +86,12 @@ pnpm run build
 
 ### Backend
 
-- Elysia + Typebox
+- Express + Zod
 - Kysely + PostgreSQL
 - Vitest + Node (tsx)
 - Docker
 - Pino + Pino-pretty
-- Generate docs for the API using @elysia/openapi
+- Generate OpenAPI docs from Zod schemas using @asteasolutions/zod-to-openapi
 
 ### Github Actions
 
@@ -91,6 +111,15 @@ pnpm run build
 - Better Stack (free-tier)
 
 ### Contracts
+
+Install [Foundry](https://book.getfoundry.sh/getting-started/installation) if needed:
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+Then:
 
 ```bash
 cd contracts

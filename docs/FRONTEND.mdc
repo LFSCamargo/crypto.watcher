@@ -15,7 +15,7 @@ alwaysApply: true
 From the [README](../README.md): Vite + React + TypeScript + TailwindCSS,
 Shadcn/UI, Zustand, React Hook Form, React Router, Sonner, Phosphor Icons.
 Web3: RainbowKit, Wagmi, Viem (+ viem-react). Tests: Vitest + Testing Library
-(unit/integration) and Playwright (e2e). Monorepo via Nx + Bun.
+(unit/integration) and Playwright (e2e). Monorepo via Nx + pnpm.
 
 ## Modular Folder Structure
 
@@ -41,7 +41,7 @@ apps/
     │   │   ├── web3/                # wagmi config, contract ABIs/hooks
     │   │   └── utils/
     │   ├── store/                   # Zustand root store + shared slices
-    │   ├── features/                # Feature modules
+    │   ├── modules/                 # Feature modules
     │   │   ├── projects/            # Catalog + project detail        [MVP]
     │   │   │   ├── components/
     │   │   │   ├── hooks/
@@ -158,7 +158,7 @@ apps/
 | `/me` | users (own profile) | 🔒 | `MVP` |
 | `/rewards` | rewards | 🔒 | `Phase 1` |
 | `/notifications` | notifications | 🔒 | `Phase 1` |
-| `/admin` | admin console | 👑 | `Phase 2` |
+| `/admin` | team/admin project actions | 👑 | `MVP` |
 
 ## Consumed API Endpoints (maps to BACKEND)
 
@@ -204,25 +204,28 @@ export interface Project {
 }
 
 export interface Comment {
-  id: string; projectId: string; authorAddress: string
+  id: string; projectId: string; authorId: string
   body: string; createdAt: string
 }
 
 export interface Proposal {
-  onchainId: string; proposerAddress: string; title: string
-  description?: string
+  id: string; onchainId: string; proposerAddress: string; title: string
+  description: string | null
   state: 'pending' | 'active' | 'succeeded' | 'defeated' | 'executed'
+  startBlock: string | null
+  endBlock: string | null
 }
 
 export interface Reputation {
-  walletAddress: string; eligible: boolean; weight: number
+  walletAddress: string; eligible: boolean; weight: string
+  factors: Record<string, unknown> | null
 }
 ```
 
 ### Form schemas (Zod + React Hook Form) `[MVP]`
 
 ```ts
-// features/projects/api/schemas.ts
+// modules/projects/api/schemas.ts
 export const createProjectSchema = z.object({
   name: z.string().min(1).max(120),
   description: z.string().optional(),
@@ -230,12 +233,12 @@ export const createProjectSchema = z.object({
   tokenAddress: z.string().optional(),
 })
 
-// features/comments/api/schemas.ts
+// modules/comments/api/schemas.ts
 export const createCommentSchema = z.object({
   body: z.string().min(1).max(5000),
 })
 
-// features/governance/api/schemas.ts  [Phase 1]
+// modules/governance/api/schemas.ts  [Phase 1]
 export const createProposalSchema = z.object({
   title: z.string().min(1).max(160),
   description: z.string().min(1),
@@ -251,7 +254,7 @@ interface SessionState {
   setUser: (u?: SessionState['user']) => void
 }
 
-// features/voting/store.ts
+// modules/voting/store.ts
 interface VotingState {
   pendingTxHash?: string
   selectedChoice?: number
@@ -265,7 +268,7 @@ interface VotingState {
 
 ## Conventions
 
-- One feature = one folder under `features/`, owning `components/`, `hooks/`,
+- One module = one folder under `modules/`, owning `components/`, `hooks/`,
   `api/`, `store.ts`, `routes.tsx` and `__tests__/`.
 - Use Shadcn/UI primitives from `components/ui/`; do not fork them per feature.
 - Global/shared state in Zustand (`store/`); feature state in the feature's slice.

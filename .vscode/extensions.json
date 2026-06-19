@@ -2,8 +2,8 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "JuanBlanco.solidity",
-    "NomicFoundation.hardhat-solidity",
+    "AckeeBlockchain.tools-for-solidity",
+    "tamasfe.even-better-toml",
     "bradlc.vscode-tailwindcss"
   ]
 }

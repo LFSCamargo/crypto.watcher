@@ -13,17 +13,23 @@
     "db:migrate": "tsx src/core/db/migrate.ts"
   },
   "dependencies": {
-    "@elysiajs/openapi": "^1.1.0",
-    "@sinclair/typebox": "^0.34.0",
-    "elysia": "^1.1.0",
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "express": "^5.2.1",
     "kysely": "^0.27.0",
     "pg": "^8.12.0",
     "pino": "^9.2.0",
-    "pino-pretty": "^11.2.0"
+    "pino-pretty": "^11.2.0",
+    "swagger-ui-express": "^5.0.1",
+    "viem": "^2.17.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^20.14.0",
     "@types/pg": "^8.11.0",
+    "@types/supertest": "^7.2.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "supertest": "^7.2.2",
     "tsx": "^4.16.0",
     "vitest": "^2.0.0"
   }

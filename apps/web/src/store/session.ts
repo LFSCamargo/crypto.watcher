@@ -3,6 +3,7 @@ import { create } from 'zustand'
 export interface SessionUser {
   id: string
   walletAddress: string
+  displayName?: string | null
   role: 'user' | 'team' | 'admin'
 }
 

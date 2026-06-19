@@ -30,6 +30,10 @@ export const projectsRepository = {
       .executeTakeFirst()
   },
 
+  async getById(id: string) {
+    return db.selectFrom('projects').selectAll().where('id', '=', id).executeTakeFirst()
+  },
+
   async create(input: {
     slug: string
     name: string
@@ -48,5 +52,50 @@ export const projectsRepository = {
       })
       .returningAll()
       .executeTakeFirstOrThrow()
+  },
+
+  async update(
+    id: string,
+    input: Partial<{
+      name: string
+      slug: string
+      description: string
+      chainId: number
+      tokenAddress: string
+    }>,
+  ) {
+    return db
+      .updateTable('projects')
+      .set({
+        ...(input.name ? { name: input.name } : {}),
+        ...(input.slug ? { slug: input.slug } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.chainId !== undefined ? { chain_id: input.chainId } : {}),
+        ...(input.tokenAddress !== undefined
+          ? { token_address: input.tokenAddress }
+          : {}),
+        updated_at: new Date(),
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
+  },
+
+  async transition(
+    id: string,
+    input: { state: ProjectState; votingContractAddress?: string },
+  ) {
+    return db
+      .updateTable('projects')
+      .set({
+        state: input.state,
+        ...(input.votingContractAddress
+          ? { voting_contract_address: input.votingContractAddress }
+          : {}),
+        updated_at: new Date(),
+      })
+      .where('id', '=', id)
+      .returningAll()
+      .executeTakeFirst()
   },
 }

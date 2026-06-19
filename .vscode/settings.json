@@ -19,7 +19,28 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/.nx": true,
+    "contracts/lib": true,
     "contracts/out": true,
     "contracts/cache": true
-  }
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.nx/**": true,
+    "contracts/lib/**": true,
+    "contracts/out/**": true,
+    "contracts/cache/**": true
+  },
+  "wake.compiler.solc.remappings": [
+    "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
+    "forge-std/=contracts/lib/forge-std/src/"
+  ],
+  "wake.compiler.solc.include_paths": ["contracts/lib"],
+  "wake.compiler.solc.exclude_paths": [
+    "node_modules",
+    "contracts/lib",
+    "contracts/out",
+    "contracts/cache"
+  ],
+  "wake.detectors.ignore_paths": ["contracts/test", "test"],
+  "wake.detectors.exclude_paths": ["contracts/lib", "lib", "node_modules"]
 }

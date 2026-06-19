@@ -17,7 +17,7 @@ projects. Read these first — they are the source of truth:
 
 ```
 apps/
-  api/        # Elysia + Typebox + Kysely (PostgreSQL)
+  api/        # Express + Zod + Kysely (PostgreSQL)
   web/        # Vite + React + TS + Tailwind + Shadcn/UI
 contracts/    # Solidity + Foundry
 docs/         # Design docs (source of truth)
@@ -58,6 +58,6 @@ forge test
 
 - TypeScript everywhere (frontend + backend). Solidity for contracts.
 - Conventional Commits enforced by commitlint + Husky.
-- Validate all API I/O with Typebox; surface via `@elysia/openapi`.
+- Validate all API I/O with Zod; surface OpenAPI via `@asteasolutions/zod-to-openapi`.
 - DB access only via Kysely repositories; on-chain reads via Viem (`core/chain`).
 - Frontend network calls via `lib/api/`; on-chain via `lib/web3/`.

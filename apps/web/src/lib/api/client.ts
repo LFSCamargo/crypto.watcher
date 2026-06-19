@@ -7,5 +7,23 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     ...init,
   })
   if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`)
+  if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
+
+export const apiPost = <T>(path: string, body?: unknown) =>
+  apiFetch<T>(path, {
+    method: 'POST',
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+
+export const apiPatch = <T>(path: string, body: unknown) =>
+  apiFetch<T>(path, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+
+export const apiDelete = <T>(path: string) =>
+  apiFetch<T>(path, {
+    method: 'DELETE',
+  })

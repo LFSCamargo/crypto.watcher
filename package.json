@@ -7,12 +7,15 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "NX_DAEMON=false nx run-many -t dev --parallel=2 --projects=api,web",
-    "build": "NX_DAEMON=false nx run-many -t build",
-    "test": "NX_DAEMON=false nx run-many -t test",
-    "lint": "NX_DAEMON=false nx run-many -t lint",
-    "typecheck": "NX_DAEMON=false nx run-many -t typecheck",
-    "format": "prettier --write .",
+    "dev": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run-many -t dev --parallel=2 --projects=api,web",
+    "build": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run-many -t build",
+    "test": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run-many -t test",
+    "lint": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run-many -t lint",
+    "typecheck": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run-many -t typecheck",
+    "format": "prettier --write . && pnpm run format:contracts",
+    "format:contracts": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:format",
+    "deploy:testnet": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:deploy:testnet",
+    "docker:dev": "docker compose up --build",
     "prepare": "husky"
   },
   "devDependencies": {

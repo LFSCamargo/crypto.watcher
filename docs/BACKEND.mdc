@@ -12,21 +12,23 @@ alwaysApply: true
 
 ## Tech Stack
 
-From the [README](../README.md): Elysia + Typebox, Kysely + PostgreSQL, Bun runtime,
-Elysia testing framework, Docker, Pino + Pino-pretty, `@elysia/openapi` for API docs,
-React Email + Nodemailer/SMTP (MailHog locally). Monorepo via Nx + Bun.
+From the [README](../README.md): Express + Zod, Kysely + PostgreSQL, Node + tsx,
+Vitest + Supertest, Docker, Pino + Pino-pretty, and OpenAPI docs generated from
+Zod schemas via `@asteasolutions/zod-to-openapi` with Swagger UI. Monorepo via Nx
++ pnpm.
 
 ## Modular Folder Structure
 
-The API is organized into self-contained feature modules. Each module owns its
-routes, service, repository (Kysely), Typebox schemas and tests. Shared concerns
-live under `core/` and `shared/`.
+The API is organized into self-contained modules. Each module owns its routes,
+service, repository (Kysely), Zod schemas and tests. Shared concerns live under
+`core/` and `shared/`.
 
 ```
 apps/
 └── api/
     ├── src/
-    │   ├── main.ts                  # Elysia app bootstrap + plugin wiring
+    │   ├── app.ts                   # Express app, middleware, routes
+    │   ├── main.ts                  # Node HTTP listener
     │   ├── core/                    # Cross-cutting infrastructure
     │   │   ├── db/                  # Kysely instance, types, migrations
     │   │   │   ├── migrations/
@@ -34,15 +36,21 @@ apps/
     │   │   ├── config/              # env loading + validation
     │   │   ├── logger/              # Pino + pino-pretty
     │   │   ├── auth/                # SIWE/session auth middleware  [MVP]
-    │   │   ├── openapi/             # @elysia/openapi setup         [MVP]
+    │   │   ├── http/                # validation + error handling   [MVP]
+    │   │   ├── openapi/             # Zod OpenAPI document          [MVP]
     │   │   ├── chain/               # Viem clients, contract reads  [MVP]
+    │   │   │   ├── client.ts
+    │   │   │   ├── contracts.ts
+    │   │   │   ├── events.repository.ts
+    │   │   │   ├── events.service.ts
+    │   │   │   └── sync.service.ts
     │   │   └── errors/              # error types + handler
     │   ├── modules/                 # Feature modules
     │   │   ├── projects/            # Project catalog + lifecycle   [MVP]
     │   │   │   ├── projects.routes.ts
     │   │   │   ├── projects.service.ts
     │   │   │   ├── projects.repository.ts
-    │   │   │   ├── projects.schema.ts   # Typebox
+    │   │   │   ├── projects.schema.ts   # Zod + OpenAPI
     │   │   │   └── projects.test.ts
     │   │   ├── comments/            # Off-chain public comments     [MVP]
     │   │   ├── auth/                # Wallet auth, sessions         [MVP]
@@ -56,7 +64,7 @@ apps/
     │   │   └── webhooks/          # Outbound webhooks               [Phase 3]
     │   ├── shared/                # Shared utils, types, guards
     │   └── emails/                # React Email templates           [MVP]
-    ├── test/                      # integration/e2e (Elysia testing framework)
+    ├── test/                      # integration/e2e (Vitest + Supertest)
     ├── Dockerfile
     └── package.json
 ```
@@ -107,7 +115,7 @@ apps/
 - In-app + email (React Email/Nodemailer) for lifecycle + governance events.
 
 ### Platform & scaling
-- API docs via `@elysia/openapi`. `[MVP]`
+- API docs via Zod-generated OpenAPI + Swagger UI. `[MVP]`
 - Observability: Sentry + Better Stack, structured Pino logs. `[MVP]`
 - Caching + rate limiting + read scaling. `[Phase 2]`
 - Public API, API keys. `[Phase 3]`
@@ -252,14 +260,29 @@ Unique: `(project_id, round)`.
 | start_block | bigint | |
 | end_block | bigint | |
 
+### `chain_events` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| chain_id | integer not null | |
+| contract_address | text not null | lowercase |
+| event_name | text not null | |
+| tx_hash | text not null | |
+| log_index | integer not null | |
+| block_number | bigint not null | |
+| payload | jsonb not null | decoded event payload |
+
+Unique: `(tx_hash, log_index)` for idempotent indexing.
+
 ### `rewards` `[Phase 1]` / `notifications` `[Phase 1]`
 - `rewards(id, wallet_address, project_id, amount, type ['reward'|'slash'], tx_hash)`.
 - `notifications(id, user_id, type, payload jsonb, read_at)`.
 
 ## REST API Endpoints
 
-> All routes are validated with Typebox; shapes feed `@elysia/openapi`. Base path
-> `/api`. `🔒` = authenticated, `👑` = team/admin role `[Phase 2]`.
+> All routes are Express handlers validated with Zod; schemas feed OpenAPI via
+> `@asteasolutions/zod-to-openapi`. `🔒` = authenticated, `👑` = team/admin role
+> `[Phase 2]`.
 
 ### auth `[MVP]`
 - `POST /auth/nonce` → `{ nonce }` for a wallet address.
@@ -303,87 +326,83 @@ Unique: `(project_id, round)`.
 - `GET /rewards/:address`, `GET /notifications` 🔒, `POST /notifications/:id/read` 🔒.
 
 ### platform
-- `GET /openapi.json` + Swagger UI via `@elysia/openapi`. `[MVP]`
+- `GET /openapi.json` + Swagger UI at `/docs`. `[MVP]`
 - `GET /health` → liveness/readiness. `[MVP]`
 - `POST /webhooks/subscriptions` 🔒. `[Phase 3]`
 
-## Typebox Schemas (representative)
+## Zod Schemas (representative)
 
 > Schemas live in each module's `*.schema.ts` and are the single source for
-> validation + OpenAPI. Examples (TypeScript, Typebox):
+> validation + OpenAPI. Examples (TypeScript, Zod):
 
 ```ts
 // modules/projects/projects.schema.ts  [MVP]
-export const ProjectState = Type.Union([
-  Type.Literal('in_analysis'), Type.Literal('ready'), Type.Literal('voting'),
-  Type.Literal('closed'), Type.Literal('analyzed'),
-])
+export const ProjectStateSchema = z
+  .enum(['in_analysis', 'ready', 'voting', 'closed', 'analyzed'])
+  .openapi('ProjectState')
 
-export const Project = Type.Object({
-  id: Type.String({ format: 'uuid' }),
-  slug: Type.String(),
-  name: Type.String({ minLength: 1, maxLength: 120 }),
-  description: Type.Optional(Type.String()),
-  chainId: Type.Integer(),
-  tokenAddress: Type.Optional(Type.String()),
-  state: ProjectState,
-  votingContractAddress: Type.Optional(Type.String()),
-  score: Type.Optional(Type.Number()),
-  createdAt: Type.String({ format: 'date-time' }),
-})
+export const ProjectSchema = z.object({
+  id: z.uuid(),
+  slug: z.string(),
+  name: z.string().min(1).max(120),
+  description: z.string().nullable().optional(),
+  chainId: z.number().int(),
+  tokenAddress: z.string().nullable().optional(),
+  state: ProjectStateSchema,
+  votingContractAddress: z.string().nullable().optional(),
+  score: z.number().optional(),
+  createdAt: z.iso.datetime(),
+}).openapi('Project')
 
-export const CreateProjectBody = Type.Object({
-  name: Type.String({ minLength: 1, maxLength: 120 }),
-  description: Type.Optional(Type.String()),
-  chainId: Type.Integer(),
-  tokenAddress: Type.Optional(Type.String()),
-})
+export const CreateProjectBodySchema = z.object({
+  name: z.string().min(1).max(120),
+  description: z.string().optional(),
+  chainId: z.number().int(),
+  tokenAddress: z.string().optional(),
+}).openapi('CreateProjectBody')
 
-export const ListProjectsQuery = Type.Object({
-  state: Type.Optional(ProjectState),
-  chainId: Type.Optional(Type.Integer()),
-  q: Type.Optional(Type.String()),
-  page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+export const ListProjectsQuerySchema = z.object({
+  state: ProjectStateSchema.optional(),
+  chainId: z.coerce.number().int().optional(),
+  q: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 })
 ```
 
 ```ts
 // modules/auth/auth.schema.ts  [MVP]
-export const NonceBody = Type.Object({ address: Type.String() })
-export const VerifyBody = Type.Object({
-  message: Type.String(),
-  signature: Type.String(),
+export const NonceBodySchema = z.object({ address: z.string() })
+export const VerifyBodySchema = z.object({
+  message: z.string(),
+  signature: z.string(),
 })
-export const SessionUser = Type.Object({
-  id: Type.String({ format: 'uuid' }),
-  walletAddress: Type.String(),
-  role: Type.Union([Type.Literal('user'), Type.Literal('team'), Type.Literal('admin')]),
+export const SessionUserSchema = z.object({
+  id: z.uuid(),
+  walletAddress: z.string(),
+  role: z.enum(['user', 'team', 'admin']),
 })
 
 // modules/comments/comments.schema.ts  [MVP]
-export const CreateCommentBody = Type.Object({
-  body: Type.String({ minLength: 1, maxLength: 5000 }),
+export const CreateCommentBodySchema = z.object({
+  body: z.string().min(1).max(5000),
 })
 
 // modules/governance/governance.schema.ts  [MVP]
-export const Proposal = Type.Object({
-  onchainId: Type.String(),
-  proposerAddress: Type.String(),
-  title: Type.String(),
-  description: Type.Optional(Type.String()),
-  state: Type.Union([
-    Type.Literal('pending'), Type.Literal('active'), Type.Literal('succeeded'),
-    Type.Literal('defeated'), Type.Literal('executed'),
-  ]),
+export const ProposalSchema = z.object({
+  onchainId: z.string(),
+  proposerAddress: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  state: z.enum(['pending', 'active', 'succeeded', 'defeated', 'executed']),
 })
 ```
 
 ## Conventions
 
-- One feature = one folder under `modules/`, with `*.routes.ts`, `*.service.ts`,
-  `*.repository.ts`, `*.schema.ts` (Typebox) and `*.test.ts`.
-- All request/response shapes validated with Typebox; schemas feed OpenAPI.
+- One module = one folder under `modules/`, with `*.routes.ts`, `*.service.ts`,
+  `*.repository.ts`, `*.schema.ts` (Zod) and `*.test.ts`.
+- All request/response shapes validated with Zod; schemas feed OpenAPI.
 - DB access only through Kysely repositories; migrations live in `core/db/migrations`.
 - On-chain reads only through `core/chain` (Viem); never read RPC from a module directly.
-- Tests with the Elysia testing framework + Bun, mirroring module layout. `[MVP]`
+- Tests with Vitest + Supertest, mirroring module layout. `[MVP]`
