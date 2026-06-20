@@ -30,10 +30,7 @@
     "contracts/out/**": true,
     "contracts/cache/**": true
   },
-  "wake.compiler.solc.remappings": [
-    "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
-    "forge-std/=contracts/lib/forge-std/src/"
-  ],
+  "wake.compiler.solc.remappings": [],
   "wake.compiler.solc.include_paths": ["contracts/lib"],
   "wake.compiler.solc.exclude_paths": [
     "node_modules",

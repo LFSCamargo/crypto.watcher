@@ -13,4 +13,5 @@ export const config = {
   ),
   logLevel: process.env.LOG_LEVEL ?? 'info',
   rpcUrl: process.env.RPC_URL ?? 'http://localhost:8545',
+  corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173').split(','),
 } as const

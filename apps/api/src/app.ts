@@ -1,5 +1,8 @@
+import cors from 'cors'
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
+import { config } from './core/config'
+import { getHealth, getOpenApiDocument } from './core/http/handlers/system.handlers'
 import { errorHandler } from './core/http/error-handler'
 import { openApiDocument } from './core/openapi/document'
 import { authRoutes } from './modules/auth/auth.routes'
@@ -13,15 +16,16 @@ import { votingRoutes } from './modules/voting/voting.routes'
 
 export const app = express()
 
+app.use(
+  cors({
+    origin: config.corsOrigins,
+    credentials: true,
+  }),
+)
 app.use(express.json())
 
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' })
-})
-
-app.get('/openapi.json', (_req, res) => {
-  res.json(openApiDocument)
-})
+app.get('/health', getHealth)
+app.get('/openapi.json', getOpenApiDocument)
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument))
 app.use('/auth', authRoutes)

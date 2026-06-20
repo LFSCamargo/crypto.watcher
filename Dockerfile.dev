@@ -3,6 +3,10 @@
 # at runtime via anonymous volumes in docker-compose.yml.
 FROM node:20-alpine
 
+# Build toolchain for native node addons (e.g. utf-8-validate, bufferutil
+# pulled in by the web3/ws stack), which node-gyp compiles during install.
+RUN apk add --no-cache python3 make g++
+
 RUN corepack enable
 WORKDIR /app
 

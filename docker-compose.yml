@@ -34,6 +34,7 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: '1025'
       RPC_URL: ${RPC_URL:-https://sepolia.base.org}
+      CORS_ORIGINS: http://localhost:5173
       # tsx/chokidar file watching inside the container (HMR).
       CHOKIDAR_USEPOLLING: 'true'
     ports:

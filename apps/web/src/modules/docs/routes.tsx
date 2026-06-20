@@ -1,0 +1,6 @@
+export { DocsLayout } from './layouts/docs-layout'
+export { DocsIntroduction } from './content/introduction'
+export { DocsWhitepaper } from './content/whitepaper'
+export { DocsTokenomics } from './content/tokenomics'
+export { DocsGovernance } from './content/governance'
+export { DocsFAQ } from './content/faq'

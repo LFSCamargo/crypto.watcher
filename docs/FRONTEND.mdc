@@ -33,7 +33,7 @@ apps/
     │   ├── app/
     │   │   ├── router.tsx           # React Router routes
     │   │   ├── providers.tsx        # Wagmi/RainbowKit/Query/Theme providers
-    │   │   └── layout/              # App shell, nav, footer
+    │   │   └── layout/              # Shared app shell, nav/search, footer
     │   ├── components/
     │   │   └── ui/                  # Shadcn/UI primitives (shared)
     │   ├── lib/                     # api client, wagmi/viem config, utils
@@ -42,13 +42,16 @@ apps/
     │   │   └── utils/
     │   ├── store/                   # Zustand root store + shared slices
     │   ├── modules/                 # Feature modules
-    │   │   ├── projects/            # Catalog + project detail        [MVP]
+    │   │   ├── projects/            # Safety index + project detail   [MVP]
     │   │   │   ├── components/
     │   │   │   ├── hooks/
     │   │   │   ├── api/
+    │   │   │   ├── lib/             # Formatting + curated references
     │   │   │   ├── store.ts         # Zustand slice
     │   │   │   ├── routes.tsx
     │   │   │   └── __tests__/
+    │   │   ├── marketing/           # Public landing page             [MVP]
+    │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── comments/            # Public commenting               [MVP]
     │   │   ├── auth/                # Wallet connect + SIWE login      [MVP]
     │   │   ├── voting/              # On-chain voting UI               [MVP]
@@ -69,7 +72,8 @@ apps/
 ## Features by Phase
 
 ### projects `[MVP]`
-- Project catalog (list + filters) and project detail page.
+- Public safety index with top-nav/landing search and project detail page.
+- Curated market-reference assets inspired by widely tracked CoinMarketCap listings.
 - Lifecycle status badges (`In analysis → Ready → Voting → Closed → Analyzed`).
 - Score visualization on the detail page.
 - Community submission form. `[Phase 2]`
@@ -107,6 +111,7 @@ apps/
 
 ### Platform & UX
 - Toasts via Sonner, icons via Phosphor, forms via React Hook Form. `[MVP]`
+- Shared public shell across landing, docs and app routes; wallet connection is optional until a user votes, comments, or manages reputation. `[MVP]`
 - Error reporting via Sentry. `[MVP]`
 - Embeddable score widgets/badges. `[Phase 3]`
 - PWA / mobile experience. `[Phase 3]`
@@ -114,7 +119,7 @@ apps/
 ## Functional Requirements (by feature & phase)
 
 ### projects `[MVP]`
-- R1: Browse a paginated, filterable catalog (by state/chain/search).
+- R1: Browse and search a public safety index without connecting a wallet.
 - R2: View a project detail page with lifecycle status and score.
 - R3: Team UI to create/update/transition projects. `[MVP]` (role-gated `[Phase 2]`)
 - R4: Community submission form. `[Phase 2]`
@@ -147,18 +152,21 @@ apps/
 
 | path | feature | access | phase |
 | --- | --- | --- | --- |
-| `/` | projects (catalog) | public | `MVP` |
-| `/projects/:slug` | projects (detail) | public | `MVP` |
-| `/projects/:slug/vote` | voting | 🔒 eligible | `MVP` |
+| `/` | marketing (public search landing) | public | `MVP` |
+| `/app` | projects (safety index) | public | `MVP` |
+| `/app/projects/:slug` | projects (detail) | public | `MVP` |
+| `/app/projects/:slug/vote` | voting | 🔒 eligible | `MVP` |
 | `/projects/submit` | projects | 🔒 | `Phase 2` |
-| `/governance` | governance (list) | public | `MVP` |
-| `/governance/:onchainId` | governance (detail) | public | `MVP` |
+| `/app/governance` | governance (list) | public | `MVP` |
+| `/app/governance/:onchainId` | governance (detail) | public | `MVP` |
 | `/governance/new` | governance | 🔒 | `Phase 1` |
-| `/u/:address` | reputation/profile | public | `MVP` |
-| `/me` | users (own profile) | 🔒 | `MVP` |
+| `/app/u/:address` | reputation/profile | public | `MVP` |
+| `/app/me` | users (own profile) | 🔒 | `MVP` |
 | `/rewards` | rewards | 🔒 | `Phase 1` |
 | `/notifications` | notifications | 🔒 | `Phase 1` |
-| `/admin` | team/admin project actions | 👑 | `MVP` |
+| `/app/admin` | team/admin project actions | 👑 | `MVP` |
+| `/docs` | docs (introduction) | public | `MVP` |
+| `/docs/whitepaper` | docs (whitepaper) | public | `MVP` |
 
 ## Consumed API Endpoints (maps to BACKEND)
 
