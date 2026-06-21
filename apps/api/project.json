@@ -9,7 +9,8 @@
       "command": "tsc --project tsconfig.build.json",
       "options": { "cwd": "apps/api" }
     },
-    "test": { "command": "vitest run", "options": { "cwd": "apps/api" } },
+    "test": { "command": "vitest run --coverage", "options": { "cwd": "apps/api" } },
+    "test:unit": { "command": "vitest run", "options": { "cwd": "apps/api" } },
     "lint": { "command": "eslint src", "options": { "cwd": "apps/api" } },
     "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "apps/api" } }
   }

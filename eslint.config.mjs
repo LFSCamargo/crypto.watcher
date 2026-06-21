@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/build/**', '**/.nx/**', '**/coverage/**', 'contracts/**'],
+    ignores: ['**/dist/**', '**/build/**', '**/.nx/**', '**/coverage/**', 'contracts/**', 'packages/o1-check/src/**/__tests__/fixtures/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

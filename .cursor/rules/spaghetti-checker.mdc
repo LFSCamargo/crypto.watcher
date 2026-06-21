@@ -1,0 +1,127 @@
+---
+description: Enforce one context per file — module layout for API and web; run check:spaghetti before finishing
+alwaysApply: true
+---
+
+# Spaghetti Checker — One Context Per File
+
+Keep each file focused on a single responsibility. Too much in one file (TMI) hurts
+readability, reviewability, and testability.
+
+**Enforcement:** `pnpm run check:spaghetti` (also in Husky pre-commit and Cursor
+`afterFileEdit` / `stop` hooks). Fix all violations before declaring work done.
+
+---
+
+## Canonical module layouts
+
+### Backend — `apps/api/src/modules/<name>/`
+
+```
+<name>/
+  handlers/              # one handler per route action
+    list-*.handler.ts
+    create-*.handler.ts
+    index.ts
+  schemas/               # one schema per file
+    *.schema.ts
+    index.ts
+  __tests__/             # all tests here — never beside source
+    *.service.test.ts
+    *.handlers.test.ts
+  <name>.routes.ts       # thin wiring only
+  <name>.service.ts
+  <name>.repository.ts
+```
+
+| File | Allowed contents |
+|------|------------------|
+| `*.routes.ts` | Router + middleware + `asyncHandler(namedHandler)` |
+| `handlers/*.handler.ts` | Single exported handler function |
+| `schemas/*.schema.ts` | Single Zod schema; import `z` from `core/openapi/zod` |
+| `*.service.ts` | Business logic; no HTTP types |
+| `__tests__/` | Vitest tests only |
+
+```typescript
+// ❌ BAD — inline handler
+commentsRoutes.get('/projects/:id/comments', asyncHandler(async (req, res) => {
+  res.json(await commentsService.listByProject(req.params.id))
+}))
+
+// ✅ GOOD
+commentsRoutes.get('/projects/:id/comments', validate({ params }), asyncHandler(listProjectCommentsHandler))
+```
+
+Shared handler helpers (e.g. session cookies) → `handlers/_shared/` or dedicated file.
+
+### Frontend — `apps/web/src/modules/<name>/`
+
+```
+<name>/
+  components/            # one React component per .tsx
+  hooks/                 # one hook per file
+  pages/                 # route-level page components
+  api/                   # typed API client for this feature
+  lib/                   # module-specific utils
+  store.ts               # Zustand slice (optional)
+  routes.tsx             # re-exports pages only — no component bodies
+  __tests__/             # Vitest tests only
+```
+
+| File | Allowed contents |
+|------|------------------|
+| `routes.tsx` | `export { XPage } from './pages/x-page'` only |
+| `pages/*.tsx` | Single page component |
+| `components/*.tsx` | Single component (or single hook if in `hooks/`) |
+| `hooks/*.ts` | Single custom hook |
+| `__tests__/` | Vitest + Testing Library tests |
+
+```typescript
+// ❌ BAD — page defined in routes.tsx
+export function ProjectsPage() { return <div>...</div> }
+
+// ✅ GOOD — routes.tsx
+export { ProjectsPage } from './pages/projects-page'
+```
+
+Cross-feature imports go through `lib/`, `components/ui/`, or public module surfaces —
+never another module's internals.
+
+---
+
+## When to split
+
+Split when a file has **more than one** of: handler, schema, service concern, React
+component, page, or hook.
+
+---
+
+## Tests
+
+All tests live in `__tests__/` — never co-located beside source.
+
+```
+modules/comments/
+  __tests__/
+    comments.service.test.ts
+    comments.handlers.test.ts
+```
+
+API target: ≥ 80% statement coverage (`apps/api/vitest.config.ts`).
+Web target: ≥ 80% on tested UI components (`apps/web/vite.config.ts`); tests are
+Testing Library only in `__tests__/*.test.tsx`.
+
+---
+
+## Agent checklist (run on every module create/modify)
+
+When creating or editing anything under `apps/api/src/modules/` or
+`apps/web/src/modules/`:
+
+1. **Match layout** — use the canonical folder tree above.
+2. **Split before merge** — new route → new handler file; new schema → new schema file; new page → `pages/`.
+3. **Run checker** — `pnpm run check:spaghetti` must pass.
+4. **Run gates** — `pnpm run typecheck` and `pnpm run test` for touched apps.
+5. **Update docs** — `docs/BACKEND.mdc` or `docs/FRONTEND.mdc` if module structure changed.
+
+If the checker fails, fix structure — do not disable or bypass the rule.

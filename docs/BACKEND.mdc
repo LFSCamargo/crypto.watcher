@@ -52,11 +52,9 @@ apps/
     │   │   └── errors/              # error types + handler
     │   ├── modules/                 # Feature modules
     │   │   ├── projects/            # Project catalog + lifecycle   [MVP]
-    │   │   │   ├── projects.routes.ts
-    │   │   │   ├── projects.service.ts
-    │   │   │   ├── projects.repository.ts
-    │   │   │   ├── projects.schema.ts   # Zod + OpenAPI
-    │   │   │   └── projects.test.ts
+    │   │   │   ├── handlers/
+    │   │   │   ├── schemas/
+    │   │   │   └── __tests__/         # Vitest tests (never co-located)
     │   │   ├── comments/            # Off-chain public comments     [MVP]
     │   │   ├── auth/                # Wallet + email auth, sessions [MVP]
     │   │   ├── users/              # Accounts + profiles           [MVP]
@@ -68,7 +66,7 @@ apps/
     │   │   │   ├── market.service.ts
     │   │   │   ├── market.repository.ts
     │   │   │   ├── market.schema.ts
-    │   │   │   └── market.service.test.ts
+    │   │   │   └── __tests__/         # market.service.test.ts, etc.
     │   │   ├── governance/        # Governance proposals/events    [MVP]
     │   │   ├── reputation/        # Reviewer credentials / council    [MVP→Phase 1]
     │   │   ├── rewards/           # Reviewer compensation             [Phase 1]
@@ -463,7 +461,7 @@ export const ProposalSchema = z.object({
 ## Conventions
 
 - One module = one folder under `modules/`, with `*.routes.ts`, `*.service.ts`,
-  `*.repository.ts`, `*.schema.ts` (Zod) and `*.test.ts`.
+  `*.repository.ts`, `schemas/` (Zod) and `__tests__/*.test.ts`.
 - All request/response shapes validated with Zod; schemas feed OpenAPI.
 - DB access only through Kysely repositories; migrations live in `core/db/migrations`.
 - On-chain reads only through `core/chain` (Viem); never read RPC from a module directly.

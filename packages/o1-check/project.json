@@ -1,0 +1,15 @@
+{
+  "name": "o1-check",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/o1-check/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "command": "tsc --project tsconfig.build.json",
+      "options": { "cwd": "packages/o1-check" }
+    },
+    "test": { "command": "vitest run", "options": { "cwd": "packages/o1-check" } },
+    "lint": { "command": "eslint src", "options": { "cwd": "packages/o1-check" } },
+    "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "packages/o1-check" } }
+  }
+}

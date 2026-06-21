@@ -7,7 +7,7 @@ import {
   ShieldCheck,
   Star,
 } from '@phosphor-icons/react'
-import { DocsFaqItem, DocsHero, DocsList, DocsP, DocsSection } from '../components/docs-ui'
+import { DocsFaqItem, DocsHero, DocsList, DocsP, DocsSection } from '../components'
 
 export function DocsFAQ() {
   return (

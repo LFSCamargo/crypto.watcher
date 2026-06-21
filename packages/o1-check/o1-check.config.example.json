@@ -1,0 +1,7 @@
+{
+  "ignore": ["dist", "coverage"],
+  "failBelow": 70,
+  "rules": {
+    "disabled": ["db.select-all"]
+  }
+}

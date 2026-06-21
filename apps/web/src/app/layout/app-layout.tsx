@@ -9,7 +9,8 @@ import { ThemeToggle } from '../../components/theme/theme-toggle'
 import { AppFooter } from '../../components/layout/app-footer'
 import { PageGridBackground } from '../../components/layout/page-grid-background'
 import { ResourcesMenu } from '../../components/layout/resources-menu'
-import { CommandPalette, useCommandPalette } from '../../components/search/command-palette'
+import { CommandPalette } from '../../components/search/command-palette'
+import { useCommandPalette } from '../../components/search/use-command-palette'
 import { Button } from '../../components/ui'
 
 const navItems = [

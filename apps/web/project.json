@@ -9,7 +9,8 @@
       "command": "tsc --noEmit && vite build",
       "options": { "cwd": "apps/web" }
     },
-    "test": { "command": "vitest run", "options": { "cwd": "apps/web" } },
+    "test": { "command": "vitest run --coverage", "options": { "cwd": "apps/web" } },
+    "test:unit": { "command": "vitest run", "options": { "cwd": "apps/web" } },
     "lint": { "command": "eslint src", "options": { "cwd": "apps/web" } },
     "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "apps/web" } }
   }

@@ -1,4 +1,5 @@
-import { BlueprintGrid, GridAccent } from '../ui/blueprint-grid'
+import { BlueprintGrid } from '../ui/blueprint-grid'
+import { GridAccent } from '../ui/grid-accent'
 
 export function PageGridBackground() {
   return (

@@ -17,7 +17,7 @@ import {
   DocsP,
   DocsSection,
   DocsSteps,
-} from '../components/docs-ui'
+} from '../components'
 
 export function DocsIntroduction() {
   return (

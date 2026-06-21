@@ -160,6 +160,21 @@ ProtocolSettings:     0x...
 
 ---
 
+## Quality checks
+
+```bash
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm run check:spaghetti   # module layout (handlers, pages, __tests__)
+pnpm run o1-check:api      # API complexity / DB risk scan (fail below 50)
+pnpm run o1-check:web      # Web UI scan (docs content excluded)
+```
+
+See `packages/o1-check/README.md` and root `o1-check.config.json` / `o1-check.web.config.json`.
+
+---
+
 ## Ports reference
 
 | Service | URL |

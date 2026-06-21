@@ -15,7 +15,7 @@ import {
   DocsPhaseCard,
   DocsSection,
   DocsSubheading,
-} from '../components/docs-ui'
+} from '../components'
 
 export function DocsWhitepaper() {
   return (

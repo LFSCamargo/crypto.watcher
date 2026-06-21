@@ -1,0 +1,9 @@
+{
+  "ignore": ["node_modules", "dist", "build", ".next", "coverage", "__tests__", "migrations"],
+  "ignorePaths": ["/docs/content/"],
+  "failBelow": 70,
+  "rules": {
+    "enabled": ["async.", "code.nested-loop", "code.quadratic-lookup", "db."],
+    "disabled": ["db.offset-pagination", "db.select-all"]
+  }
+}

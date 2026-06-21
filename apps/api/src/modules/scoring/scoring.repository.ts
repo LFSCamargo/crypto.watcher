@@ -1,4 +1,5 @@
 import { db } from '../../core/db'
+import { DEFAULT_LIST_LIMIT } from '../../core/db/query-limits'
 
 export const scoringRepository = {
   async getCurrent(projectId: string) {
@@ -16,6 +17,7 @@ export const scoringRepository = {
       .selectAll()
       .where('project_id', '=', projectId)
       .orderBy('round', 'asc')
+      .limit(DEFAULT_LIST_LIMIT)
       .execute()
   },
 

@@ -5,7 +5,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '../../.
 import { ProjectIcon } from '../../../components/brand/project-icon'
 import { ProjectPricePanel } from '../../market/components/project-price-panel'
 import { ProjectDetailBackButton } from '../components/project-detail-back-button'
-import { ProjectReviewDetail } from '../components/project-review-sections'
+import { ProjectReviewDetail } from '../components/project-review-detail'
 import { getProjectReviewProfile, getVerdictLabel } from '../lib/curated-project-reviews'
 import { getCuratedProject, projectCategories } from '../lib/curated-projects'
 

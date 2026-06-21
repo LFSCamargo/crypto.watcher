@@ -18,7 +18,7 @@ import {
   DocsSection,
   DocsSubheading,
   DocsTable,
-} from '../components/docs-ui'
+} from '../components'
 
 export function DocsTokenomics() {
   return (

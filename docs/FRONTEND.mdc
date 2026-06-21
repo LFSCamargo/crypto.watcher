@@ -315,5 +315,6 @@ interface VotingState {
 - Global/shared state in Zustand (`store/`); feature state in the feature's slice.
 - All network calls through the typed client in `lib/api/`; on-chain calls through
   `lib/web3/`.
-- Tests: Vitest + Testing Library co-located in `__tests__/`; Playwright e2e in
-  `e2e/`. `[MVP]`
+- Tests: Vitest + Testing Library in `__tests__/` as `*.test.tsx` only (render
+  components/hooks — no plain `*.test.ts` lib unit tests); Playwright e2e in
+  `e2e/`. Coverage thresholds in `vite.config.ts`. `[MVP]`

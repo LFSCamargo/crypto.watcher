@@ -1,4 +1,5 @@
 import { db } from '../../core/db'
+import { DEFAULT_LIST_LIMIT } from '../../core/db/query-limits'
 import type { AnalysisRequestStatus } from '../../core/db/schema'
 
 export const analysisRequestsRepository = {
@@ -25,7 +26,7 @@ export const analysisRequestsRepository = {
   async list(filters: { status?: AnalysisRequestStatus }) {
     let query = db.selectFrom('analysis_requests').selectAll()
     if (filters.status) query = query.where('status', '=', filters.status)
-    return query.orderBy('created_at', 'desc').execute()
+    return query.orderBy('created_at', 'desc').limit(DEFAULT_LIST_LIMIT).execute()
   },
 
   async listByUser(userId: string) {
@@ -34,6 +35,7 @@ export const analysisRequestsRepository = {
       .selectAll()
       .where('user_id', '=', userId)
       .orderBy('created_at', 'desc')
+      .limit(DEFAULT_LIST_LIMIT)
       .execute()
   },
 

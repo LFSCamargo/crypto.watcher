@@ -1,6 +1,7 @@
 export { Avatar, AvatarImage, AvatarFallback } from './avatar'
 export { Badge, badgeVariants } from './badge'
-export { BlueprintGrid, GridAccent } from './blueprint-grid'
+export { BlueprintGrid } from './blueprint-grid'
+export { GridAccent } from './grid-accent'
 export { Button, buttonVariants } from './button'
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card'
 export { Input } from './input'

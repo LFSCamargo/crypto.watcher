@@ -17,11 +17,12 @@ part of the definition of done (see `.cursor/rules/quality-gating.mdc`).
 
 ## What to test (by layer)
 
-- **Backend (`apps/api`)** — Vitest + Node. Each module has `*.test.ts` covering
-  service logic and route I/O (validation, status codes, auth/role gating).
+- **Backend (`apps/api`)** — Vitest + Node. Each module has `__tests__/*.test.ts`
+  covering service logic and route I/O (validation, status codes, auth/role gating).
   Repositories tested against a test PostgreSQL.
-- **Frontend (`apps/web`)** — Vitest + Testing Library for components/hooks
-  (co-located in `__tests__/`); Playwright for critical e2e flows in `e2e/`
+- **Frontend (`apps/web`)** — Vitest + Testing Library only. Co-locate in `__tests__/` as
+  `*.test.tsx` that render components/hooks — no plain `*.test.ts` lib unit tests.
+  Playwright for critical e2e flows in `e2e/`.
   (wallet connect, vote, governance vote).
 - **Contracts (`contracts`)** — Foundry unit + fuzz tests mirroring `src/` module
   layout; cover access control, voting, governance and reputation gating.
@@ -31,7 +32,8 @@ part of the definition of done (see `.cursor/rules/quality-gating.mdc`).
 - New/changed business logic must be covered by tests.
 - Bug fixes must include a regression test.
 - Critical paths (auth, voting, scoring, governance) require both unit and e2e tests.
-- Tests live next to the code they test and mirror the modular folder structure.
+- Tests live next to the code they test in `__tests__/` folders (never co-located
+  beside source) and mirror the modular folder structure.
 
 ## Rules
 

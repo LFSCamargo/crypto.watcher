@@ -24,5 +24,21 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/__tests__/**/*.test.tsx'],
+    coverage: {
+      provider: 'v8',
+      include: [
+        'src/components/brand/project-icon.tsx',
+        'src/modules/auth/components/password-strength-field.tsx',
+        'src/modules/projects/components/**/*.tsx',
+        'src/modules/market/components/**/*.tsx',
+      ],
+      exclude: [
+        '**/__tests__/**',
+        'src/modules/projects/components/project-search.tsx',
+        'src/modules/projects/components/reference-project-voting-cta.tsx',
+      ],
+      thresholds: { statements: 80, branches: 70, functions: 80, lines: 80 },
+    },
   },
 })

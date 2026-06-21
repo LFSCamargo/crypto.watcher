@@ -20,6 +20,8 @@ not by token-weighted public voting. Read these first — they are the source of
 apps/
   api/        # Express + Zod + Kysely (PostgreSQL)
   web/        # Vite + React + TS + Tailwind + Shadcn/UI
+packages/
+  o1-check/   # CLI complexity & performance risk checker
 contracts/    # Solidity + Foundry
 docs/         # Design docs (source of truth)
 .cursor/rules # Repo rules enforced by the agent
@@ -33,8 +35,9 @@ docs/         # Design docs (source of truth)
    `[Phase 2]`, `[Phase 3]`, `[Final]`) accurate.
 2. **Test-driven.** Write/extend tests before or alongside code; no feature lands
    without tests (see `.cursor/rules/test-driven.mdc`).
-3. **Quality gates must pass.** Lint, typecheck, tests and build must be green
-   before a change is considered done (see `.cursor/rules/quality-gating.mdc`).
+3. **Quality gates must pass.** Lint, typecheck, tests, build, and spaghetti layout
+   check must be green before a change is considered done (see
+   `.cursor/rules/quality-gating.mdc` and `.cursor/rules/spaghetti-checker.mdc`).
 4. **Modular by feature.** One feature = one folder, owning its routes/components,
    service, repository, schema and tests. Never import another module's internals;
    go through its public surface (service/UI/lib).
@@ -46,6 +49,8 @@ docs/         # Design docs (source of truth)
 pnpm install                # install all workspaces
 pnpm run dev                # run web + api in parallel (nx)
 pnpm run lint               # eslint across the monorepo
+pnpm run check:spaghetti    # module layout (handlers, schemas, pages, __tests__)
+pnpm run o1-check -- apps/api/src --config o1-check.config.json  # complexity/performance risk scan
 pnpm run typecheck          # tsc --noEmit across packages
 pnpm run test               # unit/integration tests
 pnpm run build              # build all apps

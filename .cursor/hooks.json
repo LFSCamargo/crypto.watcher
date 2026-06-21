@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/check-spaghetti.sh",
+        "matcher": "Write|StrReplace|EditNotebook",
+        "failClosed": false
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/check-spaghetti.sh",
+        "failClosed": false
+      }
+    ]
+  }
+}
