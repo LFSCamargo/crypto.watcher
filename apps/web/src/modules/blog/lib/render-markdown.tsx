@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { parseMarkdownBlocks, type MarkdownBlock } from './parse-markdown-blocks'
 
 const linkClassName =
   'font-semibold text-foreground underline decoration-primary/50 underline-offset-4 transition-colors hover:text-primary'
@@ -64,132 +65,67 @@ function renderParagraph(text: string, key: string) {
   )
 }
 
-export function renderBlogMarkdown(content: string): ReactNode[] {
-  const lines = content.split('\n')
-  const nodes: ReactNode[] = []
-  let index = 0
+function renderBlock(block: MarkdownBlock): ReactNode {
+  const key = `${block.kind}-${block.key}`
 
-  while (index < lines.length) {
-    const line = lines[index]?.trimEnd() ?? ''
-
-    if (line.trim() === '') {
-      index += 1
-      continue
-    }
-
-    if (line.startsWith('# ')) {
-      nodes.push(
-        <h1 key={`h1-${index}`} className="heading-2 mb-6 mt-10 first:mt-0">
-          {renderInline(line.slice(2), `h1-${index}`)}
-        </h1>,
+  switch (block.kind) {
+    case 'h1':
+      return (
+        <h1 key={key} className="heading-2 mb-6 mt-10 first:mt-0">
+          {renderInline(block.text, key)}
+        </h1>
       )
-      index += 1
-      continue
-    }
-
-    if (line.startsWith('## ')) {
-      nodes.push(
-        <h2 key={`h2-${index}`} className="heading-3 mb-4 mt-10 border-b border-border/50 pb-2">
-          {renderInline(line.slice(3), `h2-${index}`)}
-        </h2>,
+    case 'h2':
+      return (
+        <h2 key={key} className="heading-3 mb-4 mt-10 border-b border-border/50 pb-2">
+          {renderInline(block.text, key)}
+        </h2>
       )
-      index += 1
-      continue
-    }
-
-    if (line.startsWith('### ')) {
-      nodes.push(
-        <h3 key={`h3-${index}`} className="mb-3 mt-8 text-lg font-bold">
-          {renderInline(line.slice(4), `h3-${index}`)}
-        </h3>,
+    case 'h3':
+      return (
+        <h3 key={key} className="mb-3 mt-8 text-lg font-bold">
+          {renderInline(block.text, key)}
+        </h3>
       )
-      index += 1
-      continue
-    }
-
-    if (/^---+$/.test(line.trim())) {
-      nodes.push(<hr key={`hr-${index}`} className="my-10 border-border/60" />)
-      index += 1
-      continue
-    }
-
-    if (line.startsWith('> ')) {
-      const quoteLines: string[] = []
-      while (index < lines.length && lines[index]?.startsWith('> ')) {
-        quoteLines.push(lines[index]!.slice(2))
-        index += 1
-      }
-      nodes.push(
+    case 'hr':
+      return <hr key={key} className="my-10 border-border/60" />
+    case 'blockquote':
+      return (
         <blockquote
-          key={`quote-${index}`}
+          key={key}
           className="mb-5 border-l-4 border-primary/40 bg-primary/5 px-4 py-3 text-muted-foreground"
         >
-          {quoteLines.map((quoteLine, quoteIndex) => (
+          {block.lines.map((quoteLine, quoteIndex) => (
             <p key={quoteIndex} className={quoteIndex > 0 ? 'mt-2' : undefined}>
-              {renderInline(quoteLine, `quote-${index}-${quoteIndex}`)}
+              {renderInline(quoteLine, `${key}-${quoteIndex}`)}
             </p>
           ))}
-        </blockquote>,
+        </blockquote>
       )
-      continue
-    }
-
-    if (line.startsWith('- ')) {
-      const items: string[] = []
-      while (index < lines.length && lines[index]?.startsWith('- ')) {
-        items.push(lines[index]!.slice(2))
-        index += 1
-      }
-      nodes.push(
-        <ul key={`ul-${index}`} className="mb-5 list-disc space-y-2 pl-6 text-muted-foreground">
-          {items.map((item, itemIndex) => (
+    case 'ul':
+      return (
+        <ul key={key} className="mb-5 list-disc space-y-2 pl-6 text-muted-foreground">
+          {block.items.map((item, itemIndex) => (
             <li key={itemIndex} className="leading-relaxed">
-              {renderInline(item, `ul-${index}-${itemIndex}`)}
+              {renderInline(item, `${key}-${itemIndex}`)}
             </li>
           ))}
-        </ul>,
+        </ul>
       )
-      continue
-    }
-
-    if (/^\d+\.\s/.test(line)) {
-      const items: string[] = []
-      while (index < lines.length && /^\d+\.\s/.test(lines[index] ?? '')) {
-        items.push(lines[index]!.replace(/^\d+\.\s/, ''))
-        index += 1
-      }
-      nodes.push(
-        <ol key={`ol-${index}`} className="mb-5 list-decimal space-y-2 pl-6 text-muted-foreground">
-          {items.map((item, itemIndex) => (
+    case 'ol':
+      return (
+        <ol key={key} className="mb-5 list-decimal space-y-2 pl-6 text-muted-foreground">
+          {block.items.map((item, itemIndex) => (
             <li key={itemIndex} className="leading-relaxed">
-              {renderInline(item, `ol-${index}-${itemIndex}`)}
+              {renderInline(item, `${key}-${itemIndex}`)}
             </li>
           ))}
-        </ol>,
+        </ol>
       )
-      continue
-    }
-
-    if (line.startsWith('|')) {
-      const tableLines: string[] = []
-      while (index < lines.length && lines[index]?.startsWith('|')) {
-        tableLines.push(lines[index]!)
-        index += 1
-      }
-
-      const rows = tableLines
-        .filter((row) => !/^\|\s*-/.test(row))
-        .map((row) =>
-          row
-            .split('|')
-            .slice(1, -1)
-            .map((cell) => cell.trim()),
-        )
-
-      const [header = [], ...body] = rows
-
-      nodes.push(
-        <div key={`table-${index}`} className="mb-6 overflow-x-auto rounded-2xl border border-border">
+    case 'table': {
+      const [header = [], ...body] = block.rows
+      return (
+        <div key={key} className="mb-6 overflow-x-auto rounded-2xl border border-border">
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead className="bg-secondary/60">
               <tr>
@@ -198,7 +134,7 @@ export function renderBlogMarkdown(content: string): ReactNode[] {
                     key={cellIndex}
                     className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-foreground"
                   >
-                    {renderInline(cell, `th-${index}-${cellIndex}`)}
+                    {renderInline(cell, `${key}-th-${cellIndex}`)}
                   </th>
                 ))}
               </tr>
@@ -208,39 +144,21 @@ export function renderBlogMarkdown(content: string): ReactNode[] {
                 <tr key={rowIndex}>
                   {row.map((cell, cellIndex) => (
                     <td key={cellIndex} className="px-4 py-3 text-muted-foreground">
-                      {renderInline(cell, `td-${index}-${rowIndex}-${cellIndex}`)}
+                      {renderInline(cell, `${key}-td-${rowIndex}-${cellIndex}`)}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>,
+        </div>
       )
-      continue
     }
-
-    const paragraphLines: string[] = [line]
-    index += 1
-    while (index < lines.length) {
-      const nextLine = lines[index]?.trimEnd() ?? ''
-      if (
-        nextLine.trim() === '' ||
-        nextLine.startsWith('#') ||
-        nextLine.startsWith('- ') ||
-        nextLine.startsWith('> ') ||
-        nextLine.startsWith('|') ||
-        /^\d+\.\s/.test(nextLine) ||
-        /^---+$/.test(nextLine.trim())
-      ) {
-        break
-      }
-      paragraphLines.push(nextLine)
-      index += 1
-    }
-
-    nodes.push(renderParagraph(paragraphLines.join(' '), `p-${index}`))
+    case 'paragraph':
+      return renderParagraph(block.text, key)
   }
+}
 
-  return nodes
+export function renderBlogMarkdown(content: string): ReactNode[] {
+  return parseMarkdownBlocks(content).map(renderBlock)
 }

@@ -17,4 +17,17 @@ export const authApi = {
     apiPost<{ ok: true }>('/auth/reset-password', input),
   me: () => apiFetch<AuthUserResponse>('/auth/me'),
   logout: () => apiPost<void>('/auth/logout'),
+  walletLogin: (address: string, signMessage: (message: string) => Promise<string>) =>
+    authApi
+      .nonce(address)
+      .then((nonce) =>
+        signMessage(nonce.message).then((signature) =>
+          authApi.verify({
+            address,
+            message: nonce.message,
+            signature,
+          }),
+        ),
+      )
+      .then((result) => result.user),
 }
