@@ -46,6 +46,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
+      - name: Build email-templates
+        run: pnpm exec nx run email-templates:build
       - name: Lint
         run: pnpm exec nx run api:lint
       - name: Typecheck
