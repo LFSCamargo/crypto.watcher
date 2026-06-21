@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
 import { authApi } from '../api/auth.api'
+import type { LoginBody, RegisterBody } from '../../../lib/api/types'
 import { useSession } from '../../../store/session'
 
 export function useSessionBootstrap() {
@@ -9,16 +10,48 @@ export function useSessionBootstrap() {
 
   const query = useQuery({
     queryKey: ['auth', 'me'],
-    queryFn: authApi.me,
+    queryFn: async () => {
+      try {
+        return await authApi.me()
+      } catch {
+        return null
+      }
+    },
     retry: false,
   })
 
   useEffect(() => {
     if (query.data?.user) setUser(query.data.user)
-    if (query.isError) setUser(undefined)
-  }, [query.data, query.isError, setUser])
+    else if (query.isFetched) setUser(undefined)
+  }, [query.data, query.isFetched, setUser])
 
   return query
+}
+
+export function useRegister() {
+  const setUser = useSession((state) => state.setUser)
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (body: RegisterBody) => authApi.register(body).then((r) => r.user),
+    onSuccess: (user) => {
+      setUser(user)
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+    },
+  })
+}
+
+export function useLogin() {
+  const setUser = useSession((state) => state.setUser)
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (body: LoginBody) => authApi.login(body).then((r) => r.user),
+    onSuccess: (user) => {
+      setUser(user)
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+    },
+  })
 }
 
 export function useWalletLogin() {
@@ -43,6 +76,15 @@ export function useWalletLogin() {
       setUser(user)
       void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
     },
+  })
+}
+
+export function useLinkPublicKey() {
+  const setUser = useSession((state) => state.setUser)
+
+  return useMutation({
+    mutationFn: (publicKey: string) => authApi.linkPublicKey(publicKey).then((r) => r.user),
+    onSuccess: (user) => setUser(user),
   })
 }
 

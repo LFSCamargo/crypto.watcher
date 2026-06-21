@@ -10,6 +10,8 @@ const sizeToClass = {
   sm: 'h-8 w-8',
   md: 'h-12 w-12',
   lg: 'h-20 w-20',
+  xl: 'h-24 w-24',
+  xxl: 'h-32 w-32',
 }
 
 export function Logo({

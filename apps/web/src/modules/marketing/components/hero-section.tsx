@@ -1,119 +1,133 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, ShieldCheck, Users, ChartLineUp } from '@phosphor-icons/react'
+import { RiArrowRightLine, RiCheckLine } from '@remixicon/react'
+import { HeaderLogo } from '../../../components/brand/header-logo'
 import { Button } from '../../../components/ui'
 import { ProjectSearch } from '../../projects/components/project-search'
+import { getTopRatedProjects } from '../../projects/lib/curated-projects'
+import { TopRatedProjectCard } from './top-rated-project-card'
 
 const trustPoints = [
-  { icon: ShieldCheck, label: 'Trust-based voting' },
-  { icon: Users, label: 'Community driven' },
-  { icon: ChartLineUp, label: 'On-chain scores' },
+  '100+ projects reviewed',
+  'Authority-verified scores',
+  'No wallet needed to browse',
 ]
 
 export function HeroSection() {
+  const topRated = getTopRatedProjects(8)
+
   return (
     <section className="relative overflow-hidden">
-      {/* Ambient glow that echoes the gold shield */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-primary/15 blur-[120px]" />
-        <div className="absolute left-1/4 top-40 h-64 w-64 rounded-full bg-brand-orange/10 blur-[100px]" />
-        <div className="absolute right-1/4 top-52 h-64 w-64 rounded-full bg-brand-teal/10 blur-[100px]" />
-      </div>
-
-      <div className="container-wide relative section-padding">
+      <div className="container-wide relative z-10 pt-16 md:pt-24">
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <motion.img
-            src="/logo.png"
-            alt="Crypto Watcher shield"
-            className="relative mb-8 h-52 w-52 object-contain drop-shadow-[0_12px_60px_rgba(245,184,0,0.4)] md:h-64 md:w-64"
-            initial={{ opacity: 0, scale: 0.85, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
-            transition={{
-              opacity: { duration: 0.6, ease: 'easeOut' },
-              scale: { duration: 0.6, ease: 'easeOut' },
-              y: { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.6 },
-            }}
-            draggable={false}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <HeaderLogo />
+          </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
+            transition={{ delay: 0.04 }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-semibold"
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm text-primary">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-              Now live on Base Sepolia Testnet
-            </div>
+            <span className="flex h-2 w-2 rounded-full bg-success" />
+            Blockchain risk review company
           </motion.div>
 
           <motion.h1
-            className="heading-1 mb-6 text-balance"
+            className="heading-1 mb-5 text-balance"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
+            transition={{ delay: 0.05 }}
           >
-            Your <span className="text-gradient">shield</span> against risky
-            crypto projects
+            Is this crypto project{' '}
+            <span className="rounded-xl bg-primary px-3 text-primary-foreground">
+              safe
+            </span>
+            ?
           </motion.h1>
 
           <motion.p
             className="body-large mx-auto mb-8 max-w-xl text-balance"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
+            transition={{ delay: 0.1 }}
           >
-            Search crypto projects before you connect a wallet. Start with recognized
-            market assets, then use reputation-weighted community signals when you need
-            deeper risk analysis.
+            Search any project and see a clear safety score reviewed by our authority
+            panel — before you invest a single dollar.
           </motion.p>
 
           <motion.div
-            className="mb-6 w-full max-w-2xl"
+            className="w-full max-w-xl"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.42 }}
+            transition={{ delay: 0.15 }}
           >
-            <ProjectSearch />
+            <ProjectSearch placeholder="Try “Bitcoin”, “Uniswap”, “Solana”…" />
           </motion.div>
 
           <motion.div
-            className="flex flex-col items-center justify-center gap-3 sm:flex-row"
+            className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
+            transition={{ delay: 0.2 }}
           >
             <Button asChild size="lg" className="gap-2">
               <Link to="/app">
-                Launch App
-                <ArrowRight size={18} weight="bold" />
+                Browse safe projects
+                <RiArrowRightLine className="h-5 w-5" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link to="/docs">Read Documentation</Link>
+              <Link to="/app/analysis-request">Request a review</Link>
             </Button>
           </motion.div>
 
-          <motion.div
-            className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3"
+          <motion.ul
+            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ delay: 0.3 }}
           >
             {trustPoints.map((point) => (
-              <div
-                key={point.label}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
+              <li
+                key={point}
+                className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
               >
-                <point.icon size={18} weight="duotone" className="text-primary" />
-                {point.label}
-              </div>
+                <RiCheckLine className="h-4 w-4 text-success" />
+                {point}
+              </li>
             ))}
-          </motion.div>
+          </motion.ul>
         </div>
+
+        <motion.div
+          className="mt-16 md:mt-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <h2 className="text-xl font-bold">Top rated projects</h2>
+              <p className="text-sm text-muted-foreground">
+                Highest safety scores from our review authority
+              </p>
+            </div>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/app">View all</Link>
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 pb-10">
+            {topRated.map((project) => (
+              <TopRatedProjectCard key={project.slug} project={project} />
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )

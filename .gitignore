@@ -26,3 +26,6 @@ contracts/out/
 contracts/cache/
 contracts/broadcast/
 contracts/lib/
+# local-chain deploy records (real testnet/mainnet json files are committed)
+contracts/deployments/31337.json
+contracts/deployments/anvil.json

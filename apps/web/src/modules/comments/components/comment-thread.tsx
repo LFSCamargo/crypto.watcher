@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PaperPlaneTilt, User, ChatCircle } from '@phosphor-icons/react'
+import { RiCoinLine, RiInformationLine, RiSendPlaneLine, RiUserLine } from '@remixicon/react'
 import { useSession } from '../../../store/session'
 import { useComments, useCreateComment } from '../hooks/use-comments'
 import {
@@ -14,6 +14,8 @@ import {
   AvatarFallback,
   Skeleton,
 } from '../../../components/ui'
+
+const COMMENT_FEE_USD = 0.05
 
 export function CommentThread({ projectId }: { projectId: string }) {
   const user = useSession((state) => state.user)
@@ -29,10 +31,9 @@ export function CommentThread({ projectId }: { projectId: string }) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <ChatCircle size={18} className="text-primary" />
           Comments
           {data && data.length > 0 && (
             <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -42,28 +43,40 @@ export function CommentThread({ projectId }: { projectId: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+          <RiInformationLine className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <div className="text-muted-foreground">
+            <p className="font-semibold text-foreground">Small fee per comment</p>
+            <p className="mt-1">
+              We charge ~${COMMENT_FEE_USD.toFixed(2)} in protocol tokens per comment to
+              reduce spam and bot attacks. Each comment requires a small on-chain
+              transaction — this helps keep discussions trustworthy.
+            </p>
+          </div>
+        </div>
+
         {user && (
           <form onSubmit={handleSubmit} className="space-y-3">
             <Textarea
               onChange={(event) => setBody(event.target.value)}
               placeholder="Share your analysis..."
               value={body}
-              className="min-h-[80px] resize-none"
+              className="min-h-[80px] resize-none rounded-xl"
             />
             <Button
               type="submit"
               disabled={!body.trim() || createComment.isPending}
-              className="gap-2"
+              className="gap-2 rounded-full"
               size="sm"
             >
-              <PaperPlaneTilt size={16} />
-              {createComment.isPending ? 'Posting...' : 'Post Comment'}
+              <RiSendPlaneLine className="h-4 w-4" />
+              {createComment.isPending ? 'Posting...' : `Post comment (~$${COMMENT_FEE_USD.toFixed(2)} fee)`}
             </Button>
           </form>
         )}
 
         {!user && (
-          <div className="rounded-lg bg-muted/50 p-4 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl bg-muted/50 p-4 text-center text-sm text-muted-foreground">
             Sign in to post a comment
           </div>
         )}
@@ -96,7 +109,7 @@ export function CommentThread({ projectId }: { projectId: string }) {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-secondary text-xs">
-                      <User size={14} />
+                      <RiUserLine className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">
@@ -104,6 +117,7 @@ export function CommentThread({ projectId }: { projectId: string }) {
                       <span className="text-sm font-medium">
                         {comment.authorId.slice(0, 8)}...
                       </span>
+                      <RiCoinLine className="h-3 w-3 text-primary" aria-hidden />
                       <span className="text-xs text-muted-foreground">
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </span>

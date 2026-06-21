@@ -53,10 +53,17 @@ apps/
     │   │   │   ├── projects.schema.ts   # Zod + OpenAPI
     │   │   │   └── projects.test.ts
     │   │   ├── comments/            # Off-chain public comments     [MVP]
-    │   │   ├── auth/                # Wallet auth, sessions         [MVP]
+    │   │   ├── auth/                # Wallet + email auth, sessions [MVP]
     │   │   ├── users/              # Accounts + profiles           [MVP]
+    │   │   ├── analysis-requests/  # Paid analysis queue           [MVP]
     │   │   ├── voting/             # Vote orchestration/indexing   [MVP]
     │   │   ├── scoring/            # Score computation/read         [MVP]
+    │   │   ├── market/             # Cached USD price history       [MVP]
+    │   │   │   ├── market.routes.ts
+    │   │   │   ├── market.service.ts
+    │   │   │   ├── market.repository.ts
+    │   │   │   ├── market.schema.ts
+    │   │   │   └── market.service.test.ts
     │   │   ├── governance/        # Governance proposals/events    [MVP]
     │   │   ├── reputation/        # Reputation read/compute         [MVP→Phase 1]
     │   │   ├── rewards/           # Reward accounting               [Phase 1]
@@ -85,8 +92,14 @@ apps/
 
 ### auth + users `[MVP]`
 - Wallet connect + SIWE-style verification, session issuance.
-- Profile management.
+- Email/password registration and login with bcrypt-hashed passwords.
+- Link wallet public key to email account.
+- Profile management (nickname, X account, avatar, bio).
 - Role-based access control + admin console. `[Phase 2]`
+
+### analysis-requests `[MVP]`
+- Authenticated users submit projects for team analysis.
+- Public listing with status filter; team/admin review workflow.
 
 ### voting `[MVP]`
 - Index/track on-chain votes from per-project contracts (via `core/chain`).
@@ -96,6 +109,11 @@ apps/
 ### scoring `[MVP]`
 - Compute/serve project scores from on-chain tallies + reputation weight.
 - Enrich with external risk-data providers. `[Phase 3]`
+
+### market `[MVP]`
+- `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
+- Data sourced from CoinGecko (free public API); responses cached in PostgreSQL (`market_cache`) for 3 hours, with in-memory L1 cache and stale DB fallback when CoinGecko is unavailable.
+- Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`).
 
 ### governance — launch requirement
 - Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`
@@ -137,9 +155,16 @@ apps/
 
 ### auth + users `[MVP]`
 - R1: Wallet connect with SIWE-style nonce → signature → session.
-- R2: Sessions are httpOnly-cookie based and revocable.
-- R3: Users have a profile (display name, avatar, bio).
-- R4: Role-based access control (admin/team/user). `[Phase 2]`
+- R2: Email/password register and login with revocable sessions.
+- R3: Sessions are httpOnly-cookie based and revocable.
+- R4: Users have a profile (display name, avatar, bio, nickname, X account).
+- R5: Users can link a wallet address to an email account.
+- R6: Role-based access control (admin/team/user). `[Phase 2]`
+
+### analysis-requests `[MVP]`
+- R1: Authenticated users create analysis requests for new projects.
+- R2: Anyone can list requests filtered by status.
+- R3: Team/admin can update status and add review notes.
 
 ### voting `[MVP]`
 - R1: Only reputation-eligible wallets may vote (enforced on-chain, mirrored off-chain).
@@ -175,7 +200,12 @@ apps/
 | column | type | notes |
 | --- | --- | --- |
 | id | uuid pk | |
-| wallet_address | text unique not null | lowercase |
+| wallet_address | text unique | lowercase; nullable for email-only accounts |
+| email | text unique | nullable |
+| password_hash | text | nullable; bcrypt for email auth |
+| public_key | text | linked wallet address |
+| x_account | text | nullable |
+| nickname | text unique | nullable |
 | display_name | text | |
 | avatar_url | text | |
 | bio | text | |
@@ -186,9 +216,23 @@ apps/
 | --- | --- | --- |
 | id | uuid pk | |
 | user_id | uuid fk → users(id) on delete cascade | |
-| nonce | text not null | SIWE nonce |
+| session_type | text not null default 'wallet' | `wallet` \| `email` |
+| nonce | text | SIWE nonce; null for email sessions |
 | expires_at | timestamptz not null | |
 | revoked_at | timestamptz | nullable |
+
+### `analysis_requests` `[MVP]`
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| user_id | uuid fk → users(id) on delete cascade | |
+| project_name | text not null | |
+| project_url | text not null | |
+| description | text not null | |
+| status | text not null default 'pending' | `pending` \| `paid` \| `in_review` \| `approved` \| `rejected` |
+| payment_tx_hash | text | nullable |
+| fee_amount | numeric not null | |
+| review_notes | text | nullable; team review |
 
 ### `projects` `[MVP]`
 | column | type | notes |
@@ -212,6 +256,7 @@ Index: `projects(state)`, `projects(chain_id)`.
 | project_id | uuid fk → projects(id) on delete cascade | |
 | author_id | uuid fk → users(id) | |
 | body | text not null | |
+| comment_fee_paid | boolean not null default true | MVP placeholder (no payment yet) |
 | deleted_at | timestamptz | soft delete |
 
 Index: `comments(project_id, created_at desc)`.
@@ -287,12 +332,23 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 ### auth `[MVP]`
 - `POST /auth/nonce` → `{ nonce }` for a wallet address.
 - `POST /auth/verify` → verify SIWE signature, set session cookie.
+- `POST /auth/register` → email/password registration, set session cookie.
+- `POST /auth/login` → email/password login, set session cookie.
+- `POST /auth/link-public-key` 🔒 → link wallet address to account.
+- `POST /auth/forgot-password` → issue a reset token (reuses `sessions` with `session_type='reset'`); always 200 to avoid email enumeration. Returns the token in non-production until email infra ships.
+- `POST /auth/reset-password` → consume a valid reset token, set the new password hash, revoke outstanding reset tokens.
 - `POST /auth/logout` 🔒 → revoke session.
 - `GET  /auth/me` 🔒 → current user.
 
 ### users `[MVP]`
-- `GET   /users/:address` → public profile.
+- `GET   /users/:identifier` → public profile by wallet address or nickname.
 - `PATCH /users/me` 🔒 → update own profile.
+
+### analysis-requests `[MVP]`
+- `POST  /analysis-requests` 🔒 → create analysis request.
+- `GET   /analysis-requests` → list (filter `status`).
+- `GET   /analysis-requests/me` 🔒 → current user's requests.
+- `PATCH /analysis-requests/:id` 👑 → update status / review notes.
 
 ### projects `[MVP]`
 - `GET  /projects` → list (filters: `state`, `chainId`, `q`, `page`, `limit`).

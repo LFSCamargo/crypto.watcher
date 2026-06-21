@@ -3,18 +3,23 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowRight, ArrowsClockwise, Plus } from '@phosphor-icons/react'
+import { RiAddLine, RiArrowRightLine, RiRefreshLine, RiSearchLine } from '@remixicon/react'
 import { CommentThread } from '../comments/components/comment-thread'
 import { ScorePanel } from '../scoring/components/score-panel'
+import { AuthorityVotePanel } from '../voting/components/authority-vote-panel'
 import type { ProjectState } from '../../lib/api/types'
 import { useSession } from '../../store/session'
 import { projectsApi } from './api/projects.api'
 import { CuratedProjectCard } from './components/curated-project-card'
 import { ProjectCard } from './components/project-card'
-import { ProjectSearch } from './components/project-search'
 import { useProject, useProjects } from './hooks/use-projects'
 import { formatProjectState } from './lib/format'
-import { curatedProjects, filterCuratedProjects } from './lib/curated-projects'
+import {
+  curatedProjects,
+  filterCuratedProjects,
+  projectCategories,
+  type CuratedProject,
+} from './lib/curated-projects'
 import { ReferenceProjectDetailPage } from './pages/reference-project-detail-page'
 import {
   Button,
@@ -31,118 +36,141 @@ import {
 export { ReferenceProjectDetailPage }
 
 export function ProjectsPage() {
-  const { data, isLoading, isError } = useProjects()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const searchQuery = searchParams.get('search') ?? ''
+  const categoryParam = searchParams.get('category') ?? 'all'
+  const [titleSearch, setTitleSearch] = useState(searchQuery)
+  const { data: liveProjects, isLoading, isError: liveProjectsError } = useProjects()
 
-  const filteredProjects = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase()
+  const activeCategory =
+    categoryParam === 'all'
+      ? undefined
+      : (categoryParam as CuratedProject['category'])
 
-    if (!data || !normalizedQuery) {
-      return data ?? []
-    }
+  const filteredCuratedProjects = useMemo(() => {
+    const query = titleSearch.trim() || searchQuery.trim()
+    return filterCuratedProjects(query, curatedProjects, activeCategory)
+  }, [titleSearch, searchQuery, activeCategory])
 
-    return data.filter((project) =>
-      [project.name, project.slug, project.description ?? '', project.tokenAddress ?? ''].some(
-        (value) => value.toLowerCase().includes(normalizedQuery),
+  const filteredLiveProjects = useMemo(() => {
+    const query = (titleSearch.trim() || searchQuery.trim()).toLowerCase()
+    if (!liveProjects || !query) return liveProjects ?? []
+    return liveProjects.filter((project) =>
+      [project.name, project.slug, project.description ?? ''].some((value) =>
+        value.toLowerCase().includes(query),
       ),
     )
-  }, [data, searchQuery])
+  }, [liveProjects, titleSearch, searchQuery])
 
-  const filteredCuratedProjects = useMemo(
-    () =>
-      searchQuery.trim()
-        ? filterCuratedProjects(searchQuery)
-        : curatedProjects.slice(0, 3),
-    [searchQuery],
-  )
-
-  const hasResults = filteredProjects.length > 0 || filteredCuratedProjects.length > 0
-
-  if (isLoading) {
-    return (
-      <section>
-        <div className="mb-8">
-          <Skeleton className="mb-2 h-8 w-48" />
-          <Skeleton className="h-5 w-96" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="mt-2 h-5 w-20" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="mb-4 h-10 w-full" />
-                <Skeleton className="h-4 w-24" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-    )
+  const setCategory = (category: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (category === 'all') next.delete('category')
+    else next.set('category', category)
+    setSearchParams(next)
   }
 
-  if (isError) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">Failed to load projects.</p>
-        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-          Try again
-        </Button>
-      </Card>
-    )
+  const handleTitleSearch = () => {
+    const next = new URLSearchParams(searchParams)
+    if (titleSearch.trim()) next.set('search', titleSearch.trim())
+    else next.delete('search')
+    setSearchParams(next)
   }
 
   return (
-    <section>
-      <motion.div
-        className="mb-8"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+    <section className="space-y-8">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <Badge variant="secondary" className="mb-3">
-          Public safety index
+          Safe Projects
         </Badge>
-        <h1 className="heading-2 mb-2">
-          {searchQuery ? `Safety results for "${searchQuery}"` : 'Crypto Safety Index'}
-        </h1>
+        <h1 className="heading-2 mb-2">Browse reviewed crypto projects</h1>
         <p className="body-large max-w-3xl">
-          Search recognized market assets and community-reviewed crypto projects without
-          connecting a wallet. Wallet access is only required for voting, posting, and
-          reputation actions.
+          App Store-style catalog of 100 curated market projects plus community-reviewed
+          DApps. Filter by category or search by name — no wallet required to browse.
         </p>
       </motion.div>
 
-      <Card className="mb-8 border-primary/20 bg-card/60 p-4">
-        <ProjectSearch />
-      </Card>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="relative flex-1">
+          <RiSearchLine className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="rounded-full pl-10"
+            placeholder="Search by title..."
+            value={titleSearch}
+            onChange={(e) => setTitleSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleTitleSearch()}
+          />
+        </div>
+        <Button className="rounded-full" onClick={handleTitleSearch}>
+          Search
+        </Button>
+      </div>
 
-      {filteredCuratedProjects.length > 0 && (
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold">Market reference assets</h2>
-              <p className="text-sm text-muted-foreground">
-                Inspired by top CoinMarketCap listings; use as research context, not a
-                guarantee.
-              </p>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredCuratedProjects.map((project, index) => (
-              <CuratedProjectCard key={project.slug} index={index} project={project} />
-            ))}
-          </div>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={categoryParam === 'all' ? 'default' : 'outline'}
+          className="rounded-full"
+          onClick={() => setCategory('all')}
+        >
+          All
+        </Button>
+        {Object.entries(projectCategories).map(([id, label]) => (
+          <Button
+            key={id}
+            size="sm"
+            variant={categoryParam === id ? 'default' : 'outline'}
+            className="rounded-full"
+            onClick={() => setCategory(id)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            {filteredCuratedProjects.length} safe projects
+          </h2>
+          <Button asChild variant="ghost" size="sm" className="rounded-full gap-1">
+            <Link to="/app/analysis-request">
+              <RiAddLine className="h-4 w-4" />
+              Request review
+            </Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredCuratedProjects.map((project, index) => (
+            <CuratedProjectCard key={project.slug} index={index} project={project} />
+          ))}
+        </div>
+        {filteredCuratedProjects.length === 0 && (
+          <Card className="rounded-2xl p-12 text-center text-muted-foreground">
+            No projects match your filters.
+          </Card>
+        )}
+      </div>
+
+      {liveProjectsError && (
+        <Card className="rounded-2xl border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground">
+          Community projects are temporarily unavailable. Curated safe projects below
+          still work offline.
+        </Card>
+      )}
+
+      {isLoading && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 rounded-2xl" />
+          ))}
         </div>
       )}
 
-      {filteredProjects.length > 0 && (
+      {!isLoading && filteredLiveProjects.length > 0 && (
         <div>
-          <h2 className="mb-4 text-xl font-semibold">Community-reviewed projects</h2>
+          <h2 className="mb-4 text-lg font-semibold">Community-reviewed (on-chain)</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProjects.map((project, index) => (
+            {filteredLiveProjects.map((project, index) => (
               <motion.div
                 key={project.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -154,14 +182,6 @@ export function ProjectsPage() {
             ))}
           </div>
         </div>
-      )}
-
-      {!hasResults && (
-        <Card className="p-12 text-center">
-          <p className="text-muted-foreground">
-            No safety results matched your search yet.
-          </p>
-        </Card>
       )}
     </section>
   )
@@ -214,12 +234,13 @@ export function ProjectDetailPage() {
             {project.description ?? 'No description yet.'}
           </p>
         </div>
-        <Button asChild className="gap-2">
+        <Button asChild className="gap-2 rounded-full">
           <Link to={`/app/projects/${project.slug}/vote`}>
             Open voting
-            <ArrowRight size={16} />
+            <RiArrowRightLine className="h-4 w-4" />
           </Link>
         </Button>
+        <AuthorityVotePanel projectSlug={project.slug} projectState={project.state} />
         <CommentThread projectId={project.id} />
       </section>
       <aside className="space-y-4">
@@ -289,7 +310,7 @@ export function AdminProjectsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus size={20} />
+            <RiAddLine className="h-5 w-5" />
             Create Project
           </CardTitle>
         </CardHeader>
@@ -320,8 +341,8 @@ export function AdminProjectsPage() {
                 value={description}
               />
             </div>
-            <Button type="submit" className="w-full gap-2">
-              <Plus size={16} />
+            <Button type="submit" className="w-full gap-2 rounded-full">
+              <RiAddLine className="h-4 w-4" />
               Create
             </Button>
           </form>
@@ -331,7 +352,7 @@ export function AdminProjectsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowsClockwise size={20} />
+            <RiRefreshLine className="h-5 w-5" />
             Transition Project
           </CardTitle>
         </CardHeader>
@@ -358,8 +379,8 @@ export function AdminProjectsPage() {
                 <option value="analyzed">Analyzed</option>
               </select>
             </div>
-            <Button type="submit" className="w-full gap-2" variant="secondary">
-              <ArrowsClockwise size={16} />
+            <Button type="submit" className="w-full gap-2 rounded-full" variant="secondary">
+              <RiRefreshLine className="h-4 w-4" />
               Transition
             </Button>
           </form>

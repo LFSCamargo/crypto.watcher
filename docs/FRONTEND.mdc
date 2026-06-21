@@ -13,9 +13,9 @@ alwaysApply: true
 ## Tech Stack
 
 From the [README](../README.md): Vite + React + TypeScript + TailwindCSS,
-Shadcn/UI, Zustand, React Hook Form, React Router, Sonner, Phosphor Icons.
-Web3: RainbowKit, Wagmi, Viem (+ viem-react). Tests: Vitest + Testing Library
-(unit/integration) and Playwright (e2e). Monorepo via Nx + pnpm.
+Shadcn/UI (fully rounded, Uber-inspired cream/yellow palette), Zustand, React Hook Form,
+React Router, Sonner, Remix Icons, Raleway font. Web3: RainbowKit, Wagmi, Viem.
+Tests: Vitest + Testing Library (unit/integration) and Playwright (e2e). Monorepo via Nx + pnpm.
 
 ## Modular Folder Structure
 
@@ -46,21 +46,25 @@ apps/
     │   │   │   ├── components/
     │   │   │   ├── hooks/
     │   │   │   ├── api/
-    │   │   │   ├── lib/             # Formatting + curated references
+    │   │   │   ├── lib/             # Formatting, curated refs, icon paths, CoinGecko ids
     │   │   │   ├── store.ts         # Zustand slice
     │   │   │   ├── routes.tsx
     │   │   │   └── __tests__/
     │   │   ├── marketing/           # Public landing page             [MVP]
     │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── comments/            # Public commenting               [MVP]
-    │   │   ├── auth/                # Wallet connect + SIWE login      [MVP]
+    │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
+    │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
+    │   │   ├── profile/             # Unified user profile page           [MVP]
     │   │   ├── voting/              # On-chain voting UI               [MVP]
     │   │   ├── scoring/             # Score display/visualization      [MVP]
+    │   │   ├── market/              # Price chart + change badges      [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
     │   │   ├── reputation/         # Reputation profile/eligibility    [MVP→Phase 1]
     │   │   ├── rewards/            # Voter rewards UI                  [Phase 1]
     │   │   └── notifications/      # In-app notification center        [Phase 1]
-    │   └── styles/                  # Tailwind base + theme
+    │   ├── styles/                  # Tailwind base + theme
+    │   └── public/                  # Static assets (logos, `/icons/{slug}.png` coin logos)
     ├── e2e/                         # Playwright tests
     └── package.json
 ```
@@ -74,15 +78,35 @@ apps/
 ### projects `[MVP]`
 - Public safety index with top-nav/landing search and project detail page.
 - Curated market-reference assets inspired by widely tracked CoinMarketCap listings.
+- Local coin logos in `public/icons/{slug}.png` (synced from CoinGecko via `pnpm --filter web icons:sync`); `ProjectIcon` loads by slug with initials fallback.
 - Lifecycle status badges (`In analysis → Ready → Voting → Closed → Analyzed`).
 - Score visualization on the detail page.
+- Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
 - Community submission form. `[Phase 2]`
+
+### market `[MVP]`
+- `ProjectPricePanel` on curated reference detail pages (24h, 7d, 1m, 1y change badges).
+- `TopRatedProjectCard` on the landing hero (description, tags, price, 24h/7d/1m/1y changes, compact sparkline).
+- SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
+- `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
 
 ### comments `[MVP]`
 - Public comment thread (read by all, post when authenticated).
+- Small per-comment fee explained in UI (anti-spam); on-chain fee settlement `[MVP]` (UI + backend flag).
 
 ### auth `[MVP]`
-- Wallet connect via RainbowKit, SIWE-style login, session-aware UI.
+- Email/password registration and login with session cookies, on a split-panel branded auth shell.
+- Forgot-password and reset-password flow (token-based; dev surfaces the link until email infra ships).
+- Guided multi-step onboarding teaching search, safety scores, comments/reviews, and optional wallet linking.
+- Public-key (wallet) linking for governance-token voting.
+- Wallet connect via RainbowKit lives inside the logged-in profile dropdown (not the top nav).
+
+### analysis `[MVP]`
+- **In Analysis** page: community review requests + on-chain projects awaiting POA authority votes.
+- **Analysis Request** page: authenticated users submit projects for paid protocol review.
+
+### profile `[MVP]`
+- Unified profile page (`/app/profile`): PFP, nickname, X account, bio, public key, governor badge for authorities.
 
 ### voting `[MVP]`
 - Cast votes on a project's contract via Wagmi/Viem.
@@ -110,8 +134,10 @@ apps/
 - In-app notification center for lifecycle + governance events.
 
 ### Platform & UX
-- Toasts via Sonner, icons via Phosphor, forms via React Hook Form. `[MVP]`
-- Shared public shell across landing, docs and app routes; wallet connection is optional until a user votes, comments, or manages reputation. `[MVP]`
+- Uber-inspired light theme (cream/yellow/black), Raleway font, fully rounded Shadcn components; blueprint grid background on all pages. `[MVP]`
+- Global shell: brand + nav links | ⌘K search + theme toggle + auth CTA; site footer on all pages (landing + app) with product/resources/account links and CTA to request review. `[MVP]`
+- Command palette search (debounced, race-conditioned) over 100 curated + live projects. `[MVP]`
+- Toasts via Sonner, icons via Remix Icon, forms via React Hook Form. `[MVP]`
 - Error reporting via Sentry. `[MVP]`
 - Embeddable score widgets/badges. `[Phase 3]`
 - PWA / mobile experience. `[Phase 3]`
@@ -152,9 +178,15 @@ apps/
 
 | path | feature | access | phase |
 | --- | --- | --- | --- |
-| `/` | marketing (public search landing) | public | `MVP` |
-| `/app` | projects (safety index) | public | `MVP` |
-| `/app/projects/:slug` | projects (detail) | public | `MVP` |
+| `/` | marketing (hero search + top rated) | public | `MVP` |
+| `/auth/signin`, `/auth/signup`, `/auth/onboarding` | auth | public / 🔒 | `MVP` |
+| `/auth/forgot-password`, `/auth/reset-password` | auth (password recovery) | public | `MVP` |
+| `/app` | projects (Safe Projects App Store) | public | `MVP` |
+| `/app/reference/:slug` | projects (curated safe project detail) | public | `MVP` |
+| `/app/projects/:slug` | projects (on-chain detail) | public | `MVP` |
+| `/app/in-analysis` | analysis (POA review queue) | public | `MVP` |
+| `/app/analysis-request` | analysis (paid review request) | 🔒 | `MVP` |
+| `/app/profile` | profile (own profile) | 🔒 | `MVP` |
 | `/app/projects/:slug/vote` | voting | 🔒 eligible | `MVP` |
 | `/projects/submit` | projects | 🔒 | `Phase 2` |
 | `/app/governance` | governance (list) | public | `MVP` |
@@ -175,7 +207,8 @@ apps/
 
 | feature | endpoints / on-chain | phase |
 | --- | --- | --- |
-| auth | `POST /auth/nonce`, `POST /auth/verify`, `POST /auth/logout`, `GET /auth/me` | `MVP` |
+| auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/link-public-key`, `POST /auth/nonce`, `POST /auth/verify`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/logout`, `GET /auth/me` | `MVP` |
+| analysis | `GET /analysis-requests`, `POST /analysis-requests`, `GET /analysis-requests/me`, `PATCH /analysis-requests/:id` 👑 | `MVP` |
 | users | `GET /users/:address`, `PATCH /users/me` | `MVP` |
 | projects | `GET /projects`, `GET /projects/:slug`, `POST /projects` 👑, `PATCH /projects/:id` 👑, `POST /projects/:id/transition` 👑 | `MVP` |
 | projects | `POST /projects/submit` | `Phase 2` |

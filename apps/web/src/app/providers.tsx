@@ -1,15 +1,16 @@
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
+import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { type ReactNode, useState } from 'react'
 import { Toaster } from 'sonner'
 import { WagmiProvider } from 'wagmi'
 import { wagmiConfig } from '../lib/web3/config'
+import { ThemeProvider } from '../lib/theme/theme-provider'
 import { TooltipProvider } from '../components/ui'
 
-const rainbowKitTheme = darkTheme({
-  accentColor: '#f5b800',
-  accentColorForeground: '#0a0a0b',
-  borderRadius: 'medium',
+const rainbowKitTheme = lightTheme({
+  accentColor: '#FFC043',
+  accentColorForeground: '#111111',
+  borderRadius: 'large',
   fontStack: 'system',
   overlayBlur: 'small',
 })
@@ -17,25 +18,17 @@ const rainbowKitTheme = darkTheme({
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={rainbowKitTheme} modalSize="compact">
-          <TooltipProvider delayDuration={0}>
-            {children}
-            <Toaster
-              theme="dark"
-              position="top-right"
-              toastOptions={{
-                style: {
-                  background: 'hsl(0 0% 7%)',
-                  border: '1px solid hsl(0 0% 15%)',
-                  color: 'hsl(0 0% 98%)',
-                },
-              }}
-            />
-          </TooltipProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider theme={rainbowKitTheme} modalSize="compact">
+            <TooltipProvider delayDuration={0}>
+              {children}
+              <Toaster position="top-right" richColors closeButton />
+            </TooltipProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   )
 }

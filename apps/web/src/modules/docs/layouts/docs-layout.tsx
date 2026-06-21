@@ -25,7 +25,7 @@ export function DocsLayout() {
   const location = useLocation()
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative min-h-screen">
       <button
         className="mb-4 flex items-center justify-center rounded-lg p-2 hover:bg-secondary lg:hidden"
         onClick={() => setSidebarOpen(!sidebarOpen)}

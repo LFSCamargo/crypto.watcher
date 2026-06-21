@@ -14,7 +14,16 @@ export const projectsRepository = {
     let query = db.selectFrom('projects').selectAll()
     if (filters.state) query = query.where('state', '=', filters.state)
     if (filters.chainId) query = query.where('chain_id', '=', filters.chainId)
-    if (filters.q) query = query.where('name', 'ilike', `%${filters.q}%`)
+    if (filters.q) {
+      const pattern = `%${filters.q}%`
+      query = query.where((eb) =>
+        eb.or([
+          eb('name', 'ilike', pattern),
+          eb('description', 'ilike', pattern),
+          eb('slug', 'ilike', pattern),
+        ]),
+      )
+    }
     return query
       .orderBy('created_at', 'desc')
       .limit(filters.limit)

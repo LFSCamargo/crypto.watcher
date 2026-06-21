@@ -17,6 +17,10 @@ import {
   ListGovernanceProposalsQuerySchema,
 } from '../../modules/governance/governance.schema'
 import {
+  MarketProjectParamsSchema,
+  MarketSnapshotSchema,
+} from '../../modules/market/market.schema'
+import {
   CreateProjectBodySchema,
   ErrorResponseSchema,
   ProjectIdParamsSchema,
@@ -137,7 +141,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: 'get',
-  path: '/users/{address}',
+  path: '/users/{identifier}',
   tags: ['users'],
   request: { params: AddressParamsSchema },
   responses: { 200: { description: 'User profile', ...json(UserSchema) } },
@@ -261,6 +265,33 @@ registry.registerPath({
     },
     404: {
       description: 'Project not found',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+registry.registerPath({
+  method: 'get',
+  path: '/market/projects/{slug}',
+  tags: ['market'],
+  request: {
+    params: MarketProjectParamsSchema,
+  },
+  responses: {
+    200: {
+      description: 'Cached USD price snapshot and 7-day history',
+      content: {
+        'application/json': {
+          schema: MarketSnapshotSchema,
+        },
+      },
+    },
+    404: {
+      description: 'Price data unavailable for this project',
       content: {
         'application/json': {
           schema: ErrorResponseSchema,

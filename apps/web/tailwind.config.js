@@ -45,9 +45,13 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        brand: {
-          orange: 'hsl(var(--brand-orange))',
-          teal: 'hsl(var(--brand-teal))',
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
         },
       },
       borderRadius: {
@@ -56,8 +60,7 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Raleway', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {
@@ -92,10 +95,6 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
         },
-        'glow-pulse': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(245, 184, 0, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(245, 184, 0, 0.5)' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -106,13 +105,6 @@ export default {
         'slide-in-from-bottom': 'slide-in-from-bottom 0.3s ease-out',
         shimmer: 'shimmer 2s linear infinite',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'hero-gradient':
-          'radial-gradient(ellipse 80% 80% at 50% -20%, rgba(245, 184, 0, 0.15), transparent)',
       },
     },
   },

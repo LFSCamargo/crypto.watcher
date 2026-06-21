@@ -2,7 +2,13 @@ import { apiFetch, apiPatch, apiPost } from '../../../lib/api/client'
 import type { Project, ProjectState } from '../../../lib/api/types'
 
 export const projectsApi = {
-  list: () => apiFetch<Project[]>('/projects'),
+  list: (params?: { state?: ProjectState; q?: string }) => {
+    const search = new URLSearchParams()
+    if (params?.state) search.set('state', params.state)
+    if (params?.q) search.set('q', params.q)
+    const query = search.toString()
+    return apiFetch<Project[]>(`/projects${query ? `?${query}` : ''}`)
+  },
   getBySlug: (slug: string) => apiFetch<Project>(`/projects/${slug}`),
   create: (input: {
     name: string

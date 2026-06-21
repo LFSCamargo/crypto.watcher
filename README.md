@@ -23,6 +23,9 @@ pnpm --filter api db:migrate  # run DB migrations
 pnpm run dev                  # web (5173) + api (3000)
 ```
 
+For a full run/test/deploy guide (local dev, Docker, contract tests, and Base
+Sepolia deployment) see [RUNNING.md](./RUNNING.md).
+
 ### Run everything in Docker (with HMR)
 
 Spin up Postgres, MailHog, the API and the web app in containers; source is

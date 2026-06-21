@@ -64,5 +64,49 @@ contract Deploy is Script {
         console2.log("ProjectWatcherFactory:", address(factory));
         console2.log("Factory backend:      ", backend);
         console2.log("ProtocolSettings:     ", address(settings));
+
+        _record(
+            address(token),
+            address(timelock),
+            address(governor),
+            address(reputation),
+            address(factory),
+            backend,
+            address(settings)
+        );
+    }
+
+    /// @dev Persist deployed addresses to `deployments/<network>.json` so the
+    ///      apps/team don't need to re-deploy or hunt for addresses.
+    function _record(
+        address token,
+        address timelock,
+        address governor,
+        address reputation,
+        address factory,
+        address backend,
+        address settings
+    ) internal {
+        string memory key = "deployment";
+        vm.serializeUint(key, "chainId", block.chainid);
+        vm.serializeAddress(key, "governanceToken", token);
+        vm.serializeAddress(key, "timelock", timelock);
+        vm.serializeAddress(key, "governor", governor);
+        vm.serializeAddress(key, "reputationRegistry", reputation);
+        vm.serializeAddress(key, "projectWatcherFactory", factory);
+        vm.serializeAddress(key, "factoryBackend", backend);
+        string memory out = vm.serializeAddress(key, "protocolSettings", settings);
+
+        string memory path = string.concat("deployments/", _network(), ".json");
+        vm.writeJson(out, path);
+        console2.log("Saved deployment to:  ", path);
+    }
+
+    function _network() internal view returns (string memory) {
+        if (block.chainid == 84_532) return "base-sepolia";
+        if (block.chainid == 11_155_111) return "sepolia";
+        if (block.chainid == 8453) return "base";
+        if (block.chainid == 1) return "mainnet";
+        return vm.toString(block.chainid);
     }
 }

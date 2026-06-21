@@ -2,16 +2,21 @@ import { Router } from 'express'
 import { requireAuth } from '../../core/auth/session'
 import { asyncHandler, HttpError, validate } from '../../core/http/validation'
 import { usersService } from './users.service'
-import { AddressParamsSchema, UpdateMeBodySchema } from './users.schema'
+import { UpdateMeBodySchema, UserIdentifierParamsSchema } from './users.schema'
 
 export const usersRoutes = Router()
 
 usersRoutes.get(
-  '/:address',
-  validate({ params: AddressParamsSchema }),
+  '/:identifier',
+  validate({ params: UserIdentifierParamsSchema }),
   asyncHandler(async (req, res) => {
-    const params = AddressParamsSchema.parse(req.params)
-    const user = await usersService.getByAddress(params.address)
+    const params = UserIdentifierParamsSchema.parse(req.params)
+    const { identifier } = params
+
+    const user = identifier.startsWith('0x')
+      ? await usersService.getByAddress(identifier)
+      : await usersService.getByNickname(identifier)
+
     if (!user) throw new HttpError(404, 'User not found')
     res.json(user)
   }),

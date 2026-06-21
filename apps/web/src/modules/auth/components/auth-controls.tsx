@@ -1,118 +1,152 @@
+import { Link, useNavigate } from 'react-router-dom'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { toast } from 'sonner'
 import { useAccount } from 'wagmi'
-import { SignIn, SignOut } from '@phosphor-icons/react'
+import {
+  RiCompass3Line,
+  RiLogoutBoxRLine,
+  RiShieldCheckLine,
+  RiUserLine,
+  RiWallet3Line,
+} from '@remixicon/react'
 import { useSession } from '../../../store/session'
 import { useLogout, useWalletLogin } from '../hooks/use-session'
-import { Button, Avatar, AvatarFallback } from '../../../components/ui'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../../../components/ui'
 
 export function AuthControls() {
+  const navigate = useNavigate()
   const { isConnected } = useAccount()
   const user = useSession((state) => state.user)
   const login = useWalletLogin()
   const logout = useLogout()
 
-  const handleLogin = async () => {
-    try {
-      await login.mutateAsync()
-      toast.success('Signed in')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Unable to sign in')
-    }
-  }
+  const displayName =
+    user?.nickname ?? user?.displayName ?? user?.email?.split('@')[0] ?? 'Account'
+  const walletLinked = Boolean(user?.publicKey ?? user?.walletAddress)
 
   const handleLogout = async () => {
     await logout.mutateAsync()
     toast.success('Signed out')
+    navigate('/')
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+          <Link to="/auth/signin">Sign in</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link to="/auth/signup">Get started</Link>
+        </Button>
+      </div>
+    )
   }
 
   return (
-    <div className="flex items-center gap-3">
-      {user && (
-        <div className="hidden items-center gap-2 sm:flex">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-1.5 transition-colors hover:bg-secondary sm:pr-3"
+        >
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary/10 text-xs text-primary">
-              {user.displayName?.charAt(0).toUpperCase() ??
-                user.walletAddress.charAt(2).toUpperCase()}
+            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={displayName} /> : null}
+            <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
+              {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span className="max-w-[120px] truncate text-sm text-muted-foreground">
-            {user.displayName ?? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`}
+          <span className="hidden max-w-[120px] truncate text-sm font-semibold sm:inline">
+            {displayName}
           </span>
-        </div>
-      )}
-      <ConnectButton.Custom>
-        {({ account, chain, openConnectModal, openChainModal, openAccountModal, mounted }) => {
-          const connected = mounted && account && chain
+        </button>
+      </DropdownMenuTrigger>
 
-          return (
-            <div
-              {...(!mounted && {
-                'aria-hidden': true,
-                style: {
-                  opacity: 0,
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                },
-              })}
-            >
-              {(() => {
-                if (!connected) {
-                  return (
-                    <Button onClick={openConnectModal} size="sm">
-                      Connect Wallet
-                    </Button>
-                  )
-                }
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>
+          <p className="truncate text-sm font-semibold">{displayName}</p>
+          {user.email ? (
+            <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          ) : null}
+          {user.role !== 'user' ? (
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-foreground">
+              <RiShieldCheckLine className="h-3 w-3" />
+              {user.role} authority
+            </span>
+          ) : null}
+        </DropdownMenuLabel>
 
-                if (chain.unsupported) {
-                  return (
-                    <Button onClick={openChainModal} variant="destructive" size="sm">
-                      Wrong network
-                    </Button>
-                  )
-                }
+        <DropdownMenuSeparator />
 
-                return (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={openChainModal}
-                      variant="outline"
-                      size="sm"
-                      className="hidden sm:flex"
-                    >
-                      {chain.hasIcon && chain.iconUrl && (
-                        <img
-                          alt={chain.name ?? 'Chain icon'}
-                          src={chain.iconUrl}
-                          className="h-4 w-4"
-                        />
-                      )}
-                      {chain.name}
-                    </Button>
+        <DropdownMenuItem onSelect={() => navigate('/app/profile')}>
+          <RiUserLine className="h-4 w-4" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate('/app/in-analysis')}>
+          <RiCompass3Line className="h-4 w-4" />
+          In Analysis
+        </DropdownMenuItem>
 
-                    <Button onClick={openAccountModal} variant="secondary" size="sm">
-                      {account.displayName}
-                    </Button>
-                  </div>
-                )
-              })()}
-            </div>
-          )
-        }}
-      </ConnectButton.Custom>
-      {isConnected && !user && (
-        <Button variant="outline" size="sm" onClick={handleLogin} className="gap-2">
-          <SignIn size={16} />
-          <span className="hidden sm:inline">Sign in</span>
-        </Button>
-      )}
-      {user && (
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
-          <SignOut size={16} />
-          <span className="hidden sm:inline">Logout</span>
-        </Button>
-      )}
-    </div>
+        <DropdownMenuSeparator />
+
+        <ConnectButton.Custom>
+          {({ openConnectModal, openAccountModal, account, mounted }) => {
+            const connected = mounted && account
+            const onSelect = (event: Event) => {
+              event.preventDefault()
+              if (walletLinked && connected) {
+                openAccountModal()
+              } else if (connected) {
+                login.mutate(undefined, {
+                  onSuccess: () => toast.success('Wallet linked'),
+                  onError: (e) =>
+                    toast.error(e instanceof Error ? e.message : 'Could not link wallet'),
+                })
+              } else {
+                openConnectModal()
+              }
+            }
+
+            return (
+              <DropdownMenuItem onSelect={onSelect}>
+                <RiWallet3Line className="h-4 w-4" />
+                {walletLinked
+                  ? 'Wallet linked'
+                  : isConnected
+                    ? 'Link this wallet'
+                    : 'Connect wallet'}
+                {walletLinked ? (
+                  <span className="ml-auto h-2 w-2 rounded-full bg-success" />
+                ) : null}
+              </DropdownMenuItem>
+            )
+          }}
+        </ConnectButton.Custom>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault()
+            void handleLogout()
+          }}
+          className="text-destructive focus:bg-destructive/10"
+        >
+          <RiLogoutBoxRLine className="h-4 w-4" />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

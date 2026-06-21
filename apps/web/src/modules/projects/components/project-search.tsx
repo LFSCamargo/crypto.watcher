@@ -1,4 +1,3 @@
-import { ArrowUpRight, MagnifyingGlass, ShieldCheck } from '@phosphor-icons/react'
 import {
   useEffect,
   useMemo,
@@ -7,80 +6,67 @@ import {
   type KeyboardEvent,
 } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { RiSearchLine } from '@remixicon/react'
 import { Input } from '../../../components/ui'
 import { cn, useDebouncedValue } from '../../../lib/utils'
 import { useProjects } from '../hooks/use-projects'
-import { filterCuratedProjects } from '../lib/curated-projects'
-import { formatProjectState } from '../lib/format'
+import { buildProjectSearchResults } from '../lib/search-projects'
+import { ProjectSearchResults } from './project-search-results'
 
 interface ProjectSearchProps {
   className?: string
   inputClassName?: string
   placeholder?: string
   size?: 'default' | 'compact'
-}
-
-interface SearchResult {
-  key: string
-  title: string
-  subtitle: string
-  kind: 'reference' | 'project'
-  to: string
+  inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 export function ProjectSearch({
   className,
   inputClassName,
-  placeholder = 'Search BTC, Ethereum, Solana...',
+  placeholder = 'Search BTC, Ethereum, Solana…',
   size = 'default',
+  inputRef: externalRef,
 }: ProjectSearchProps) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { data: liveProjects } = useProjects()
+  const internalRef = useRef<HTMLInputElement>(null)
+  const inputRef = externalRef ?? internalRef
   const [query, setQuery] = useState(searchParams.get('search') ?? '')
   const debouncedQuery = useDebouncedValue(query, 300)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
+  const requestIdRef = useRef(0)
+  const [resolvedQuery, setResolvedQuery] = useState(debouncedQuery)
 
   useEffect(() => {
     setQuery(searchParams.get('search') ?? '')
   }, [searchParams])
 
-  const results = useMemo<SearchResult[]>(() => {
-    const trimmedQuery = debouncedQuery.trim()
-    if (!trimmedQuery) {
-      return []
+  useEffect(() => {
+    const currentRequest = ++requestIdRef.current
+    const trimmed = debouncedQuery.trim()
+
+    if (!trimmed) {
+      setResolvedQuery('')
+      return
     }
 
-    const normalizedQuery = trimmedQuery.toLowerCase()
+    const timer = window.setTimeout(() => {
+      if (currentRequest === requestIdRef.current) {
+        setResolvedQuery(trimmed)
+      }
+    }, 0)
 
-    const referenceResults: SearchResult[] = filterCuratedProjects(trimmedQuery).map(
-      (project) => ({
-        key: `reference-${project.slug}`,
-        title: project.name,
-        subtitle: `${project.symbol} · Reference asset`,
-        kind: 'reference',
-        to: `/app/reference/${project.slug}`,
-      }),
-    )
+    return () => window.clearTimeout(timer)
+  }, [debouncedQuery])
 
-    const projectResults: SearchResult[] = (liveProjects ?? [])
-      .filter((project) =>
-        [project.name, project.slug, project.description ?? ''].some((value) =>
-          value.toLowerCase().includes(normalizedQuery),
-        ),
-      )
-      .map((project) => ({
-        key: `project-${project.id}`,
-        title: project.name,
-        subtitle: formatProjectState(project.state),
-        kind: 'project',
-        to: `/app/projects/${project.slug}`,
-      }))
-
-    return [...referenceResults, ...projectResults].slice(0, 8)
-  }, [debouncedQuery, liveProjects])
+  const results = useMemo(
+    () => buildProjectSearchResults(resolvedQuery, liveProjects),
+    [resolvedQuery, liveProjects],
+  )
 
   useEffect(() => {
     setActiveIndex(-1)
@@ -125,21 +111,23 @@ export function ProjectSearch({
       submitSearch()
     } else if (event.key === 'Escape') {
       setOpen(false)
+      inputRef.current?.blur()
     }
   }
 
   return (
     <div ref={containerRef} className={cn('relative w-full', className)} role="search">
       <div className="relative">
-        <MagnifyingGlass
+        <RiSearchLine
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
           size={18}
         />
         <Input
+          ref={inputRef as React.RefObject<HTMLInputElement>}
           aria-label="Search crypto projects"
           autoComplete="off"
-          className={cn('pl-10', size === 'compact' && 'h-9', inputClassName)}
+          className={cn('pl-11 pr-16', size === 'compact' && 'h-10', inputClassName)}
           onChange={(event) => {
             setQuery(event.target.value)
             setOpen(true)
@@ -149,45 +137,23 @@ export function ProjectSearch({
           placeholder={placeholder}
           value={query}
         />
+        <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-flex">
+          <span>⌘</span>
+          <span className="text-muted-foreground/70">+</span>
+          <span>K</span>
+        </kbd>
       </div>
 
-      {open && results.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-auto rounded-xl border border-border bg-popover p-1.5 shadow-xl">
-          {results.map((result, index) => (
-            <li key={result.key}>
-              <button
-                type="button"
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors',
-                  index === activeIndex ? 'bg-secondary' : 'hover:bg-secondary/60',
-                )}
-                onMouseDown={(event) => event.preventDefault()}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => goTo(result.to)}
-              >
-                <span
-                  className={cn(
-                    'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                    result.kind === 'reference'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-secondary text-muted-foreground',
-                  )}
-                >
-                  <ShieldCheck size={16} weight="duotone" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">
-                    {result.title}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {result.subtitle}
-                  </span>
-                </span>
-                <ArrowUpRight size={14} className="shrink-0 text-muted-foreground" />
-              </button>
-            </li>
-          ))}
-        </ul>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
+          <ProjectSearchResults
+            results={results}
+            query={resolvedQuery}
+            activeIndex={activeIndex}
+            onSelect={goTo}
+            onHover={setActiveIndex}
+          />
+        </div>
       )}
     </div>
   )

@@ -2,6 +2,13 @@
 
 export type ProjectState = 'in_analysis' | 'ready' | 'voting' | 'closed' | 'analyzed'
 
+export type AnalysisRequestStatus =
+  | 'pending'
+  | 'paid'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
+
 export interface Project {
   id: string
   slug: string
@@ -17,10 +24,14 @@ export interface Project {
 
 export interface User {
   id: string
-  walletAddress: string
+  walletAddress: string | null
+  email: string | null
+  publicKey: string | null
   displayName: string | null
+  nickname: string | null
   avatarUrl: string | null
   bio: string | null
+  xAccount: string | null
   role: 'user' | 'team' | 'admin'
   createdAt: string
 }
@@ -32,6 +43,30 @@ export interface AuthUserResponse {
 export interface NonceResponse {
   nonce: string
   message: string
+}
+
+export interface RegisterBody {
+  email: string
+  password: string
+  nickname?: string
+}
+
+export interface LoginBody {
+  email: string
+  password: string
+}
+
+export interface AnalysisRequest {
+  id: string
+  userId: string
+  projectName: string
+  projectUrl: string
+  description: string | null
+  status: AnalysisRequestStatus
+  paymentTxHash: string | null
+  feeAmount: string
+  reviewNotes: string | null
+  createdAt: string
 }
 
 export interface Comment {

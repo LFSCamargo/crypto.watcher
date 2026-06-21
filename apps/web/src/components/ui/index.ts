@@ -9,3 +9,19 @@ export { Separator } from './separator'
 export { Skeleton } from './skeleton'
 export { Textarea } from './textarea'
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'
+export {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './dialog'
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+} from './dropdown-menu'

@@ -1,12 +1,17 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, ShieldCheck } from '@phosphor-icons/react'
+import { RiArrowRightUpLine, RiShieldCheckLine } from '@remixicon/react'
 import { motion } from 'framer-motion'
 import type { CuratedProject } from '../lib/curated-projects'
-import { Badge, Card, CardContent, CardHeader, CardTitle } from '../../../components/ui'
+import { projectCategories } from '../lib/curated-projects'
+import { Badge, Card } from '../../../components/ui'
+import { ProjectIcon } from '../../../components/brand/project-icon'
 
-/**
- * Card used for curated/reference assets in the safety index.
- */
+function scoreTone(score: number) {
+  if (score >= 85) return 'success' as const
+  if (score >= 70) return 'warning' as const
+  return 'destructive' as const
+}
+
 export function CuratedProjectCard({
   index,
   project,
@@ -14,55 +19,52 @@ export function CuratedProjectCard({
   index: number
   project: CuratedProject
 }) {
+  const tone = scoreTone(project.score)
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: Math.min(index * 0.025, 0.25) }}
     >
-      <Link className="group block" to={`/app/reference/${project.slug}`}>
-        <Card className="card-hover h-full overflow-hidden">
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={project.status === 'reference' ? 'success' : 'warning'}>
-                    Rank #{project.rank}
-                  </Badge>
-                  <Badge variant="secondary">{project.network}</Badge>
-                </div>
-                <CardTitle className="mt-3 flex items-center gap-2 text-lg">
-                  {project.name}
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {project.symbol}
-                  </span>
-                </CardTitle>
-              </div>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ShieldCheck size={20} weight="duotone" />
-              </div>
+      <Link className="group block h-full" to={`/app/reference/${project.slug}`}>
+        <Card className="card-hover flex h-full flex-col p-5">
+          <div className="flex items-start gap-3">
+            <ProjectIcon
+              symbol={project.symbol}
+              name={project.name}
+              slug={project.slug}
+              className="h-12 w-12 shrink-0"
+              textClassName="text-xs"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-base font-bold leading-tight">{project.name}</p>
+              <p className="truncate text-xs font-medium text-muted-foreground">
+                {project.symbol} · {projectCategories[project.category]}
+              </p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-              {project.description}
-            </p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary to-yellow-400 transition-all"
-                    style={{ width: `${project.score}%` }}
-                  />
-                </div>
-                <span className="text-sm font-medium text-primary">{project.score}</span>
-              </div>
-              <span className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-primary">
-                View details
-                <ArrowRight size={14} />
-              </span>
-            </div>
-          </CardContent>
+            <Badge
+              variant={tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'destructive'}
+              className="shrink-0"
+            >
+              {project.score}%
+            </Badge>
+          </div>
+
+          <p className="mt-3 line-clamp-2 flex-1 text-sm text-muted-foreground">
+            {project.description}
+          </p>
+
+          <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <RiShieldCheckLine className="h-4 w-4 text-primary" />
+              {project.network}
+            </span>
+            <span className="flex items-center gap-1 font-semibold text-foreground/70 transition-colors group-hover:text-foreground">
+              Details
+              <RiArrowRightUpLine className="h-4 w-4" />
+            </span>
+          </div>
         </Card>
       </Link>
     </motion.div>

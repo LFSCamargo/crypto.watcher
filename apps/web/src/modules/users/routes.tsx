@@ -52,8 +52,7 @@ export function MePage() {
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-primary/10 text-xl text-primary">
-                {user.displayName?.charAt(0).toUpperCase() ??
-                  user.walletAddress.charAt(2).toUpperCase()}
+                {(user.displayName ?? user.nickname ?? user.email ?? 'U').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
@@ -63,7 +62,9 @@ export function MePage() {
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Wallet size={14} />
                 <span className="truncate">
-                  {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                  {user.walletAddress
+                    ? `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`
+                    : user.email ?? 'No wallet linked'}
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -96,12 +97,14 @@ export function MePage() {
             </Button>
           </form>
 
-          <div className="rounded-lg bg-muted/50 p-4">
-            <h3 className="mb-2 text-sm font-medium">Wallet Address</h3>
-            <p className="break-all font-mono text-sm text-muted-foreground">
-              {user.walletAddress}
-            </p>
-          </div>
+          {user.walletAddress && (
+            <div className="rounded-lg bg-muted/50 p-4">
+              <h3 className="mb-2 text-sm font-medium">Wallet Address</h3>
+              <p className="break-all font-mono text-sm text-muted-foreground">
+                {user.walletAddress}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>

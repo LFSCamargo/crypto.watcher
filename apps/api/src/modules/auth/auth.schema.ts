@@ -25,6 +25,40 @@ export const VerifyBodySchema = z
   })
   .openapi('VerifyBody')
 
+export const RegisterBodySchema = z
+  .object({
+    email: z.email(),
+    password: z.string().min(8).max(128),
+    nickname: z.string().min(2).max(32).optional(),
+  })
+  .openapi('RegisterBody')
+
+export const LoginBodySchema = z
+  .object({
+    email: z.email(),
+    password: z.string().min(1).max(128),
+  })
+  .openapi('LoginBody')
+
+export const LinkPublicKeyBodySchema = z
+  .object({
+    publicKey: z.string().min(1),
+  })
+  .openapi('LinkPublicKeyBody')
+
+export const ForgotPasswordBodySchema = z
+  .object({
+    email: z.email(),
+  })
+  .openapi('ForgotPasswordBody')
+
+export const ResetPasswordBodySchema = z
+  .object({
+    token: z.string().min(1),
+    password: z.string().min(8).max(128),
+  })
+  .openapi('ResetPasswordBody')
+
 export const AuthUserResponseSchema = z
   .object({
     user: UserSchema,

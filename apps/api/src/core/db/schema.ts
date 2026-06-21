@@ -10,10 +10,22 @@ export type GovernanceProposalState =
   | 'defeated'
   | 'executed'
 export type RewardType = 'reward' | 'slash'
+export type SessionType = 'wallet' | 'email' | 'reset'
+export type AnalysisRequestStatus =
+  | 'pending'
+  | 'paid'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
 
 export interface UsersTable {
   id: Generated<string>
-  wallet_address: string
+  wallet_address: string | null
+  email: string | null
+  password_hash: string | null
+  public_key: string | null
+  x_account: string | null
+  nickname: string | null
   display_name: string | null
   avatar_url: string | null
   bio: string | null
@@ -41,6 +53,7 @@ export interface CommentsTable {
   project_id: string
   author_id: string
   body: string
+  comment_fee_paid: Generated<boolean>
   deleted_at: Date | null
   created_at: Generated<Date>
 }
@@ -48,10 +61,25 @@ export interface CommentsTable {
 export interface SessionsTable {
   id: Generated<string>
   user_id: string
-  nonce: string
+  session_type: Generated<SessionType>
+  nonce: string | null
   expires_at: Date
   revoked_at: Date | null
   created_at: Generated<Date>
+}
+
+export interface AnalysisRequestsTable {
+  id: Generated<string>
+  user_id: string
+  project_name: string
+  project_url: string
+  description: string
+  status: Generated<AnalysisRequestStatus>
+  payment_tx_hash: string | null
+  fee_amount: string
+  review_notes: string | null
+  created_at: Generated<Date>
+  updated_at: Date | null
 }
 
 export interface VotesTable {
@@ -133,14 +161,29 @@ export interface ChainEventsTable {
   created_at: Generated<Date>
 }
 
+export interface MarketCacheTable {
+  slug: string
+  coingecko_id: string
+  snapshot: JSONColumnType<
+    Record<string, unknown>,
+    Record<string, unknown>,
+    Record<string, unknown>
+  >
+  fetched_at: Date
+  expires_at: Date
+  updated_at: Generated<Date>
+}
+
 export interface Database {
   users: UsersTable
   sessions: SessionsTable
   projects: ProjectsTable
   comments: CommentsTable
+  analysis_requests: AnalysisRequestsTable
   votes: VotesTable
   scores: ScoresTable
   reputation: ReputationTable
   governance_proposals: GovernanceProposalsTable
   chain_events: ChainEventsTable
+  market_cache: MarketCacheTable
 }
