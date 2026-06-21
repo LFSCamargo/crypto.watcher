@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": true
+  },
+  "exclude": ["**/__tests__/**", "**/*.test.ts", "src/emails/**", "dist", "node_modules"]
+}
