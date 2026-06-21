@@ -31,7 +31,7 @@ export function ScorePanel({ projectId }: { projectId: string }) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            No score available yet. Voting may still be in progress.
+            No score available yet. The governor council may still be reviewing this project.
           </p>
         </CardContent>
       </Card>
@@ -86,7 +86,7 @@ export function ScorePanel({ projectId }: { projectId: string }) {
           <p>Round {data.round}</p>
           {data.breakdown && (
             <p className="mt-1">
-              Based on {Object.keys(data.breakdown).length} voting factors
+              Based on {Object.keys(data.breakdown).length} review factors
             </p>
           )}
         </div>

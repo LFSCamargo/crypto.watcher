@@ -10,7 +10,7 @@ interface AuthorityVotePanelProps {
   projectState: string
 }
 
-/** POA authority panel for governors reviewing in-analysis projects. */
+/** Governor-only panel for publishing expert review decisions on in-analysis projects. */
 export function AuthorityVotePanel({ projectSlug, projectState }: AuthorityVotePanelProps) {
   const user = useSession((state) => state.user)
   const [notes, setNotes] = useState('')
@@ -22,12 +22,12 @@ export function AuthorityVotePanel({ projectSlug, projectState }: AuthorityVoteP
   return (
     <Card className="rounded-2xl border-primary/30 bg-primary/5">
       <CardHeader>
-        <CardTitle className="text-base">Authority review (POA)</CardTitle>
+        <CardTitle className="text-base">Governor review</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          As a protocol authority, cast your safe/unsafe decision. Requires governance
-          tokens linked to your public key.
+          As a governor, publish your expert safe/unsafe assessment and structured notes.
+          Only the governor council influences the official score.
         </p>
         <Textarea
           value={notes}
@@ -38,21 +38,21 @@ export function AuthorityVotePanel({ projectSlug, projectState }: AuthorityVoteP
         <div className="flex flex-wrap gap-2">
           <Button
             className="rounded-full gap-1"
-            onClick={() => toast.success('Safe vote recorded (on-chain via governance token)')}
+            onClick={() => toast.success('Safe assessment recorded')}
           >
             <RiThumbUpLine className="h-4 w-4" />
-            Vote safe
+            Mark safe
           </Button>
           <Button
             variant="destructive"
             className="rounded-full gap-1"
-            onClick={() => toast.success('Unsafe vote recorded')}
+            onClick={() => toast.success('Unsafe assessment recorded')}
           >
             <RiThumbDownLine className="h-4 w-4" />
-            Vote unsafe
+            Mark unsafe
           </Button>
           <Button asChild variant="outline" className="rounded-full">
-            <Link to={`/app/projects/${projectSlug}/vote`}>Open on-chain vote</Link>
+            <Link to={`/app/projects/${projectSlug}`}>Publish report</Link>
           </Button>
         </div>
       </CardContent>

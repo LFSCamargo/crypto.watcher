@@ -4,8 +4,9 @@ Context and operating rules for AI agents (and humans) working in this repo.
 
 ## What this project is
 
-Crypto Watcher is a reputation-weighted, on-chain risk-analysis tool for crypto
-projects. Read these first — they are the source of truth:
+Crypto Watcher is an expert-governed, on-chain risk-analysis tool for crypto
+projects. Reviews and official scores are published by a vetted governor council —
+not by token-weighted public voting. Read these first — they are the source of truth:
 
 - Product overview: [README.md](./README.md)
 - Roadmap & phases (`MVP → Final`): [docs/ROADMAP.mdc](./docs/ROADMAP.mdc)

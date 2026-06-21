@@ -44,17 +44,17 @@ export function InAnalysisPage() {
     <section className="space-y-10">
       <div>
         <Badge variant="secondary" className="mb-3">
-          Authority review queue
+          Governor review queue
         </Badge>
         <h1 className="heading-2 mb-2">In Analysis</h1>
         <p className="body-large max-w-3xl">
-          Projects currently under review by our POA authority panel. Governors decide
-          whether each project is safe or unsafe before scores are published.
+          Projects currently under review by our expert governor council. Governors
+          investigate each project and publish structured reports with official scores.
         </p>
       </div>
 
       <div>
-        <h2 className="mb-4 text-xl font-semibold">Community review requests</h2>
+        <h2 className="mb-4 text-xl font-semibold">Review requests</h2>
         {requestsLoading ? (
           <Skeleton className="h-32 w-full rounded-2xl" />
         ) : requestsError ? (
@@ -197,7 +197,7 @@ export function AnalysisRequestPage() {
         <RiShieldCheckLine className="mx-auto mb-4 h-12 w-12 text-primary" />
         <h1 className="heading-3 mb-2">Request a project review</h1>
         <p className="mb-6 text-muted-foreground">
-          Sign in to pay protocol fees and deploy a voting contract for your project.
+          Sign in to pay the review fee and submit your project to the governor council queue.
         </p>
         <Button asChild className="rounded-full">
           <Link to="/auth/signin">Sign in to continue</Link>
@@ -218,8 +218,8 @@ export function AnalysisRequestPage() {
         </Badge>
         <h1 className="heading-2 mb-2">Request Analysis</h1>
         <p className="body-large">
-          Ask our protocol to review a DApp or crypto project. After submission, pay
-          the deployment fee to activate on-chain voting by our POA authority panel.
+          Ask our expert governor council to review a DApp or crypto project. After
+          submission, pay the review fee to enter the investigation queue.
         </p>
       </div>
 
@@ -230,9 +230,9 @@ export function AnalysisRequestPage() {
             <p className="font-semibold">How it works</p>
             <ol className="mt-2 list-decimal space-y-1 pl-4 text-muted-foreground">
               <li>Submit your project details below</li>
-              <li>Pay the protocol fee to deploy the voting contract</li>
-              <li>Authority governors review and vote safe or unsafe</li>
-              <li>Published safety score appears in the Safe Projects catalog</li>
+              <li>Pay the review fee (funds the protocol treasury and expert work)</li>
+              <li>Governors investigate and publish a structured report</li>
+              <li>Official safety score appears in the Safe Projects catalog</li>
             </ol>
           </div>
         </CardContent>

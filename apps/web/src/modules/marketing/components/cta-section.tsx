@@ -21,8 +21,8 @@ export function CTASection() {
             Want a project reviewed by our authority panel?
           </h2>
           <p className="max-w-xl text-background/70">
-            Submit any DApp or protocol, pay the protocol fee to deploy its voting
-            contract, and let our governors publish a safety verdict.
+            Submit any DApp or protocol, pay the review fee, and our expert governor
+            council will investigate and publish a structured safety report.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" variant="secondary" className="gap-2">

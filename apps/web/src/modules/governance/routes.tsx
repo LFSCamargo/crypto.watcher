@@ -75,7 +75,8 @@ export function GovernancePage() {
           Governance
         </h1>
         <p className="body-large">
-          MVP governance is live from launch through token voting and timelock execution.
+          CWT holders vote on protocol parameters — reviewer policy, methodology and
+          accountability. Project scores are published by the expert governor council.
         </p>
       </motion.div>
 

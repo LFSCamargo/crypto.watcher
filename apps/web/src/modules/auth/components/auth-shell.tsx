@@ -7,7 +7,7 @@ import { ShieldLogo } from '../../../components/brand/shield-logo'
 const perks = [
   'Browse 100+ authority-reviewed projects',
   'Comment and discuss with the community',
-  'Request reviews and vote on safety',
+  'Request reviews and participate in protocol governance',
 ]
 
 interface AuthShellProps {

@@ -40,7 +40,7 @@ export function SignInPage() {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Access your profile, comments and governance votes."
+      subtitle="Access your profile, comments and protocol governance."
       footer={
         <span className="text-muted-foreground">
           Don&apos;t have an account?{' '}
@@ -116,7 +116,7 @@ export function SignUpPage() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Join Crypto Watcher to comment, vote and request reviews."
+      subtitle="Join Crypto Watcher to comment, submit evidence and request reviews."
       footer={
         <span className="text-muted-foreground">
           Already have an account?{' '}
@@ -406,10 +406,11 @@ export function OnboardingPage() {
               <p className="mb-1 text-xs font-bold text-muted-foreground">
                 LAST STEP — OPTIONAL
               </p>
-              <h1 className="heading-3 mb-2">Link your wallet to vote</h1>
+              <h1 className="heading-3 mb-2">Link your wallet (optional)</h1>
               <p className="mb-4 text-muted-foreground">
-                Add your public key to receive governance tokens and vote on project
-                safety. You can also do this later from your profile.
+                Add your public key to participate in protocol governance with CWT. Project
+                scores are published by our expert governor council — not by public voting.
+                You can also do this later from your profile.
               </p>
               <div className="space-y-2">
                 <Label htmlFor="publicKey">Wallet address</Label>

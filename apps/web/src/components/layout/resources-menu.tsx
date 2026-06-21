@@ -31,13 +31,13 @@ const resources = [
     to: '/docs/tokenomics',
     icon: RiCoinsLine,
     title: 'Tokenomics',
-    description: 'Governance token and review incentives.',
+    description: 'Protocol governance and reviewer council policy.',
   },
   {
     to: '/docs/governance',
     icon: RiGovernmentLine,
     title: 'Governance',
-    description: 'Proof-of-Authority panel and voting.',
+    description: 'Expert council reviews and protocol governance.',
   },
   {
     to: '/docs/faq',

@@ -67,30 +67,31 @@ export function ReputationPage() {
                 ) : (
                   <XCircle size={16} className="text-red-400" weight="fill" />
                 )}
-                Eligibility Status
+                Council Status
               </div>
               <Badge
                 variant={data.eligible ? 'success' : 'destructive'}
                 className="text-sm"
               >
-                {data.eligible ? 'Eligible to Vote' : 'Not Eligible'}
+                {data.eligible ? 'Governor council member' : 'Not a reviewer'}
               </Badge>
             </div>
 
             <div className="rounded-lg border border-border p-4">
               <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                 <TrendUp size={16} className="text-primary" />
-                Voting Weight
+                Reviewer weight
               </div>
               <p className="text-2xl font-bold text-primary">{data.weight}</p>
             </div>
           </div>
 
           <div className="rounded-lg bg-muted/30 p-4">
-            <h3 className="mb-2 text-sm font-medium">About Reputation</h3>
+            <h3 className="mb-2 text-sm font-medium">About reviewer credentials</h3>
             <p className="text-sm text-muted-foreground">
-              Your voting weight determines how much influence your vote has in project
-              risk assessments. Higher weight means more impact on final scores.
+              Reviewer credentials track governor council membership and accountability.
+              Regular users do not vote on project scores — only vetted governors publish
+              official ratings.
             </p>
           </div>
         </CardContent>

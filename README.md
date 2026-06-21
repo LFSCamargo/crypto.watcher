@@ -1,18 +1,17 @@
 # Crypto Watcher
 
-Crypto Watcher is a risk analysis tool for crypto assets/projects/protocols. The tool is designed to help users analyze whether or not a project is worth investing in, based on the risk and potential rewards.
+Crypto Watcher is a risk analysis tool for crypto assets, projects and protocols. It helps users decide whether a project is worth investing in based on **expert review**, transparent methodology and evidence — not popularity or purchasable influence.
 
 ## Core Idea
 
-- Analyze projects based on their risk and potential rewards.
+- Analyze projects based on their risk and potential rewards using **vetted expert reviewers**.
 - Protect users from investing in projects that are not worth investing in.
-- Provide a voting system for users to vote on the risk and potential rewards.
-- Not everyone will be allowed to vote on the risk and potential rewards. Only trustworthy users will be allowed to vote, they will be rewarded with tokens for their votes.
-- The voting system will be based on the reputation of the user. The more trustworthy the user is, the more votes they will be able to cast.
-- The governance token will be distributed to users.
-- In order to use the voting system, user will be able to interact with a smart contract that will be deployed on the blockchain, for each project.
-- While voting will be closed, everyone can comment on the project, this will be a publically available information, off-chain stored, that will be used to analyze the project.
-- Deploy contract -> Project in analysis by team (Voting system will be deployed on the contract) -> Project is ready for voting -> Voting starts -> Voting ends -> Project is analyzed -> Score is calculated -> And shown to the users
+- Publish official risk scores and structured reports from a **governor council** with expertise in smart contract security, protocol design, tokenomics, compliance, infrastructure and on-chain analysis.
+- **Regular users do not vote on the final risk score.** They can consume reports, view ratings, submit evidence, report incidents and participate in discussions — but score authority stays with governors.
+- A **governance token** powers **protocol governance** (reviewer selection, methodology, accountability) — not vote-to-rate on projects.
+- Each reviewed project can have an on-chain registry/contract anchoring the published outcome for auditability.
+- While under review, anyone can comment and submit evidence off-chain; governors synthesize this into the official report.
+- Review requested → Project in analysis → Governor review → Report published → Score shown to users
 
 ## Getting started
 

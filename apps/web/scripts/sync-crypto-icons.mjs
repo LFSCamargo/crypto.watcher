@@ -1,13 +1,11 @@
 /**
  * Downloads coin logos into `src/public/icons/` keyed by curated project slug.
  *
- * Sources (in order):
- * 1. Existing local file (skip)
- * 2. SpotHQ cryptocurrency-icons (by symbol)
- * 3. CoinGecko CDN direct URLs (curated overrides)
- * 4. CoinGecko batch markets API (remaining)
+ * Primary source: CoinGecko batch markets API (official logos).
+ * Fallbacks: SpotHQ cryptocurrency-icons, Trust Wallet assets.
  *
  * Run: pnpm --filter web icons:sync
+ * Force refresh all: pnpm --filter web icons:sync -- --force
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -16,6 +14,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const publicIconsDir = path.resolve(__dirname, '../src/public/icons')
 const curatedProjectsPath = path.resolve(__dirname, '../src/modules/projects/lib/curated-projects.ts')
+const forceRefresh = process.argv.includes('--force')
 
 const COINGECKO_ID_OVERRIDES = {
   xrp: 'ripple',
@@ -63,7 +62,6 @@ const COINGECKO_ID_OVERRIDES = {
   'usd-coin': 'usd-coin',
 }
 
-/** SpotHQ icon filename overrides when symbol differs from repo file name. */
 const SPOTHQ_SYMBOL_OVERRIDES = {
   POL: 'matic',
   SKY: 'mkr',
@@ -72,16 +70,9 @@ const SPOTHQ_SYMBOL_OVERRIDES = {
   W: 'wormhole',
 }
 
-/** Direct CoinGecko CDN URLs for assets missing from SpotHQ (via batch API when possible). */
-const COINGECKO_DIRECT_URLS = {
-  'polygon-ecosystem-token':
-    'https://coin-images.coingecko.com/coins/images/4713/large/polygon.png',
-  morpho: 'https://coin-images.coingecko.com/coins/images/29837/large/Morpho-token-icon.png',
-  'jito-governance-token':
-    'https://coin-images.coingecko.com/coins/images/33228/large/jto.png',
-  'berachain-bera': 'https://coin-images.coingecko.com/coins/images/25235/large/BERA.png',
-  pendle: 'https://coin-images.coingecko.com/coins/images/15069/large/Pendle_Logo_Normal-03.png',
-  ethena: 'https://coin-images.coingecko.com/coins/images/36530/large/ethena.png',
+const TRUSTWALLET_BY_SLUG = {
+  marinade:
+    'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/MNDEFzGvMt87ueuHvVU9VcTqsAP5b3fTGPsHuuPA5ey/logo.png',
 }
 
 function resolveCoingeckoId(slug) {
@@ -122,106 +113,137 @@ async function downloadImage(url, destination) {
     throw new Error(`HTTP ${response.status}`)
   }
   const buffer = Buffer.from(await response.arrayBuffer())
-  if (buffer.length < 200) {
+  if (buffer.length < 100) {
     throw new Error('response too small')
   }
   await fs.writeFile(destination, buffer)
 }
 
 async function fetchMarkets(coinIds) {
-  const params = new URLSearchParams({
-    vs_currency: 'usd',
-    ids: coinIds.join(','),
-    per_page: '250',
-    page: '1',
-    sparkline: 'false',
-  })
-  const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/markets?${params.toString()}`,
-  )
-  if (!response.ok) {
-    throw new Error(`markets API HTTP ${response.status}`)
+  const chunks = []
+  for (let index = 0; index < coinIds.length; index += 50) {
+    chunks.push(coinIds.slice(index, index + 50))
   }
-  return response.json()
+
+  const markets = []
+  for (const chunk of chunks) {
+    const params = new URLSearchParams({
+      vs_currency: 'usd',
+      ids: chunk.join(','),
+      per_page: '250',
+      page: '1',
+      sparkline: 'false',
+    })
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/markets?${params.toString()}`,
+    )
+    if (!response.ok) {
+      throw new Error(`markets API HTTP ${response.status}`)
+    }
+    markets.push(...(await response.json()))
+    if (chunks.length > 1) {
+      await sleep(1500)
+    }
+  }
+  return markets
+}
+
+async function downloadWithFallbacks(slug, symbol, destination) {
+  const coinId = resolveCoingeckoId(slug)
+  const errors = []
+
+  if (coinId) {
+    try {
+      const markets = await fetchMarkets([coinId])
+      const imageUrl = markets[0]?.image
+      if (imageUrl) {
+        await downloadImage(imageUrl, destination)
+        return { source: 'coingecko-api', coinId, url: imageUrl }
+      }
+    } catch (error) {
+      errors.push(`coingecko: ${error.message}`)
+    }
+  }
+
+  const trustwalletUrl = TRUSTWALLET_BY_SLUG[slug]
+  if (trustwalletUrl) {
+    try {
+      await downloadImage(trustwalletUrl, destination)
+      return { source: 'trustwallet', url: trustwalletUrl }
+    } catch (error) {
+      errors.push(`trustwallet: ${error.message}`)
+    }
+  }
+
+  try {
+    await downloadImage(spothqUrl(symbol), destination)
+    return { source: 'spothq', symbol }
+  } catch (error) {
+    errors.push(`spothq: ${error.message}`)
+  }
+
+  throw new Error(errors.join('; '))
 }
 
 async function main() {
   await fs.mkdir(publicIconsDir, { recursive: true })
   const projects = await readProjects()
   const manifest = {}
-  const pending = []
+  const failures = []
+
+  const coinIds = [...new Set(projects.map(({ slug }) => resolveCoingeckoId(slug)).filter(Boolean))]
+  let marketById = new Map()
+
+  try {
+    console.log(`Fetching CoinGecko metadata for ${coinIds.length} coins…`)
+    const markets = await fetchMarkets(coinIds)
+    marketById = new Map(markets.map((coin) => [coin.id, coin]))
+    console.log(`CoinGecko returned ${markets.length} coin images`)
+  } catch (error) {
+    console.warn(`CoinGecko batch prefetch failed: ${error.message}`)
+  }
 
   for (const { slug, symbol } of projects) {
     const destination = path.join(publicIconsDir, `${slug}.png`)
-    if (await fileExists(destination)) {
+    const exists = await fileExists(destination)
+
+    if (exists && !forceRefresh) {
       manifest[slug] = { source: 'existing', symbol }
       continue
     }
 
-    const directUrl = COINGECKO_DIRECT_URLS[slug]
-    if (directUrl) {
-      try {
-        await downloadImage(directUrl, destination)
-        manifest[slug] = { source: 'coingecko-direct', url: directUrl, symbol }
-        console.log(`✓ ${slug} (direct)`)
+    const coinId = resolveCoingeckoId(slug)
+    const market = coinId ? marketById.get(coinId) : undefined
+
+    try {
+      if (market?.image) {
+        await downloadImage(market.image, destination)
+        manifest[slug] = { source: 'coingecko-api', coinId, symbol, url: market.image }
+        console.log(`✓ ${slug} (${coinId})`)
         continue
-      } catch (error) {
-        console.error(`✗ ${slug} direct: ${error.message}`)
       }
-    }
 
-    try {
-      await downloadImage(spothqUrl(symbol), destination)
-      manifest[slug] = { source: 'spothq', symbol }
-      console.log(`✓ ${slug} (spothq/${symbol})`)
-      continue
-    } catch {
-      pending.push({ slug, symbol })
-    }
-  }
-
-  if (pending.length > 0) {
-    console.log(`\nFetching ${pending.length} icons from CoinGecko batch API…`)
-    await sleep(5000)
-    const coinIds = pending
-      .map(({ slug }) => resolveCoingeckoId(slug))
-      .filter(Boolean)
-    const uniqueIds = [...new Set(coinIds)]
-
-    try {
-      const markets = await fetchMarkets(uniqueIds)
-      const marketById = new Map(markets.map((coin) => [coin.id, coin]))
-
-      for (const { slug, symbol } of pending) {
-        const coinId = resolveCoingeckoId(slug)
-        const destination = path.join(publicIconsDir, `${slug}.png`)
-        const market = coinId ? marketById.get(coinId) : undefined
-
-        if (!market?.image) {
-          console.error(`✗ ${slug}: missing CoinGecko market data`)
-          continue
-        }
-
-        try {
-          await downloadImage(market.image, destination)
-          manifest[slug] = { source: 'coingecko-api', coinId, symbol, url: market.image }
-          console.log(`✓ ${slug} (coingecko/${coinId})`)
-        } catch (error) {
-          console.error(`✗ ${slug} download: ${error.message}`)
-        }
-      }
+      const result = await downloadWithFallbacks(slug, symbol, destination)
+      manifest[slug] = { ...result, symbol }
+      console.log(`✓ ${slug} (${result.source})`)
     } catch (error) {
-      console.error(`CoinGecko batch failed: ${error.message}`)
+      failures.push({ slug, symbol, reason: error.message })
+      console.error(`✗ ${slug}: ${error.message}`)
     }
+
+    await sleep(100)
   }
 
-  const downloaded = Object.keys(manifest).length
   await fs.writeFile(
     path.join(publicIconsDir, 'manifest.json'),
-    `${JSON.stringify({ generatedAt: new Date().toISOString(), icons: manifest, pending: projects.filter((p) => !manifest[p.slug]).map((p) => p.slug) }, null, 2)}\n`,
+    `${JSON.stringify({ generatedAt: new Date().toISOString(), forceRefresh, icons: manifest, failures }, null, 2)}\n`,
   )
 
-  console.log(`\nIcons ready: ${downloaded}/${projects.length}`)
+  console.log(`\nIcons ready: ${Object.keys(manifest).length}/${projects.length}`)
+  if (failures.length > 0) {
+    console.log('Failures:', failures)
+    process.exitCode = 1
+  }
 }
 
 main()

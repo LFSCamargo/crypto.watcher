@@ -26,39 +26,41 @@ export function DocsIntroduction() {
         icon={BookOpen}
         eyebrow="Introduction"
         title="Introduction to Crypto Watcher"
-        description="Crypto Watcher is a reputation-weighted risk analysis platform for crypto projects. It helps users make informed investment decisions through community-driven analysis."
+        description="Crypto Watcher is an expert-governed risk analysis platform for crypto projects. Official scores come from a vetted governor council — not from public vote-to-rate."
       />
 
       <DocsSection icon={ShieldCheck} title="What is Crypto Watcher?">
         <DocsP>
           In the fast-moving world of cryptocurrency, making informed investment
-          decisions is crucial. Crypto Watcher provides a transparent, on-chain system
-          for analyzing the risk and potential of crypto projects through community
-          participation.
+          decisions is crucial. Crypto Watcher provides a transparent system for
+          analyzing the risk and potential of crypto projects through{' '}
+          <strong className="text-foreground">expert review</strong>, structured
+          reports and evidence-based scoring.
         </DocsP>
         <DocsP>
-          Unlike traditional rating systems, Crypto Watcher uses{' '}
-          <strong className="text-foreground">reputation-weighted voting</strong>. This
-          means that votes from trustworthy, experienced users carry more weight than
-          those from newcomers or unverified accounts.
+          Unlike crowd-sourced rating sites, Crypto Watcher restricts review authority to
+          a <strong className="text-foreground">curated governor council</strong> with
+          demonstrated expertise in smart contract security, protocol design, tokenomics,
+          compliance, infrastructure and on-chain analysis. Trust comes from reviewer
+          expertise and transparency — not token ownership or popularity.
         </DocsP>
       </DocsSection>
 
       <DocsSection icon={Lightning} title="Core Features">
         <DocsCardGrid columns={2}>
-          <DocsFeatureCard icon={Scales} title="Reputation-Weighted Voting">
-            Your voting power is proportional to your reputation score, so trusted
-            voices shape the outcome.
+          <DocsFeatureCard icon={Scales} title="Expert Governor Reviews">
+            Only vetted reviewers investigate projects and publish official risk scores
+            and structured reports.
           </DocsFeatureCard>
-          <DocsFeatureCard icon={Cube} title="On-Chain Transparency">
-            All votes and scores are stored on the blockchain and cannot be tampered
-            with.
+          <DocsFeatureCard icon={Cube} title="On-Chain Audit Trail">
+            Published outcomes are anchored on-chain for transparency and immutability.
           </DocsFeatureCard>
-          <DocsFeatureCard icon={Coins} title="Governance Token">
-            Earn tokens by participating and use them to shape the protocol's future.
+          <DocsFeatureCard icon={Coins} title="Protocol Governance">
+            CWT holders govern reviewer selection, methodology and accountability — not
+            individual project scores.
           </DocsFeatureCard>
-          <DocsFeatureCard icon={ChartPieSlice} title="Per-Project Contracts">
-            Each project gets its own smart contract for maximum transparency.
+          <DocsFeatureCard icon={ChartPieSlice} title="Per-Project Registry">
+            Each reviewed project gets an on-chain record for auditability.
           </DocsFeatureCard>
         </DocsCardGrid>
       </DocsSection>
@@ -67,23 +69,24 @@ export function DocsIntroduction() {
         <DocsSteps
           steps={[
             {
-              title: 'Project Submission',
+              title: 'Review Requested',
               description:
-                'A project is submitted for analysis and a voting contract is deployed.',
+                'A user or team requests analysis; the project enters the review queue.',
             },
             {
               title: 'Analysis Period',
               description:
-                'Community members can comment and share their research.',
+                'Governors investigate; anyone can comment and submit evidence.',
             },
             {
-              title: 'Voting Period',
-              description: 'Eligible users cast their weighted votes.',
-            },
-            {
-              title: 'Score Calculation',
+              title: 'Governor Review',
               description:
-                'The final risk score is calculated and recorded on-chain.',
+                'The council evaluates risks, audits available information and drafts a structured report.',
+            },
+            {
+              title: 'Report Published',
+              description:
+                'The official risk score and report are published for all users to read.',
             },
           ]}
         />
@@ -93,17 +96,19 @@ export function DocsIntroduction() {
         <DocsSteps
           steps={[
             {
-              title: 'Connect your wallet',
-              description: 'MetaMask, Rainbow, or any WalletConnect wallet.',
-            },
-            {
-              title: 'Build your reputation',
-              description: 'Participate in the community to grow your voting power.',
-            },
-            {
-              title: 'Start voting',
+              title: 'Browse projects',
               description:
-                'Vote on projects once you meet the eligibility requirements.',
+                'Search the safety index and read expert-reviewed scores — no wallet required.',
+            },
+            {
+              title: 'Participate in discussion',
+              description:
+                'Comment, submit evidence and report incidents to help governors investigate.',
+            },
+            {
+              title: 'Request a review',
+              description:
+                'Submit a project for the governor council to investigate.',
             },
           ]}
         />

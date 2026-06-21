@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { RiAddLine, RiArrowRightLine, RiRefreshLine, RiSearchLine } from '@remixicon/react'
+import { RiAddLine, RiRefreshLine, RiSearchLine } from '@remixicon/react'
 import { CommentThread } from '../comments/components/comment-thread'
 import { ScorePanel } from '../scoring/components/score-panel'
 import { AuthorityVotePanel } from '../voting/components/authority-vote-panel'
@@ -21,6 +21,11 @@ import {
   type CuratedProject,
 } from './lib/curated-projects'
 import { ReferenceProjectDetailPage } from './pages/reference-project-detail-page'
+import { ProjectDetailBackButton } from './components/project-detail-back-button'
+import { ProjectReviewDetail } from './components/project-review-sections'
+import { getProjectReviewProfile, getVerdictLabel } from './lib/curated-project-reviews'
+import { getCuratedProject } from './lib/curated-projects'
+import { ProjectIcon } from '../../components/brand/project-icon'
 import {
   Button,
   Card,
@@ -84,8 +89,8 @@ export function ProjectsPage() {
         </Badge>
         <h1 className="heading-2 mb-2">Browse reviewed crypto projects</h1>
         <p className="body-large max-w-3xl">
-          App Store-style catalog of 100 curated market projects plus community-reviewed
-          DApps. Filter by category or search by name — no wallet required to browse.
+          App Store-style catalog of 100 curated market projects plus expert-reviewed
+          on-chain projects. Filter by category or search by name — no wallet required to browse.
         </p>
       </motion.div>
 
@@ -168,7 +173,7 @@ export function ProjectsPage() {
 
       {!isLoading && filteredLiveProjects.length > 0 && (
         <div>
-          <h2 className="mb-4 text-lg font-semibold">Community-reviewed (on-chain)</h2>
+          <h2 className="mb-4 text-lg font-semibold">Expert-reviewed (on-chain)</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredLiveProjects.map((project, index) => (
               <motion.div
@@ -190,6 +195,8 @@ export function ProjectsPage() {
 export function ProjectDetailPage() {
   const { slug } = useParams()
   const { data: project, isLoading, isError } = useProject(slug)
+  const curated = slug ? getCuratedProject(slug) : undefined
+  const review = curated ? getProjectReviewProfile(curated) : null
 
   if (isLoading) {
     return (
@@ -225,29 +232,65 @@ export function ProjectDetailPage() {
       animate={{ opacity: 1 }}
     >
       <section className="space-y-6">
-        <div>
-          <Badge variant="secondary" className="mb-3">
-            {formatProjectState(project.state)}
-          </Badge>
-          <h1 className="heading-2 mb-2">{project.name}</h1>
-          <p className="body-large">
-            {project.description ?? 'No description yet.'}
-          </p>
+        <ProjectDetailBackButton />
+        <div className="flex items-start gap-4">
+          {curated ? (
+            <ProjectIcon
+              symbol={curated.symbol}
+              name={curated.name}
+              slug={curated.slug}
+              className="h-14 w-14 shrink-0"
+            />
+          ) : null}
+          <div>
+            <Badge variant="secondary" className="mb-3">
+              {formatProjectState(project.state)}
+            </Badge>
+            <h1 className="heading-2 mb-2">{project.name}</h1>
+            <p className="body-large">
+              {project.description ?? curated?.description ?? 'No description yet.'}
+            </p>
+          </div>
         </div>
-        <Button asChild className="gap-2 rounded-full">
-          <Link to={`/app/projects/${project.slug}/vote`}>
-            Open voting
-            <RiArrowRightLine className="h-4 w-4" />
-          </Link>
-        </Button>
+        {review ? (
+          <ProjectReviewDetail profile={review} />
+        ) : (
+          <Card className="rounded-2xl">
+            <CardContent className="p-6 text-sm text-muted-foreground">
+              Governor review in progress. Structured reports and external audit coverage will
+              appear here once the council publishes findings.{' '}
+              <Link to="/app/analysis-request" className="font-semibold text-primary hover:underline">
+                Submit evidence
+              </Link>{' '}
+              to help investigators.
+            </CardContent>
+          </Card>
+        )}
         <AuthorityVotePanel projectSlug={project.slug} projectState={project.state} />
         <CommentThread projectId={project.id} />
       </section>
       <aside className="space-y-4">
         <ScorePanel projectId={project.id} />
+        {review ? (
+          <Card className="rounded-2xl border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-base">Council verdict</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-primary">
+                {curated?.score ?? '—'}%
+              </p>
+              <p className="mt-1 text-sm font-medium">{getVerdictLabel(review.verdict)}</p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {review.externalReviews.length} specific security/finance report
+                {review.externalReviews.length === 1 ? '' : 's'} indexed.
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Contract</CardTitle>
+            <CardTitle className="text-base">On-chain registry</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="break-all text-sm text-muted-foreground">

@@ -4,6 +4,7 @@ import {
   Lifebuoy,
   Question,
   Scales,
+  ShieldCheck,
   Star,
 } from '@phosphor-icons/react'
 import { DocsFaqItem, DocsHero, DocsList, DocsP, DocsSection } from '../components/docs-ui'
@@ -21,18 +22,18 @@ export function DocsFAQ() {
       <DocsSection icon={Question} title="General">
         <DocsFaqItem question="What is Crypto Watcher?">
           <DocsP>
-            Crypto Watcher is a reputation-weighted risk analysis platform for crypto
-            projects. It uses community voting to assess the risk and potential of crypto
-            projects, with votes weighted by user reputation.
+            Crypto Watcher is an expert-governed risk analysis platform for crypto
+            projects. Official risk scores and structured reports are published by a
+            vetted governor council — not by public token-weighted voting.
           </DocsP>
         </DocsFaqItem>
         <DocsFaqItem question="How is this different from other rating sites?">
           <DocsList
             items={[
-              'Stores all data on-chain for transparency',
-              'Weights votes by reputation, not just count',
-              'Rewards accurate voters with tokens',
-              'Is governed by the community',
+              'Scores come from vetted expert reviewers, not crowd votes',
+              'Transparent methodology and conflict-of-interest disclosure',
+              'Public can submit evidence and report incidents — but not set the score',
+              'Protocol governed by CWT holders; project scores governed by experts',
             ]}
           />
         </DocsFaqItem>
@@ -44,68 +45,49 @@ export function DocsFAQ() {
         </DocsFaqItem>
       </DocsSection>
 
-      <DocsSection icon={Scales} title="Voting">
-        <DocsFaqItem question="Who can vote?">
-          <DocsP>To vote on project risk assessments, you must:</DocsP>
+      <DocsSection icon={ShieldCheck} title="Reviews & Scores">
+        <DocsFaqItem question="Who publishes project risk scores?">
+          <DocsP>
+            Only vetted governors/admins on the expert council. They investigate projects,
+            audit available information, evaluate risks and publish structured reports with
+            an official score.
+          </DocsP>
+        </DocsFaqItem>
+        <DocsFaqItem question="Can regular users vote on project scores?">
+          <DocsP>
+            No. Regular users cannot influence the final risk score through tokens or public
+            voting. You can read reports, submit evidence, report incidents and discuss —
+            but score authority stays with the governor council.
+          </DocsP>
+        </DocsFaqItem>
+        <DocsFaqItem question="How can I contribute without voting on scores?">
           <DocsList
             items={[
-              'Connect a wallet with a verified address',
-              'Meet the minimum reputation threshold',
-              'Not have voted on the same project already',
+              'Submit evidence for governor review',
+              'Report incidents or suspicious activity',
+              'Participate in public comments and discussion',
+              'Request a paid review for a project you care about',
             ]}
           />
-        </DocsFaqItem>
-        <DocsFaqItem question="How is my vote weighted?">
-          <DocsP>
-            Your vote weight is determined by your reputation score, which is based on:
-          </DocsP>
-          <DocsList
-            items={[
-              'Historical voting accuracy',
-              'Time in the community',
-              'Token stake',
-              'Contribution quality',
-            ]}
-          />
-        </DocsFaqItem>
-        <DocsFaqItem question="Can I change my vote?">
-          <DocsP>
-            No, once a vote is cast, it cannot be changed. This is by design to prevent
-            vote manipulation based on late-breaking information.
-          </DocsP>
         </DocsFaqItem>
       </DocsSection>
 
-      <DocsSection icon={Star} title="Reputation">
-        <DocsFaqItem question="How do I build reputation?">
-          <DocsList
-            items={[
-              <>
-                <strong className="text-foreground">Accurate voting:</strong> Votes that
-                align with the final outcome
-              </>,
-              <>
-                <strong className="text-foreground">Time:</strong> Longer membership
-                increases reputation
-              </>,
-              <>
-                <strong className="text-foreground">Staking:</strong> Staked tokens
-                contribute to reputation
-              </>,
-              <>
-                <strong className="text-foreground">Contributions:</strong> Quality
-                analysis and comments
-              </>,
-            ]}
-          />
+      <DocsSection icon={Star} title="Reviewer Council">
+        <DocsFaqItem question="How are reviewers selected?">
+          <DocsP>
+            Reviewers are carefully selected and vetted by the platform for demonstrated
+            expertise in areas such as smart contract security, protocol design, tokenomics,
+            compliance, infrastructure and on-chain analysis. Roster changes are subject to
+            protocol governance.
+          </DocsP>
         </DocsFaqItem>
-        <DocsFaqItem question="Can I lose reputation?">
-          <DocsP>Yes, reputation can decrease due to:</DocsP>
+        <DocsFaqItem question="How are reviewers held accountable?">
           <DocsList
             items={[
-              'Consistently inaccurate voting',
-              'Malicious behavior (slashing)',
-              'Inactivity decay',
+              'Conflict-of-interest disclosure on every report',
+              'Transparent, versioned review methodology',
+              'Appeals and re-review by the council',
+              'Penalties for misconduct (Phase 1)',
             ]}
           />
         </DocsFaqItem>
@@ -115,25 +97,32 @@ export function DocsFAQ() {
         <DocsFaqItem question="What is the CWT token used for?">
           <DocsList
             items={[
-              'Governance voting on protocol changes',
-              'Staking to increase reputation weight',
-              'Rewards for accurate voting',
+              'Protocol governance: reviewer policy, methodology, fees, treasury',
+              'Vote delegation for protocol proposals',
+              'Does NOT grant influence over individual project risk scores',
             ]}
           />
         </DocsFaqItem>
-        <DocsFaqItem question="How do I earn tokens?">
-          <DocsList
-            items={[
-              'Voting accurately on project assessments',
-              'Staking rewards',
-              'Community contribution rewards',
-            ]}
-          />
+        <DocsFaqItem question="Can I buy influence on project ratings with CWT?">
+          <DocsP>
+            No. Crypto Watcher explicitly rejects vote-to-rate and pay-to-rate models.
+            Trust comes from reviewer expertise and transparency, not token ownership.
+          </DocsP>
         </DocsFaqItem>
         <DocsFaqItem question="Where can I buy CWT tokens?">
           <DocsP>
             During the testnet phase, tokens are not tradeable. Once the mainnet launches,
             token availability will be announced.
+          </DocsP>
+        </DocsFaqItem>
+      </DocsSection>
+
+      <DocsSection icon={Scales} title="Governance">
+        <DocsFaqItem question="What can I vote on with CWT?">
+          <DocsP>
+            Protocol decisions only: reviewer council roster, review methodology, fee
+            schedules, treasury allocations and similar platform parameters. You cannot use
+            CWT to vote on individual project risk scores.
           </DocsP>
         </DocsFaqItem>
       </DocsSection>

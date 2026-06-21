@@ -8,6 +8,12 @@ alwaysApply: true
 > [ROADMAP](./ROADMAP.mdc). Keep this file in sync with the roadmap and with the
 > actual `contracts/` implementation (see the docs-sync rule in `.cursor/rules/`).
 
+> **Product model:** Official project risk scores are published by a vetted governor
+> council only. CWT governs **protocol** decisions (reviewer roster, methodology,
+> accountability) — not vote-to-rate on individual projects. Legacy `ProjectVoting` /
+> reputation-weighted public score contracts remain in the repo from an earlier design
+> and are being refactored toward governor-only review authority.
+
 ## Tech Stack
 
 - Solidity + Foundry (`forge`, `cast`, `anvil`) — see [README](../README.md).
@@ -27,21 +33,21 @@ contracts/
 ├── remappings.txt
 ├── lib/                          # forge dependencies (OpenZeppelin, forge-std)
 ├── src/
-│   ├── governance/               # Governance module
+│   ├── governance/               # Protocol governance module
 │   │   ├── GovernanceToken.sol   # ERC20Votes governance token  [MVP]
 │   │   ├── CryptoWatcherGovernor.sol  # Governor (proposals/voting)  [MVP→Final]
 │   │   ├── Timelock.sol          # TimelockController             [MVP]
-│   │   ├── ProtocolSettings.sol  # Governed voting params         [MVP]
+│   │   ├── ProtocolSettings.sol  # Governed protocol params       [MVP]
 │   │   └── interfaces/
-│   ├── voting/                   # Per-project voting module
-│   │   ├── ProjectVoting.sol     # Per-project vote/tally/close   [MVP]
+│   ├── voting/                   # Per-project registry module (legacy name)
+│   │   ├── ProjectVoting.sol     # On-chain review record / anchor [MVP] (legacy vote-to-rate being removed)
 │   │   ├── ProjectWatcherFactory.sol # Backend-gated submit + registry [MVP]
 │   │   └── interfaces/
-│   ├── reputation/               # Reputation & eligibility module
-│   │   ├── ReputationRegistry.sol # Eligibility + weight source   [MVP→Phase 1]
+│   ├── reputation/               # Reviewer credentials module
+│   │   ├── ReputationRegistry.sol # Governor eligibility + reviewer weight [MVP→Phase 1]
 │   │   └── interfaces/
-│   ├── rewards/                  # Voter rewards module
-│   │   ├── RewardDistributor.sol # Reward + slashing              [Phase 1]
+│   ├── rewards/                  # Reviewer compensation module
+│   │   ├── RewardDistributor.sol # Governor compensation + misconduct penalties [Phase 1]
 │   │   └── interfaces/
 │   ├── access/                   # Shared access control / roles
 │   │   └── Roles.sol
@@ -58,57 +64,58 @@ contracts/
 ## Modules by Phase
 
 ### Governance module — launch requirement
-- `GovernanceToken` (`ERC20Votes`): token + delegation support. `[MVP]`
-- Seed distribution to trustworthy users. `[MVP]`
+- `GovernanceToken` (`ERC20Votes`): token + delegation support for **protocol**
+  governance only. `[MVP]`
+- Seed distribution to early protocol participants / treasury. `[MVP]`
 - `Timelock` (`TimelockController`) owned by team multisig at launch. `[MVP]`
-- `CryptoWatcherGovernor`: minimal proposals for protocol params (voting duration,
-  reputation threshold). `[MVP]`
-- `ProtocolSettings`: Timelock-owned voting duration and reputation threshold. `[MVP]`
-- Community token-weighted proposals, quorum + voting delay. `[Phase 1]`
-- Vote delegation UX support. `[Phase 2]`
+- `CryptoWatcherGovernor`: proposals for protocol params (reviewer roster changes,
+  methodology version, review fees, backend submitter rotation). `[MVP]`
+- `ProtocolSettings`: Timelock-owned review methodology and council policy params. `[MVP]`
+- Community token-weighted **protocol** proposals, quorum + voting delay. `[Phase 1]`
+- Vote delegation UX support for protocol votes. `[Phase 2]`
 - Full DAO: treasury + upgrade control governed on-chain. `[Final]`
 
-### Voting module
-- `ProjectVoting`: cast vote, close, tally; lifecycle states matching the
-  README flow (`Ready → Voting → Closed → Analyzed`). Records the `submitter`
-  (project owner) alongside the operating `team`. `[MVP]`
+### Review registry module (folder: `voting/`)
 - `ProjectWatcherFactory`: backend-controlled `submitProject(projectId, submitter)`
   callable only by the platform `backend` (users pay for their review off-chain;
-  the backend then emits the contract on their behalf). Deploys one voting
-  contract per project, records the paying user as submitter, prevents duplicate
-  ids and exposes a registry (`votingOf`, `submitterOf`, enumeration).
+  the backend then emits the on-chain record on their behalf). Deploys one registry
+  contract per project, records the paying user as submitter, prevents duplicate ids
+  and exposes a registry (`votingOf`, `submitterOf`, enumeration).
   `Ownable2Step` + `Pausable`; governance owns it, can rotate the `backend`
   address (`setBackend`) and pause submissions. `[MVP]`
-- Indexer-friendly events include `projectId`, deployed voting address, vote weight,
-  opened timestamp, close timestamp and final tallies. `[MVP]`
-- Reputation-gated voting (only eligible wallets). `[MVP]`
-- Reputation-weighted vote power (basic, single-factor). `[MVP]`
-- Tiered vote weight by reputation. `[Phase 1]`
-- Multi-chain deployment of voting contracts. `[Phase 2]`
+- `ProjectVoting` (legacy): currently implements public vote-to-rate; target state is
+  governor-only score publication with on-chain audit trail. Refactor in progress. `[MVP]`
+- Indexer-friendly events for published scores, reviewer attestations, methodology
+  version and timestamps. `[MVP]`
+- Governor-gated score publication (only `GOVERNOR_ROLE` / council members). `[MVP]`
+- Multi-chain deployment of project registry contracts. `[Phase 2]`
 
-### Reputation module
-- `ReputationRegistry`: eligibility allow-list + basic weight, with minimum weight
-  threshold controlled by admin/governance. `[MVP]`
-- Multi-factor reputation (accuracy, tenure, staking, decay). `[Phase 1]`
-- On-chain reputation portability. `[Phase 2]`
-- Decentralized reputation / verifiable credentials. `[Final]`
+### Reputation module (reviewer credentials)
+- `ReputationRegistry`: governor/reviewer allow-list + accountability weight for
+  **council members only** — not public score voting eligibility. `[MVP→Phase 1]`
+- Multi-factor reviewer reputation (report quality, timeliness, appeal overturn rate,
+  conflict disclosures). `[Phase 1]`
+- On-chain reviewer credential references. `[Phase 2]`
+- Decentralized expertise verification. `[Final]`
 
-### Rewards module
-- `RewardDistributor`: distribute governance tokens for accurate votes. `[Phase 1]`
-- Slashing / penalties for malicious voting. `[Phase 1]`
-- Sustainable reward tokenomics + treasury funding. `[Final]`
+### Rewards module (reviewer compensation)
+- `RewardDistributor`: compensate governors for completed reviews; penalties for
+  misconduct — **not** rewards for public project score voting. `[Phase 1]`
+- Slashing / penalties for governor misconduct (conflicts, falsified reports). `[Phase 1]`
+- Sustainable reviewer compensation + treasury funding. `[Final]`
 
 ## Scoring
 
-- Project score computed from on-chain tallies; weighting by reputation. `[MVP]`
-- Score factors enriched with external risk signals (data providers). `[Phase 3]`
-- Advanced automated + community hybrid risk model. `[Phase 3]`
+- Official project score published by governor council; methodology version referenced
+  on-chain. `[MVP]`
+- Score factors enriched with external risk signals to **assist** governors (human-in-the-loop). `[Phase 3]`
+- Appeals and re-review workflow (governor council, not token vote). `[Phase 1]`
 
 ## Security & Testing
 
 - Foundry unit + fuzz tests per module, CI security scanning. `[MVP]`
 - Fork-based integration tests in `test/integration/` exercise the full deploy +
-  voting + governance lifecycle against a Sepolia fork (`SEPOLIA_RPC_URL`); they
+  governance + review-registry lifecycle against a Sepolia fork (`SEPOLIA_RPC_URL`); they
   skip automatically when no RPC is configured. `[MVP]`
 - External audits scaling with phase. `[Phase 2 → Final]`
 - Formal verification of core contracts. `[Final]`

@@ -37,6 +37,7 @@ cp apps/web/.env.example apps/web/.env
 docker compose up -d postgres mailhog   # Postgres (5432) + MailHog (1025/8025)
 pnpm --filter api run db:migrate         # run DB migrations
 pnpm run dev                             # web (5173) + api (3000) in parallel
+pnpm --filter web icons:sync             # fetch curated coin logos (first time / after catalog changes)
 ```
 
 - Web: <http://localhost:5173>

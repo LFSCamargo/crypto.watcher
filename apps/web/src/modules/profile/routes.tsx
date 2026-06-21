@@ -88,7 +88,7 @@ export function ProfilePage() {
           {isAuthority && (
             <Badge className="mt-2" variant="success">
               <RiShieldStarLine className="mr-1 h-3 w-3" />
-              POA Authority
+              Governor
             </Badge>
           )}
         </div>
@@ -163,7 +163,7 @@ export function ProfilePage() {
                 className="rounded-xl font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Required for governance-token voting on projects
+                Required for CWT protocol governance (not project score voting)
               </p>
             </div>
             <Button type="submit" className="rounded-full" disabled={updateMe.isPending}>
@@ -179,7 +179,7 @@ export function ProfilePage() {
             <CardTitle className="text-base">Governor reviews</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            As a POA authority, your project safety votes appear on the In Analysis page.
+            As a governor, you publish expert reviews and scores from the In Analysis queue.
             <Button asChild variant="outline" size="sm" className="mt-4 rounded-full">
               <Link to="/app/in-analysis">Open review queue</Link>
             </Button>
