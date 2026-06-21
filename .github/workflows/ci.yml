@@ -25,6 +25,14 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm run check:spaghetti
 
+  knip:
+    name: Knip (dead code)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm run knip
+
   packages:
     name: packages/o1-check
     runs-on: ubuntu-latest
