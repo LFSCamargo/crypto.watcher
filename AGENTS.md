@@ -60,6 +60,23 @@ forge build
 forge test
 ```
 
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` validates the monorepo in parallel, scoped by path on pull
+requests and full on pushes to `main`:
+
+| Job | Scope | Gates |
+|-----|-------|-------|
+| `workspace` | `scripts/`, root config | `check:spaghetti` |
+| `packages/o1-check` | `packages/*` | lint, typecheck, test, build |
+| `apps/api` | `apps/api` | lint, typecheck, test, build, `o1-check:api` |
+| `apps/web` | `apps/web` | lint, typecheck, test, build, `o1-check:web` |
+| `contracts` | `contracts/` | `forge build`, `forge test` |
+| `CI` | aggregation | fails if any required job failed |
+
+Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run
+in `.github/workflows/security.yml`.
+
 ## Conventions
 
 - TypeScript everywhere (frontend + backend). Solidity for contracts.
