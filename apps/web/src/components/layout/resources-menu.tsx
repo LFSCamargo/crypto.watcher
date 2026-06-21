@@ -4,6 +4,7 @@ import {
   RiCoinsLine,
   RiFileTextLine,
   RiGovernmentLine,
+  RiNewsLine,
   RiQuestionLine,
 } from '@remixicon/react'
 import {
@@ -15,6 +16,12 @@ import {
 } from '../ui/navigation-menu'
 
 const resources = [
+  {
+    to: '/blog',
+    icon: RiNewsLine,
+    title: 'Blog',
+    description: 'Launch story, updates and roadmap news.',
+  },
   {
     to: '/docs',
     icon: RiBookOpenLine,
@@ -31,13 +38,13 @@ const resources = [
     to: '/docs/tokenomics',
     icon: RiCoinsLine,
     title: 'Tokenomics',
-    description: 'Governance token and review incentives.',
+    description: 'Protocol governance and reviewer council policy.',
   },
   {
     to: '/docs/governance',
     icon: RiGovernmentLine,
     title: 'Governance',
-    description: 'Proof-of-Authority panel and voting.',
+    description: 'Expert council reviews and protocol governance.',
   },
   {
     to: '/docs/faq',

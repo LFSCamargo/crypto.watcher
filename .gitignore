@@ -21,6 +21,7 @@ logs/
 coverage/
 playwright-report/
 test-results/
+lighthouse-reports/
 # foundry
 contracts/out/
 contracts/cache/

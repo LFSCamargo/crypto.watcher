@@ -5,27 +5,83 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NX_DAEMON: false
+  NX_ISOLATE_PLUGINS: false
+
 jobs:
-  monorepo:
+  spaghetti:
+    name: Spaghetti detector
     runs-on: ubuntu-latest
-    env:
-      NX_DAEMON: false
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
-      - run: pnpm run typecheck
-      - run: pnpm run test
-      - run: pnpm run build
+      - uses: ./.github/actions/setup-pnpm
+      - run: pnpm run check:spaghetti
+
+  packages:
+    name: packages/o1-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - name: Lint
+        run: pnpm exec nx run-many -t lint --projects=o1-check,email-templates
+      - name: Typecheck
+        run: pnpm exec nx run-many -t typecheck --projects=o1-check,email-templates
+      - name: Test (coverage)
+        run: pnpm exec nx run-many -t test --projects=o1-check,email-templates
+      - name: Build
+        run: pnpm exec nx run-many -t build --projects=o1-check,email-templates
+
+  api:
+    name: apps/api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - name: Build email-templates
+        run: pnpm exec nx run email-templates:build
+      - name: Lint
+        run: pnpm exec nx run api:lint
+      - name: Typecheck
+        run: pnpm exec nx run api:typecheck
+      - name: Test (coverage)
+        run: pnpm exec nx run api:test
+      - name: Build
+        run: pnpm exec nx run api:build
+      - name: O1 complexity check
+        run: pnpm run o1-check:api
+
+  web:
+    name: apps/web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - name: Lint
+        run: pnpm exec nx run web:lint
+      - name: Typecheck
+        run: pnpm exec nx run web:typecheck
+      - name: Test (coverage)
+        run: pnpm exec nx run web:test
+      - name: Build
+        run: pnpm exec nx run web:build
+      - uses: browser-actions/setup-chrome@v1
+      - name: O1 complexity check
+        run: pnpm run o1-check:web
+      - name: Lighthouse
+        run: pnpm run lighthouse:web -- --skip-build
 
   contracts:
+    name: contracts
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,5 +92,7 @@ jobs:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts --no-commit
-      - run: forge build --sizes
-      - run: forge test -vvv
+      - name: Build
+        run: forge build --sizes
+      - name: Test
+        run: forge test -vvv

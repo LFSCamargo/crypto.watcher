@@ -1,6 +1,8 @@
-import { randomBytes } from 'node:crypto'
+import { randomBytes, randomInt } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { isAddress, verifyMessage } from 'viem'
+import { config } from '../../core/config'
+import { mailService } from '../../core/mail/mail.service'
 import { normalizeAddress } from '../../shared/address'
 import { mapUser, usersService } from '../users/users.service'
 import { authRepository } from './auth.repository'
@@ -10,8 +12,13 @@ const BCRYPT_ROUNDS = 10
 const WALLET_NONCE_TTL_MS = 10 * 60 * 1000
 const EMAIL_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
+const OTP_TTL_MS = 10 * 60 * 1000
+const RESET_EMAIL_EXPIRES_MINUTES = 30
+const OTP_EMAIL_EXPIRES_MINUTES = 10
 
 export const sessionCookieName = SESSION_COOKIE
+
+export const generateOtpCode = () => randomInt(100_000, 1_000_000).toString()
 
 export const buildSignInMessage = (address: string, nonce: string): string =>
   [
@@ -35,6 +42,7 @@ const sessionUserFromRow = (session: {
   avatar_url: string | null
   bio: string | null
   role: 'user' | 'team' | 'admin'
+  email_verified_at: Date | null
   created_at: Date
   updated_at: Date | null
 }) =>
@@ -49,9 +57,35 @@ const sessionUserFromRow = (session: {
     avatar_url: session.avatar_url,
     bio: session.bio,
     role: session.role,
+    email_verified_at: session.email_verified_at,
     created_at: session.created_at,
     updated_at: session.updated_at,
   })
+
+const issueOtpForUser = async (
+  userId: string,
+  email: string,
+  purpose: 'verify_email' | 'password_reset',
+) => {
+  await authRepository.revokeUserOtpTokens(userId, purpose)
+  const code = generateOtpCode()
+  await authRepository.createSession({
+    userId,
+    sessionType: 'otp',
+    nonce: code,
+    otpPurpose: purpose,
+    expiresAt: new Date(Date.now() + OTP_TTL_MS),
+  })
+
+  await mailService.sendOtpEmail({
+    to: email,
+    code,
+    purpose,
+    expiresMinutes: OTP_EMAIL_EXPIRES_MINUTES,
+  })
+
+  return code
+}
 
 export const authService = {
   async createNonce(address: string) {
@@ -111,6 +145,8 @@ export const authService = {
       expiresAt: new Date(Date.now() + EMAIL_SESSION_TTL_MS),
     })
 
+    await issueOtpForUser(user.id, user.email!, 'verify_email').catch(() => undefined)
+
     return { sessionId: session.id, user }
   },
 
@@ -157,8 +193,14 @@ export const authService = {
       expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
     })
 
-    // No email infra yet: surface the token in non-production so the flow is testable.
-    const token_ = process.env.NODE_ENV === 'production' ? undefined : token
+    const resetUrl = `${config.webUrl}/auth/reset-password?token=${token}`
+    await mailService.sendPasswordResetEmail({
+      to: userRow.email!,
+      resetUrl,
+      expiresMinutes: RESET_EMAIL_EXPIRES_MINUTES,
+    })
+
+    const token_ = config.env === 'production' ? undefined : token
     return { ok: true as const, token: token_ }
   },
 
@@ -182,4 +224,52 @@ export const authService = {
   },
 
   revokeSession: authRepository.revokeSession,
+
+  async sendEmailVerificationOtp(email: string) {
+    const userRow = await usersService.getRowByEmail(email.toLowerCase())
+    if (!userRow?.email) return { ok: true as const }
+
+    const code = await issueOtpForUser(userRow.id, userRow.email, 'verify_email')
+    const code_ = config.env === 'production' ? undefined : code
+    return { ok: true as const, code: code_ }
+  },
+
+  async verifyEmailOtp(input: { email: string; code: string }) {
+    const otp = await authRepository.getActiveOtpForEmail(
+      input.email.toLowerCase(),
+      input.code,
+      'verify_email',
+    )
+    if (!otp) return undefined
+
+    const user = await usersService.markEmailVerified(otp.user_id)
+    if (!user) return undefined
+
+    await authRepository.revokeUserOtpTokens(otp.user_id, 'verify_email')
+    return { ok: true as const, user }
+  },
+
+  async sendPasswordResetOtp(email: string) {
+    const userRow = await usersService.getRowByEmail(email.toLowerCase())
+    if (!userRow?.password_hash || !userRow.email) return { ok: true as const }
+
+    const code = await issueOtpForUser(userRow.id, userRow.email, 'password_reset')
+    const code_ = config.env === 'production' ? undefined : code
+    return { ok: true as const, code: code_ }
+  },
+
+  async resetPasswordWithOtp(input: { email: string; code: string; password: string }) {
+    const otp = await authRepository.getActiveOtpForEmail(
+      input.email.toLowerCase(),
+      input.code,
+      'password_reset',
+    )
+    if (!otp) return undefined
+
+    const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS)
+    await usersService.updatePassword(otp.user_id, passwordHash)
+    await authRepository.revokeUserOtpTokens(otp.user_id, 'password_reset')
+    await authRepository.revokeUserResetTokens(otp.user_id)
+    return { ok: true as const }
+  },
 }

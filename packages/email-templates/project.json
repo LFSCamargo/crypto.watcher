@@ -1,0 +1,20 @@
+{
+  "name": "email-templates",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/email-templates/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "command": "tsc --project tsconfig.build.json",
+      "options": { "cwd": "packages/email-templates" }
+    },
+    "test": { "command": "vitest run", "options": { "cwd": "packages/email-templates" } },
+    "lint": { "command": "eslint src", "options": { "cwd": "packages/email-templates" } },
+    "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "packages/email-templates" } },
+    "dev": {
+      "command": "email dev --dir src/emails --port 3030",
+      "options": { "cwd": "packages/email-templates" },
+      "continuous": true
+    }
+  }
+}

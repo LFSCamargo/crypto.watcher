@@ -6,31 +6,34 @@ alwaysApply: true
 # Crypto Watcher — Project Overview
 
 Crypto Watcher is a risk-analysis tool for crypto assets/projects/protocols. It
-helps users decide whether a project is worth investing in, based on its risk and
-potential rewards. Source of truth: [README.md](../../README.md).
+helps users decide whether a project is worth investing in, based on expert review,
+transparent methodology and evidence. Source of truth: [README.md](../../README.md).
 
 ## Purpose
 
-- Analyze projects by their risk and potential rewards.
+- Analyze projects by their risk and potential rewards using vetted expert reviewers.
 - Protect users from investing in projects that aren't worth it.
-- Surface a community-driven score so users make informed decisions.
+- Surface an **expert-reviewed** score so users make informed decisions.
 
 ## Core mechanics
 
-- **Reputation-weighted voting.** Only trustworthy users may vote; the more
-  trustworthy a user, the more voting power they hold. Voters are rewarded with
-  tokens for participating.
-- **Governance token** distributed to users; powers protocol governance (a launch
-  requirement, present from MVP).
-- **Per-project smart contract.** Each project gets its own on-chain voting
-  contract that users interact with.
-- **Public off-chain comments.** While voting is closed, anyone can comment;
-  comments are public and used to help analyze the project.
+- **Governor council reviews.** Only platform-selected, vetted reviewers (governors/
+  admins) may publish official risk scores and structured reports.
+- **Expertise, not popularity.** Review authority requires demonstrated knowledge in
+  areas such as smart contract security, protocol design, tokenomics, compliance,
+  infrastructure and on-chain analysis.
+- **Public participation without score influence.** Users consume reports, view
+  ratings, submit evidence, report incidents and discuss — but do **not** influence
+  the final score through tokens or public voting.
+- **Governance token for protocol governance only.** CWT governs reviewer selection,
+  methodology, accountability and transparency — not vote-to-rate on projects.
+- **Per-project on-chain record.** Each reviewed project can anchor published outcomes
+  on-chain for auditability.
+- **Public off-chain comments and evidence.** Open discussion feeds governor analysis.
 
 ## Project lifecycle
 
-`Deploy contract → In analysis by team → Ready for voting → Voting starts →
-Voting ends → Project analyzed → Score calculated → Score shown to users`
+`Review requested → In analysis → Governor review → Report published → Score shown to users`
 
 ## Where to look next
 

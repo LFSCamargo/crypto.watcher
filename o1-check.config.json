@@ -1,0 +1,7 @@
+{
+  "ignore": ["node_modules", "dist", "build", ".next", "coverage", "__tests__", "migrations"],
+  "failBelow": 50,
+  "rules": {
+    "disabled": ["db.offset-pagination", "db.select-all"]
+  }
+}

@@ -61,7 +61,7 @@ export function ProjectCard({ project }: { project: Project }) {
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full bg-gradient-to-r from-primary to-yellow-400 transition-all"
+                      className="h-full bg-gradient-to-r from-primary to-amber-500 transition-all"
                       style={{ width: `${Math.min(100, Math.max(0, project.score))}%` }}
                     />
                   </div>

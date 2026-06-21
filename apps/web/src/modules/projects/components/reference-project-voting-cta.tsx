@@ -1,49 +1,30 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { Link } from 'react-router-dom'
-import { useAccount } from 'wagmi'
+import { RiAddLine } from '@remixicon/react'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '../../../components/ui'
 
 /**
- * Wallet-gated voting call to action for reference projects.
+ * Encourages users to request expert review or submit evidence — not public score voting.
  */
 export function ReferenceProjectVotingCTA({ slug }: { slug: string }) {
-  const { isConnected } = useAccount()
-
   return (
     <Card className="border-primary/20 bg-card/80">
       <CardHeader>
-        <CardTitle className="text-base">Security auditor voting</CardTitle>
+        <CardTitle className="text-base">Contribute to the review</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isConnected ? (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Your wallet is connected. Open the project voting workflow to submit your
-              auditor vote and on-chain rationale.
-            </p>
-            <Button asChild className="w-full">
-              <Link to={`/app/projects/${slug}/vote`}>Open auditor voting</Link>
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              If this reference asset is not yet onboarded as a tracked project, create it
-              in the admin flow first.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Connect your wallet to view the voting section and participate as a security
-              auditor.
-            </p>
-            <ConnectButton.Custom>
-              {({ openConnectModal }) => (
-                <Button type="button" className="w-full" onClick={openConnectModal}>
-                  Connect your wallet
-                </Button>
-              )}
-            </ConnectButton.Custom>
-          </>
-        )}
+        <p className="text-sm text-muted-foreground">
+          Official scores are published by our expert governor council. You can request a
+          formal review or browse on-chain projects to submit evidence and comments.
+        </p>
+        <Button asChild className="w-full gap-2 rounded-full">
+          <Link to="/app/analysis-request">
+            <RiAddLine className="h-4 w-4" />
+            Request a review
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full rounded-full">
+          <Link to={`/app/reference/${slug}`}>View expert report</Link>
+        </Button>
       </CardContent>
     </Card>
   )

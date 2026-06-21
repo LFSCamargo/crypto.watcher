@@ -1,10 +1,15 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { RiArrowRightUpLine, RiShieldCheckLine } from '@remixicon/react'
 import { motion } from 'framer-motion'
 import type { CuratedProject } from '../lib/curated-projects'
 import { projectCategories } from '../lib/curated-projects'
-import { Badge, Card } from '../../../components/ui'
+import { Badge, Skeleton } from '../../../components/ui'
 import { ProjectIcon } from '../../../components/brand/project-icon'
+import { useMarketPrice } from '../../market/hooks/use-market-price'
+import { changeTone, formatPercentChange, formatUsd } from '../../market/lib/format-price'
+import { MiniSparkline } from '../../market/components/mini-sparkline'
+import { PriceChart } from '../../market/components/price-chart'
 
 function scoreTone(score: number) {
   if (score >= 85) return 'success' as const
@@ -12,60 +17,211 @@ function scoreTone(score: number) {
   return 'destructive' as const
 }
 
+function statusLabel(status: CuratedProject['status']) {
+  switch (status) {
+    case 'safe':
+      return 'Reviewed safe'
+    case 'reference':
+      return 'Reference'
+    case 'watch':
+      return 'Under watch'
+  }
+}
+
+function statusVariant(status: CuratedProject['status']) {
+  switch (status) {
+    case 'safe':
+      return 'success' as const
+    case 'reference':
+      return 'secondary' as const
+    case 'watch':
+      return 'warning' as const
+  }
+}
+
+function MarketChangeChip({
+  label,
+  value,
+}: {
+  label: string
+  value: number | null | undefined
+}) {
+  const tone = changeTone(value ?? null)
+
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/20 px-2.5 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`mt-0.5 text-xs font-bold tabular-nums ${
+          tone === 'positive'
+            ? 'text-success'
+            : tone === 'negative'
+              ? 'text-destructive'
+              : 'text-muted-foreground'
+        }`}
+      >
+        {formatPercentChange(value ?? null)}
+      </p>
+    </div>
+  )
+}
+
 export function CuratedProjectCard({
   index,
   project,
+  richChart = false,
 }: {
   index: number
   project: CuratedProject
+  /** Use the full interactive PriceChart (good for landing hero with few cards). Default is cheap mini sparkline for dense grids. */
+  richChart?: boolean
 }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Only fetch market data (and thus render any chart) when the card is near the viewport.
+  // This prevents firing 50-100 simultaneous CoinGecko calls when loading /app.
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry?.isIntersecting) {
+          setIsVisible(true)
+          // Once visible, we can stop observing to save work
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }, // prefetch a bit before it scrolls into view
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const { data, isLoading } = useMarketPrice(isVisible ? project.slug : undefined)
   const tone = scoreTone(project.score)
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.025, 0.25) }}
     >
-      <Link className="group block h-full" to={`/app/reference/${project.slug}`}>
-        <Card className="card-hover flex h-full flex-col p-5">
+      <Link
+        to={`/app/reference/${project.slug}`}
+        className="group card-hover flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card"
+      >
+        <div className="flex flex-1 flex-col gap-3 p-4 pb-3">
           <div className="flex items-start gap-3">
             <ProjectIcon
               symbol={project.symbol}
               name={project.name}
               slug={project.slug}
-              className="h-12 w-12 shrink-0"
-              textClassName="text-xs"
+              className="h-11 w-11 shrink-0"
+              textClassName="text-[10px]"
             />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-base font-bold leading-tight">{project.name}</p>
-              <p className="truncate text-xs font-medium text-muted-foreground">
-                {project.symbol} · {projectCategories[project.category]}
-              </p>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate font-bold leading-tight">{project.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {project.symbol} · Rank #{project.rank}
+                  </p>
+                </div>
+                <Badge
+                  variant={tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'destructive'}
+                  className="shrink-0 rounded-full"
+                >
+                  {project.score}%
+                </Badge>
+              </div>
             </div>
-            <Badge
-              variant={tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'destructive'}
-              className="shrink-0"
-            >
-              {project.score}%
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            <Badge variant="secondary" className="rounded-full text-[10px]">
+              {projectCategories[project.category]}
+            </Badge>
+            <Badge variant="outline" className="rounded-full text-[10px]">
+              {project.network}
+            </Badge>
+            <Badge variant={statusVariant(project.status)} className="rounded-full text-[10px]">
+              {statusLabel(project.status)}
             </Badge>
           </div>
 
-          <p className="mt-3 line-clamp-2 flex-1 text-sm text-muted-foreground">
+          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {project.description}
           </p>
 
-          <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <RiShieldCheckLine className="h-4 w-4 text-primary" />
-              {project.network}
+          <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-24 rounded-md" />
+                <div className="grid grid-cols-4 gap-2">
+                  <Skeleton className="h-12 rounded-lg" />
+                  <Skeleton className="h-12 rounded-lg" />
+                  <Skeleton className="h-12 rounded-lg" />
+                  <Skeleton className="h-12 rounded-lg" />
+                </div>
+              </div>
+            ) : data ? (
+              <>
+                <div className="mb-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Price
+                  </p>
+                  <p className="text-lg font-bold tabular-nums">{formatUsd(data.price)}</p>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  <MarketChangeChip label="24h" value={data.change24h} />
+                  <MarketChangeChip label="7d" value={data.change7d} />
+                  <MarketChangeChip label="1m" value={data.change1m} />
+                  <MarketChangeChip label="1y" value={data.change1y} />
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Live price data unavailable{isLoading ? '…' : ' (may be rate limited or not indexed)'}
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <RiShieldCheckLine className="h-3.5 w-3.5 text-primary" />
+              Expert safety review
             </span>
             <span className="flex items-center gap-1 font-semibold text-foreground/70 transition-colors group-hover:text-foreground">
-              Details
-              <RiArrowRightUpLine className="h-4 w-4" />
+              View review
+              <RiArrowRightUpLine className="h-3.5 w-3.5" />
             </span>
           </div>
-        </Card>
+        </div>
+
+        {data ? (
+          richChart ? (
+            <PriceChart
+              history={data.history}
+              variant="compact"
+              className="border-t border-border/60"
+              defaultRange="1y"
+              showRangeSelector={false}
+            />
+          ) : (
+            <div className="border-t border-border/60 bg-muted/5 px-3 py-1.5">
+              <MiniSparkline history={data.history} maxPoints={40} />
+            </div>
+          )
+        ) : isLoading ? (
+          <Skeleton className="h-10 w-full rounded-none" />
+        ) : null}
       </Link>
     </motion.div>
   )

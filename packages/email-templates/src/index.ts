@@ -1,0 +1,6 @@
+export type { OtpPurpose, OtpEmailCopy } from './otp-copy'
+export { getOtpEmailCopy } from './otp-copy'
+export type { OtpEmailProps } from './templates/otp-email'
+export type { PasswordResetEmailProps } from './templates/password-reset-email'
+export { renderOtpEmail, type RenderedEmail } from './render-otp-email'
+export { renderPasswordResetEmail } from './render-password-reset-email'

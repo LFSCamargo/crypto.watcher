@@ -1,4 +1,5 @@
 import { db } from '../../core/db'
+import { COMMENT_LIST_LIMIT } from '../../core/db/query-limits'
 
 export const commentsRepository = {
   async listByProject(projectId: string) {
@@ -8,6 +9,7 @@ export const commentsRepository = {
       .where('project_id', '=', projectId)
       .where('deleted_at', 'is', null)
       .orderBy('created_at', 'desc')
+      .limit(COMMENT_LIST_LIMIT)
       .execute()
   },
 

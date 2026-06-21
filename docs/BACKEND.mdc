@@ -17,6 +17,11 @@ Vitest + Supertest, Docker, Pino + Pino-pretty, and OpenAPI docs generated from
 Zod schemas via `@asteasolutions/zod-to-openapi` with Swagger UI. Monorepo via Nx
 + pnpm.
 
+> **Product model:** Official risk scores are published by vetted governors/admins only.
+> Regular users submit evidence, report incidents and discuss — but do not influence
+> the final score via tokens or public voting. Legacy `voting/` and reputation-weighted
+> score paths remain from an earlier design and are being refactored.
+
 ## Modular Folder Structure
 
 The API is organized into self-contained modules. Each module owns its routes,
@@ -24,6 +29,15 @@ service, repository (Kysely), Zod schemas and tests. Shared concerns live under
 `core/` and `shared/`.
 
 ```
+packages/
+└── email-templates/               # React Email transactional templates [MVP]
+    ├── src/
+    │   ├── components/            # shared layout
+    │   ├── emails/                # preview entrypoints (`pnpm email:dev`)
+    │   ├── templates/             # otp-email, password-reset-email
+    │   └── __tests__/
+    └── package.json
+
 apps/
 └── api/
     ├── src/
@@ -34,6 +48,7 @@ apps/
     │   │   │   ├── migrations/
     │   │   │   └── schema.ts
     │   │   ├── config/              # env loading + validation
+    │   │   ├── mail/                # Nodemailer transport + send helpers [MVP]
     │   │   ├── logger/              # Pino + pino-pretty
     │   │   ├── auth/                # SIWE/session auth middleware  [MVP]
     │   │   ├── http/                # validation + error handling   [MVP]
@@ -47,30 +62,27 @@ apps/
     │   │   └── errors/              # error types + handler
     │   ├── modules/                 # Feature modules
     │   │   ├── projects/            # Project catalog + lifecycle   [MVP]
-    │   │   │   ├── projects.routes.ts
-    │   │   │   ├── projects.service.ts
-    │   │   │   ├── projects.repository.ts
-    │   │   │   ├── projects.schema.ts   # Zod + OpenAPI
-    │   │   │   └── projects.test.ts
+    │   │   │   ├── handlers/
+    │   │   │   ├── schemas/
+    │   │   │   └── __tests__/         # Vitest tests (never co-located)
     │   │   ├── comments/            # Off-chain public comments     [MVP]
     │   │   ├── auth/                # Wallet + email auth, sessions [MVP]
     │   │   ├── users/              # Accounts + profiles           [MVP]
     │   │   ├── analysis-requests/  # Paid analysis queue           [MVP]
-    │   │   ├── voting/             # Vote orchestration/indexing   [MVP]
-    │   │   ├── scoring/            # Score computation/read         [MVP]
+    │   │   ├── voting/             # Legacy vote index; migrating to reviews [MVP]
+    │   │   ├── scoring/            # Governor-published score read API    [MVP]
     │   │   ├── market/             # Cached USD price history       [MVP]
     │   │   │   ├── market.routes.ts
     │   │   │   ├── market.service.ts
     │   │   │   ├── market.repository.ts
     │   │   │   ├── market.schema.ts
-    │   │   │   └── market.service.test.ts
+    │   │   │   └── __tests__/         # market.service.test.ts, etc.
     │   │   ├── governance/        # Governance proposals/events    [MVP]
-    │   │   ├── reputation/        # Reputation read/compute         [MVP→Phase 1]
-    │   │   ├── rewards/           # Reward accounting               [Phase 1]
+    │   │   ├── reputation/        # Reviewer credentials / council    [MVP→Phase 1]
+    │   │   ├── rewards/           # Reviewer compensation             [Phase 1]
     │   │   ├── notifications/     # In-app + email notifications    [Phase 1]
     │   │   └── webhooks/          # Outbound webhooks               [Phase 3]
     │   ├── shared/                # Shared utils, types, guards
-    │   └── emails/                # React Email templates           [MVP]
     ├── test/                      # integration/e2e (Vitest + Supertest)
     ├── Dockerfile
     └── package.json
@@ -83,8 +95,8 @@ apps/
 
 ### projects `[MVP]`
 - CRUD + lifecycle state machine matching the README flow
-  (`In analysis → Ready → Voting → Closed → Analyzed`).
-- Read project score for display.
+  (`In analysis → Under review → Report published`).
+- Read expert-published project score for display.
 - Community submission queue. `[Phase 2]`
 
 ### comments `[MVP]`
@@ -93,6 +105,7 @@ apps/
 ### auth + users `[MVP]`
 - Wallet connect + SIWE-style verification, session issuance.
 - Email/password registration and login with bcrypt-hashed passwords.
+- Email verification and password-reset OTP emails via `packages/email-templates` + `core/mail` (Nodemailer/MailHog).
 - Link wallet public key to email account.
 - Profile management (nickname, X account, avatar, bio).
 - Role-based access control + admin console. `[Phase 2]`
@@ -101,14 +114,15 @@ apps/
 - Authenticated users submit projects for team analysis.
 - Public listing with status filter; team/admin review workflow.
 
-### voting `[MVP]`
-- Index/track on-chain votes from per-project contracts (via `core/chain`).
-- Eligibility checks surfaced from the reputation module.
+### voting `[MVP]` (legacy — migrating to governor reviews)
+- Index on-chain review registry events from per-project contracts (via `core/chain`).
+- Legacy public vote tallies retained until refactor completes.
 - Subgraph/indexer ingestion replacing direct RPC reads. `[Phase 2]`
 
 ### scoring `[MVP]`
-- Compute/serve project scores from on-chain tallies + reputation weight.
-- Enrich with external risk-data providers. `[Phase 3]`
+- Serve governor-published project scores and structured report breakdown.
+- Scores immutable per review round; methodology version referenced.
+- Enrich with external risk-data providers to assist governors. `[Phase 3]`
 
 ### market `[MVP]`
 - `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
@@ -123,11 +137,11 @@ apps/
 - Full DAO/treasury data surfaces. `[Final]`
 
 ### reputation `[MVP → Phase 1]`
-- Serve eligibility + basic weight. `[MVP]`
-- Multi-factor computation + decay jobs. `[Phase 1]`
+- Serve governor/reviewer credentials + council accountability metrics. `[MVP]`
+- Multi-factor reviewer reputation + decay jobs. `[Phase 1]`
 
 ### rewards `[Phase 1]`
-- Reward accounting and slashing records, synced with on-chain distributor.
+- Reviewer compensation and misconduct penalty records, synced with on-chain distributor.
 
 ### notifications `[Phase 1]`
 - In-app + email (React Email/Nodemailer) for lifecycle + governance events.
@@ -145,7 +159,7 @@ apps/
 ### projects `[MVP]`
 - R1: Team can create/update a project and transition its lifecycle state.
 - R2: Anyone can list/read projects, filter by state/chain, paginate.
-- R3: Each project exposes a computed score once `Analyzed`.
+- R3: Each project exposes an expert-published score once `Report published`.
 - R4: Community submission queue with team review. `[Phase 2]`
 
 ### comments `[MVP]`
@@ -166,15 +180,15 @@ apps/
 - R2: Anyone can list requests filtered by status.
 - R3: Team/admin can update status and add review notes.
 
-### voting `[MVP]`
-- R1: Only reputation-eligible wallets may vote (enforced on-chain, mirrored off-chain).
-- R2: Backend indexes on-chain votes per project and serves tallies.
-- R3: Vote weight reflects reputation. `[MVP]` Tiered weights `[Phase 1]`.
+### voting `[MVP]` (legacy)
+- R1: Legacy public vote index retained for migration; new work uses governor-only scoring.
+- R2: Backend indexes on-chain registry events per project.
+- R3: Public users cannot publish or amend official scores. `[MVP]`
 
 ### scoring `[MVP]`
-- R1: Compute score from on-chain tally + reputation weight once voting closes.
-- R2: Score is immutable per voting round and versioned.
-- R3: Enrich with external risk signals. `[Phase 3]`
+- R1: Serve governor-published score + breakdown once review is complete.
+- R2: Score is immutable per review round and methodology version.
+- R3: Enrich with external risk signals for governor analysis. `[Phase 3]`
 
 ### governance `[MVP]` — launch requirement
 - R1: Index governance proposals, votes and outcomes from the Governor.
@@ -182,11 +196,11 @@ apps/
 - R3: Emit notifications on governance lifecycle events. `[Phase 1]`
 
 ### reputation `[MVP → Phase 1]`
-- R1: Serve eligibility + weight for a wallet. `[MVP]`
-- R2: Recompute multi-factor reputation on a schedule. `[Phase 1]`
+- R1: Serve reviewer credentials + council membership for governors. `[MVP]`
+- R2: Recompute multi-factor reviewer accountability on a schedule. `[Phase 1]`
 
 ### rewards `[Phase 1]` / notifications `[Phase 1]`
-- R1: Record reward/slashing events synced with on-chain distributor.
+- R1: Record reviewer compensation / misconduct events synced with on-chain distributor.
 - R2: Deliver in-app + email notifications for lifecycle/governance events.
 
 ## SQL Data Modeling (PostgreSQL via Kysely)
@@ -210,14 +224,16 @@ apps/
 | avatar_url | text | |
 | bio | text | |
 | role | text not null default 'user' | `user` \| `team` \| `admin` `[Phase 2]` |
+| email_verified_at | timestamptz | nullable; set after OTP email verification |
 
 ### `sessions` `[MVP]`
 | column | type | notes |
 | --- | --- | --- |
 | id | uuid pk | |
 | user_id | uuid fk → users(id) on delete cascade | |
-| session_type | text not null default 'wallet' | `wallet` \| `email` |
-| nonce | text | SIWE nonce; null for email sessions |
+| session_type | text not null default 'wallet' | `wallet` \| `email` \| `reset` \| `otp` |
+| nonce | text | SIWE nonce, reset token, or OTP code |
+| otp_purpose | text | `verify_email` \| `password_reset` when `session_type='otp'` |
 | expires_at | timestamptz not null | |
 | revoked_at | timestamptz | nullable |
 
@@ -243,7 +259,7 @@ apps/
 | description | text | |
 | chain_id | integer not null | |
 | token_address | text | nullable |
-| state | text not null default 'in_analysis' | `in_analysis` \| `ready` \| `voting` \| `closed` \| `analyzed` |
+| state | text not null default 'in_analysis' | `in_analysis` \| `under_review` \| `report_published` (legacy: `ready` \| `voting` \| `closed` \| `analyzed`) |
 | voting_contract_address | text | set when deployed |
 | submitted_by | uuid fk → users(id) | nullable `[Phase 2]` |
 
@@ -261,7 +277,7 @@ Index: `projects(state)`, `projects(chain_id)`.
 
 Index: `comments(project_id, created_at desc)`.
 
-### `votes` `[MVP]` (off-chain index of on-chain votes)
+### `votes` `[MVP]` (legacy — public vote index; being removed)
 | column | type | notes |
 | --- | --- | --- |
 | id | uuid pk | |
@@ -285,12 +301,12 @@ Index: unique `(project_id, voter_address, round)`; `votes(project_id)`.
 
 Unique: `(project_id, round)`.
 
-### `reputation` `[MVP → Phase 1]`
+### `reputation` `[MVP → Phase 1]` (reviewer credentials)
 | column | type | notes |
 | --- | --- | --- |
 | wallet_address | text pk | lowercase |
-| eligible | boolean not null default false | gating `[MVP]` |
-| weight | numeric not null default 0 | |
+| eligible | boolean not null default false | governor council membership `[MVP]` |
+| weight | numeric not null default 0 | reviewer accountability weight |
 | factors | jsonb | multi-factor inputs `[Phase 1]` |
 
 ### `governance_proposals` `[MVP]`
@@ -335,8 +351,12 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 - `POST /auth/register` → email/password registration, set session cookie.
 - `POST /auth/login` → email/password login, set session cookie.
 - `POST /auth/link-public-key` 🔒 → link wallet address to account.
-- `POST /auth/forgot-password` → issue a reset token (reuses `sessions` with `session_type='reset'`); always 200 to avoid email enumeration. Returns the token in non-production until email infra ships.
+- `POST /auth/forgot-password` → issue a reset token and email a reset link (`PasswordResetEmail` template); always 200 to avoid email enumeration. Returns the token in non-production for local testing.
+- `POST /auth/forgot-password-otp` → email a 6-digit password-reset OTP; always 200.
 - `POST /auth/reset-password` → consume a valid reset token, set the new password hash, revoke outstanding reset tokens.
+- `POST /auth/reset-password-otp` → consume a valid password-reset OTP.
+- `POST /auth/verify-email-otp` → verify a 6-digit email verification OTP and set `users.email_verified_at`.
+- `POST /auth/resend-email-otp` → resend the email verification OTP.
 - `POST /auth/logout` 🔒 → revoke session.
 - `GET  /auth/me` 🔒 → current user.
 
@@ -363,9 +383,9 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 - `POST   /projects/:id/comments` 🔒 → create.
 - `DELETE /comments/:id` 🔒 → soft-delete own.
 
-### voting `[MVP]`
-- `GET /projects/:id/votes` → tally + per-choice weights.
-- `GET /projects/:id/votes/eligibility?address=` → eligibility for a wallet.
+### voting `[MVP]` (legacy)
+- `GET /projects/:id/votes` → legacy public vote tally (deprecated).
+- `GET /projects/:id/votes/eligibility?address=` → legacy eligibility (deprecated).
 
 ### scoring `[MVP]`
 - `GET /projects/:id/score` → current score + breakdown.
@@ -376,7 +396,7 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 - `GET /governance/proposals/:onchainId` → detail + votes.
 
 ### reputation `[MVP → Phase 1]`
-- `GET /reputation/:address` → eligibility + weight (+ factors `[Phase 1]`).
+- `GET /reputation/:address` → reviewer credentials (+ factors `[Phase 1]`).
 
 ### rewards / notifications `[Phase 1]`
 - `GET /rewards/:address`, `GET /notifications` 🔒, `POST /notifications/:id/read` 🔒.
@@ -394,7 +414,7 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 ```ts
 // modules/projects/projects.schema.ts  [MVP]
 export const ProjectStateSchema = z
-  .enum(['in_analysis', 'ready', 'voting', 'closed', 'analyzed'])
+  .enum(['in_analysis', 'under_review', 'report_published'])
   .openapi('ProjectState')
 
 export const ProjectSchema = z.object({
@@ -457,7 +477,7 @@ export const ProposalSchema = z.object({
 ## Conventions
 
 - One module = one folder under `modules/`, with `*.routes.ts`, `*.service.ts`,
-  `*.repository.ts`, `*.schema.ts` (Zod) and `*.test.ts`.
+  `*.repository.ts`, `schemas/` (Zod) and `__tests__/*.test.ts`.
 - All request/response shapes validated with Zod; schemas feed OpenAPI.
 - DB access only through Kysely repositories; migrations live in `core/db/migrations`.
 - On-chain reads only through `core/chain` (Viem); never read RPC from a module directly.

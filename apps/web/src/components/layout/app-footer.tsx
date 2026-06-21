@@ -15,6 +15,7 @@ const productLinks = [
 ]
 
 const resourceLinks = [
+  { to: '/blog', label: 'Blog' },
   { to: '/docs', label: 'Documentation' },
   { to: '/docs/whitepaper', label: 'Whitepaper' },
   { to: '/docs/governance', label: 'Governance' },
@@ -98,8 +99,8 @@ export function AppFooter() {
                 <div>
                   <p className="text-lg font-bold">Need a project reviewed?</p>
                   <p className="mt-1 max-w-lg text-sm text-background/70">
-                    Deploy a voting contract and pay protocol fees to request an
-                    official risk analysis from our authority panel.
+                    Pay the review fee to request an official risk analysis from our
+                    expert governor council.
                   </p>
                 </div>
               </div>

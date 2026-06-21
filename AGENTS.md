@@ -4,8 +4,9 @@ Context and operating rules for AI agents (and humans) working in this repo.
 
 ## What this project is
 
-Crypto Watcher is a reputation-weighted, on-chain risk-analysis tool for crypto
-projects. Read these first — they are the source of truth:
+Crypto Watcher is an expert-governed, on-chain risk-analysis tool for crypto
+projects. Reviews and official scores are published by a vetted governor council —
+not by token-weighted public voting. Read these first — they are the source of truth:
 
 - Product overview: [README.md](./README.md)
 - Roadmap & phases (`MVP → Final`): [docs/ROADMAP.mdc](./docs/ROADMAP.mdc)
@@ -19,6 +20,8 @@ projects. Read these first — they are the source of truth:
 apps/
   api/        # Express + Zod + Kysely (PostgreSQL)
   web/        # Vite + React + TS + Tailwind + Shadcn/UI
+packages/
+  o1-check/   # CLI complexity & performance risk checker
 contracts/    # Solidity + Foundry
 docs/         # Design docs (source of truth)
 .cursor/rules # Repo rules enforced by the agent
@@ -32,8 +35,9 @@ docs/         # Design docs (source of truth)
    `[Phase 2]`, `[Phase 3]`, `[Final]`) accurate.
 2. **Test-driven.** Write/extend tests before or alongside code; no feature lands
    without tests (see `.cursor/rules/test-driven.mdc`).
-3. **Quality gates must pass.** Lint, typecheck, tests and build must be green
-   before a change is considered done (see `.cursor/rules/quality-gating.mdc`).
+3. **Quality gates must pass.** Lint, typecheck, tests, build, and spaghetti layout
+   check must be green before a change is considered done (see
+   `.cursor/rules/quality-gating.mdc` and `.cursor/rules/spaghetti-checker.mdc`).
 4. **Modular by feature.** One feature = one folder, owning its routes/components,
    service, repository, schema and tests. Never import another module's internals;
    go through its public surface (service/UI/lib).
@@ -42,17 +46,38 @@ docs/         # Design docs (source of truth)
 ## Common commands
 
 ```bash
-pnpm install                # install all workspaces
+pnpm install                # install all workspaces (Node 22.13 — run `nvm use` first)
 pnpm run dev                # run web + api in parallel (nx)
 pnpm run lint               # eslint across the monorepo
+pnpm run check:spaghetti    # module layout (handlers, schemas, pages, __tests__)
+pnpm run o1-check -- apps/api/src --config o1-check.config.json  # complexity/performance risk scan
 pnpm run typecheck          # tsc --noEmit across packages
 pnpm run test               # unit/integration tests
 pnpm run build              # build all apps
+pnpm run lighthouse:web
+pnpm run email:dev          # React Email preview at http://localhost:3030     # Lighthouse audits on production preview (apps/web)
 
 # contracts (run inside contracts/)
 forge build
 forge test
 ```
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` runs on every pull request and push to `main`. PR checks
+always validate `apps/*` and `packages/*`:
+
+| Job | Scope | Gates |
+|-----|-------|-------|
+| `Spaghetti detector` | `apps/api`, `apps/web` modules | `check:spaghetti` |
+| `packages/o1-check` | `packages/o1-check` | lint, typecheck, test (coverage), build |
+| `packages/email-templates` | `packages/email-templates` | lint, typecheck, test, build |
+| `apps/api` | `apps/api` | lint, typecheck, test (coverage), build, `o1-check:api` |
+| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web`, Lighthouse |
+| `contracts` | `contracts/` | `forge build`, `forge test` (push to `main` only) |
+
+Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run on
+`main` pushes and weekly schedule in `.github/workflows/security.yml` (not on PRs).
 
 ## Conventions
 

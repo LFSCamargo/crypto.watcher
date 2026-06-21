@@ -1,0 +1,37 @@
+{
+  "name": "email-templates",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "React Email templates for Crypto Watcher transactional mail",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "dev": "email dev --dir src/emails --port 3030",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.0.31",
+    "@react-email/render": "^1.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@react-email/ui": "^6.6.3",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "react-email": "^6.6.3",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

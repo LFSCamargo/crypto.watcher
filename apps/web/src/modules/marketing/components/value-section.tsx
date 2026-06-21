@@ -30,9 +30,9 @@ export function ValueSection() {
     <section className="border-t border-border bg-card/40">
       <div className="container-wide section-padding">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="heading-2 mb-3">Check before you invest</h2>
+          <h2 className="heading-2 mb-3">Simple to use, serious underneath</h2>
           <p className="body-large">
-            Three simple steps between you and a safer crypto decision.
+            You don’t need to be an expert to benefit from expert reviews. Here’s how most people use Crypto Watcher.
           </p>
         </div>
 

@@ -37,6 +37,7 @@ cp apps/web/.env.example apps/web/.env
 docker compose up -d postgres mailhog   # Postgres (5432) + MailHog (1025/8025)
 pnpm --filter api run db:migrate         # run DB migrations
 pnpm run dev                             # web (5173) + api (3000) in parallel
+pnpm --filter web icons:sync             # fetch curated coin logos (first time / after catalog changes)
 ```
 
 - Web: <http://localhost:5173>
@@ -156,6 +157,21 @@ ProtocolSettings:     0x...
 
 > The deploy is idempotent in the sense that addresses are saved to the JSON file;
 > only re-run `pnpm run deploy:testnet` when you actually want to redeploy.
+
+---
+
+## Quality checks
+
+```bash
+pnpm run lint
+pnpm run typecheck
+pnpm run test
+pnpm run check:spaghetti   # module layout (handlers, pages, __tests__)
+pnpm run o1-check:api      # API complexity / DB risk scan (fail below 50)
+pnpm run o1-check:web      # Web UI scan (docs content excluded)
+```
+
+See `packages/o1-check/README.md` and root `o1-check.config.json` / `o1-check.web.config.json`.
 
 ---
 

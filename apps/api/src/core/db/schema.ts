@@ -10,7 +10,8 @@ export type GovernanceProposalState =
   | 'defeated'
   | 'executed'
 export type RewardType = 'reward' | 'slash'
-export type SessionType = 'wallet' | 'email' | 'reset'
+export type SessionType = 'wallet' | 'email' | 'reset' | 'otp'
+export type OtpPurpose = 'verify_email' | 'password_reset'
 export type AnalysisRequestStatus =
   | 'pending'
   | 'paid'
@@ -30,6 +31,7 @@ export interface UsersTable {
   avatar_url: string | null
   bio: string | null
   role: Generated<'user' | 'team' | 'admin'>
+  email_verified_at: Date | null
   created_at: Generated<Date>
   updated_at: Date | null
 }
@@ -63,6 +65,7 @@ export interface SessionsTable {
   user_id: string
   session_type: Generated<SessionType>
   nonce: string | null
+  otp_purpose: OtpPurpose | null
   expires_at: Date
   revoked_at: Date | null
   created_at: Generated<Date>

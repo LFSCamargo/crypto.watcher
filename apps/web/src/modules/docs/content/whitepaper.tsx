@@ -15,7 +15,7 @@ import {
   DocsPhaseCard,
   DocsSection,
   DocsSubheading,
-} from '../components/docs-ui'
+} from '../components'
 
 export function DocsWhitepaper() {
   return (
@@ -24,7 +24,7 @@ export function DocsWhitepaper() {
         icon={Rocket}
         eyebrow="Whitepaper"
         title="Whitepaper"
-        description="A comprehensive overview of the Crypto Watcher protocol, its design principles, and technical implementation."
+        description="A comprehensive overview of the Crypto Watcher protocol — expert-governed risk assessment, transparent methodology and protocol governance."
       />
 
       <DocsSection icon={Star} title="Abstract">
@@ -34,10 +34,11 @@ export function DocsWhitepaper() {
           rating systems often lack transparency or can be manipulated.
         </DocsP>
         <DocsP>
-          Crypto Watcher introduces a novel approach to project risk assessment using
-          reputation-weighted community voting. By leveraging blockchain technology and
-          economic incentives, we create a trustworthy, manipulation-resistant system for
-          evaluating crypto projects.
+          Crypto Watcher introduces a professional approach to project risk assessment:
+          a vetted governor council with expertise in smart contract security, protocol
+          design, tokenomics, compliance, infrastructure and on-chain analysis publishes
+          official scores and structured reports. Trust comes from reviewer expertise and
+          transparency — not from token-weighted public voting or popularity.
         </DocsP>
       </DocsSection>
 
@@ -50,73 +51,86 @@ export function DocsWhitepaper() {
           investors must rely on limited public information.
         </DocsP>
         <DocsSubheading>Rating Manipulation</DocsSubheading>
-        <DocsP>Traditional rating systems are vulnerable to manipulation through:</DocsP>
+        <DocsP>Traditional and crowd-sourced rating systems are vulnerable to manipulation through:</DocsP>
         <DocsList
           items={[
-            'Sybil attacks (creating multiple fake accounts)',
-            'Paid reviews and ratings',
+            'Vote-to-rate models where influence can be purchased',
+            'Sybil attacks and coordinated brigading',
+            'Paid reviews and astroturfed sentiment',
             'Conflicts of interest among rating providers',
-            'Centralized control over rating methodology',
+            'Popularity mistaken for expertise',
           ]}
         />
       </DocsSection>
 
       <DocsSection icon={Stack} title="Solution Architecture">
-        <DocsSubheading>Reputation System</DocsSubheading>
+        <DocsSubheading>Expert Governor Council</DocsSubheading>
         <DocsP>
-          At the core of Crypto Watcher is a reputation system that assigns weights to
-          user votes based on their track record. Reputation is earned through:
+          At the core of Crypto Watcher is a curated council of vetted reviewers. Only
+          governors/admins may investigate projects and publish official risk scores.
+          Reviewers are selected for demonstrated expertise and held accountable through:
         </DocsP>
         <DocsList
           items={[
-            'Accurate predictions (voting aligned with eventual outcomes)',
-            'Tenure in the community',
-            'Stake in the governance token',
-            'Contributions to project analysis',
+            'Transparent, versioned review methodology',
+            'Conflict-of-interest disclosure on every report',
+            'Evidence-based scoring with cited findings',
+            'Appeals and re-review by the council (not token votes)',
+            'Whistleblowing and community incident reporting',
           ]}
         />
-        <DocsSubheading>Per-Project Voting Contracts</DocsSubheading>
-        <DocsP>Each project under analysis receives its own smart contract that:</DocsP>
+        <DocsSubheading>Public Participation (Without Score Influence)</DocsSubheading>
+        <DocsP>Regular users contribute to the ecosystem by:</DocsP>
         <DocsList
           items={[
-            'Records all votes immutably on-chain',
-            'Enforces eligibility requirements',
-            'Calculates weighted scores automatically',
+            'Reading expert reports and published scores',
+            'Submitting evidence for governor review',
+            'Reporting incidents and suspicious activity',
+            'Participating in open discussion and comments',
+          ]}
+        />
+        <DocsSubheading>Per-Project On-Chain Registry</DocsSubheading>
+        <DocsP>Each reviewed project receives an on-chain record that:</DocsP>
+        <DocsList
+          items={[
+            'Anchors the published score and methodology version',
+            'Provides an immutable audit trail',
             'Emits events for indexing and analytics',
+            'Does not enable public vote-to-rate on scores',
           ]}
         />
-        <DocsSubheading>Governance</DocsSubheading>
-        <DocsP>Protocol parameters are controlled through on-chain governance:</DocsP>
+        <DocsSubheading>Protocol Governance</DocsSubheading>
+        <DocsP>CWT governs protocol parameters — not individual project ratings:</DocsP>
         <DocsList
           items={[
-            'Voting duration periods',
-            'Minimum reputation thresholds',
-            'Reward distribution rates',
-            'Eligibility criteria',
+            'Reviewer council roster and policy',
+            'Review methodology versions',
+            'Fee schedules and treasury allocations',
+            'Whistleblowing and appeals policy',
           ]}
         />
       </DocsSection>
 
       <DocsSection icon={Cube} title="Economic Model">
         <DocsSubheading>Token Utility</DocsSubheading>
-        <DocsP>The governance token serves multiple purposes:</DocsP>
+        <DocsP>The governance token serves protocol governance only:</DocsP>
         <DocsList
           items={[
             <>
-              <strong className="text-foreground">Voting Power:</strong> Token holders
-              can vote on protocol changes
+              <strong className="text-foreground">Protocol voting:</strong> CWT holders
+              vote on reviewer policy and methodology — not project scores
             </>,
             <>
-              <strong className="text-foreground">Staking:</strong> Staked tokens
-              contribute to reputation weight
+              <strong className="text-foreground">Treasury:</strong> Funds reviewer
+              operations and compensation
             </>,
             <>
-              <strong className="text-foreground">Rewards:</strong> Distributed to
-              accurate voters
+              <strong className="text-foreground">Accountability:</strong> Penalties for
+              governor misconduct
             </>,
             <>
-              <strong className="text-foreground">Penalties:</strong> Slashed for
-              malicious behavior
+              <strong className="text-foreground">Explicitly excluded:</strong> Pay-to-rate,
+              vote-to-rate, or purchasable score influence
             </>,
           ]}
         />
@@ -129,7 +143,8 @@ export function DocsWhitepaper() {
             'Timelock on governance actions',
             'Multi-sig requirements for critical operations',
             'Pause functionality for emergencies',
-            'Gradual decentralization roadmap',
+            'Role-gated score publication (governors only)',
+            'Gradual decentralization of protocol governance',
           ]}
         />
       </DocsSection>
@@ -141,28 +156,28 @@ export function DocsWhitepaper() {
             title="MVP"
             active
             items={[
-              'Basic reputation system',
-              'Per-project voting contracts',
-              'Governance token launch',
-              'Web application',
+              'Governor council reviews + structured reports',
+              'Per-project on-chain registry',
+              'Protocol governance token launch',
+              'Public comments + evidence submission',
             ]}
           />
           <DocsPhaseCard
             phase="Phase 2"
-            title="Enhanced Features"
+            title="Accountability"
             items={[
-              'Multi-factor reputation',
-              'Reward distribution',
-              'Advanced analytics',
+              'Reviewer reputation + misconduct penalties',
+              'Whistleblowing workflow',
+              'Methodology versioning on-chain',
             ]}
           />
           <DocsPhaseCard
             phase="Phase 3"
-            title="Decentralization"
+            title="Scale"
             items={[
-              'Full DAO governance',
+              'Expanded council specializations',
               'Multi-chain deployment',
-              'External data integrations',
+              'External data integrations for governors',
             ]}
           />
         </DocsCardGrid>
@@ -170,10 +185,10 @@ export function DocsWhitepaper() {
 
       <DocsSection icon={ShieldCheck} title="Conclusion">
         <DocsP>
-          Crypto Watcher represents a significant step forward in creating transparent,
-          community-driven risk assessment for crypto projects. By combining reputation
-          systems with blockchain technology, we can create a more trustworthy
-          information ecosystem for the crypto industry.
+          Crypto Watcher creates a trustworthy information layer for crypto investing by
+          combining expert review with transparent methodology — similar to how people trust
+          security auditors, credit rating agencies and professional analysts. Influence on
+          scores is earned through expertise and accountability, not token ownership.
         </DocsP>
       </DocsSection>
     </div>

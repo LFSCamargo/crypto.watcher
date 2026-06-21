@@ -4,22 +4,22 @@ import {
   NonceBodySchema,
   NonceResponseSchema,
   VerifyBodySchema,
-} from '../../modules/auth/auth.schema'
+} from '../../modules/auth/schemas'
 import {
   CommentParamsSchema,
   CommentSchema,
   CreateCommentBodySchema,
   ProjectCommentsParamsSchema,
-} from '../../modules/comments/comments.schema'
+} from '../../modules/comments/schemas'
 import {
   GovernanceProposalParamsSchema,
   GovernanceProposalSchema,
   ListGovernanceProposalsQuerySchema,
-} from '../../modules/governance/governance.schema'
+} from '../../modules/governance/schemas'
 import {
   MarketProjectParamsSchema,
   MarketSnapshotSchema,
-} from '../../modules/market/market.schema'
+} from '../../modules/market/schemas'
 import {
   CreateProjectBodySchema,
   ErrorResponseSchema,
@@ -29,26 +29,26 @@ import {
   ProjectSchema,
   TransitionProjectBodySchema,
   UpdateProjectBodySchema,
-} from '../../modules/projects/projects.schema'
+} from '../../modules/projects/schemas'
 import {
   ReputationParamsSchema,
   ReputationSchema,
-} from '../../modules/reputation/reputation.schema'
+} from '../../modules/reputation/schemas'
 import {
   ScoreProjectParamsSchema,
   ScoreSchema,
-} from '../../modules/scoring/scoring.schema'
+} from '../../modules/scoring/schemas'
 import {
   AddressParamsSchema,
   UpdateMeBodySchema,
   UserSchema,
-} from '../../modules/users/users.schema'
+} from '../../modules/users/schemas'
 import {
   VoteEligibilityQuerySchema,
   VoteEligibilitySchema,
   VoteTallySchema,
   VotingProjectParamsSchema,
-} from '../../modules/voting/voting.schema'
+} from '../../modules/voting/schemas'
 
 const registry = new OpenAPIRegistry()
 

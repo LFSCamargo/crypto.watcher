@@ -1,5 +1,5 @@
 import { db } from '../../core/db'
-import type { SessionType } from '../../core/db/schema'
+import type { OtpPurpose, SessionType } from '../../core/db/schema'
 
 const userSessionSelect = [
   'sessions.id as session_id',
@@ -15,6 +15,7 @@ const userSessionSelect = [
   'users.avatar_url',
   'users.bio',
   'users.role',
+  'users.email_verified_at',
   'users.created_at',
   'users.updated_at',
 ] as const
@@ -24,6 +25,7 @@ export const authRepository = {
     userId: string
     sessionType?: SessionType
     nonce?: string | null
+    otpPurpose?: OtpPurpose | null
     expiresAt: Date
   }) {
     return db
@@ -32,6 +34,7 @@ export const authRepository = {
         user_id: input.userId,
         session_type: input.sessionType ?? 'wallet',
         nonce: input.nonce ?? null,
+        otp_purpose: input.otpPurpose ?? null,
         expires_at: input.expiresAt,
       })
       .returningAll()
@@ -69,6 +72,31 @@ export const authRepository = {
       .where('session_type', '=', 'reset')
       .where('revoked_at', 'is', null)
       .execute()
+  },
+
+  async revokeUserOtpTokens(userId: string, purpose: OtpPurpose) {
+    await db
+      .updateTable('sessions')
+      .set({ revoked_at: new Date() })
+      .where('user_id', '=', userId)
+      .where('session_type', '=', 'otp')
+      .where('otp_purpose', '=', purpose)
+      .where('revoked_at', 'is', null)
+      .execute()
+  },
+
+  async getActiveOtpForEmail(email: string, code: string, purpose: OtpPurpose) {
+    return db
+      .selectFrom('sessions')
+      .innerJoin('users', 'users.id', 'sessions.user_id')
+      .select(['sessions.id', 'sessions.user_id', 'sessions.expires_at'])
+      .where('users.email', '=', email.toLowerCase())
+      .where('sessions.nonce', '=', code)
+      .where('sessions.session_type', '=', 'otp')
+      .where('sessions.otp_purpose', '=', purpose)
+      .where('sessions.revoked_at', 'is', null)
+      .where('sessions.expires_at', '>', new Date())
+      .executeTakeFirst()
   },
 
   async getActiveSessionById(sessionId: string) {

@@ -61,16 +61,9 @@ export function useWalletLogin() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: () => {
       if (!address) throw new Error('Connect a wallet first')
-      const nonce = await authApi.nonce(address)
-      const signature = await signMessageAsync({ message: nonce.message })
-      const result = await authApi.verify({
-        address,
-        message: nonce.message,
-        signature,
-      })
-      return result.user
+      return authApi.walletLogin(address, (message) => signMessageAsync({ message }))
     },
     onSuccess: (user) => {
       setUser(user)

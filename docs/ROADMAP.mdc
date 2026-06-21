@@ -12,20 +12,37 @@ alwaysApply: true
 ## Product Summary
 
 Crypto Watcher is a risk-analysis tool for crypto assets, projects and protocols.
-It helps users decide whether a project is worth investing in based on risk and
-potential reward. Core mechanics (see [README](../README.md)):
+It helps users decide whether a project is worth investing in based on expert
+review, transparent methodology and evidence — not popularity or token-weighted
+votes on the final score.
 
-- Community risk/reward analysis through a **reputation-weighted, on-chain voting system**.
-- Only trustworthy (reputation-gated) users may vote; voters are rewarded with tokens.
-- A **governance token** is distributed to users and powers protocol governance.
-- Each project has its own voting smart contract deployed on-chain.
-- While voting is closed, anyone may comment (off-chain, public).
-- Project lifecycle: `Deploy contract → In analysis by team → Ready for voting →
-  Voting starts → Voting ends → Analyzed → Score calculated → Shown to users`.
+Core mechanics (see [README](../README.md)):
 
-> **Governance is a launch requirement.** Per the instructions, a minimum viable
-> governance layer ships in the MVP and is hardened in every subsequent phase.
+- **Governor council reviews.** Only platform-selected, vetted reviewers (governors/
+  admins) with demonstrated expertise may investigate projects and publish official
+  risk scores and structured reports.
+- **Expertise, not popularity.** Review authority is reserved for specialists in areas
+  such as smart contract security, protocol design, tokenomics, compliance,
+  infrastructure and on-chain analysis.
+- **Public participation without score influence.** Regular users consume reports,
+  view ratings, submit evidence, report incidents and discuss findings — but they
+  do **not** influence the final risk score through tokens or public voting.
+- **Governance token for protocol governance only.** CWT governs reviewer selection,
+  methodology, accountability and transparency — not vote-to-rate on projects.
+- **Per-project on-chain record.** Each reviewed project can have an on-chain
+  contract/registry entry for auditability of published outcomes.
+- **Public off-chain comments and evidence.** Open discussion and whistleblowing
+  feed the review process; governors synthesize evidence into the official score.
+- Project lifecycle: `Review requested → In analysis → Governor review → Report
+  published → Score shown to users`.
+
+> **Governance is a launch requirement.** A minimum viable governance layer ships in
+> MVP to manage the reviewer council, review methodology and protocol parameters.
 > Governance never appears as a "later" bolt-on.
+
+> **Anti-pattern we explicitly reject:** vote-to-rate systems where influence on
+> project scores can be purchased or crowd-sourced without expert vetting. Trust comes
+> from reviewer expertise and transparency, not token ownership.
 
 ## Phase Legend
 
@@ -33,41 +50,42 @@ Every feature in the dependent docs is tagged with one of the following so we ca
 prioritize:
 
 - `MVP` — minimum lovable product, first public launch.
-- `Phase 1` — trust & rewards.
-- `Phase 2` — scale & decentralization.
+- `Phase 1` — trust, accountability & reviewer operations.
+- `Phase 2` — scale & decentralization of governance (not review authority).
 - `Phase 3` — ecosystem & integrations.
-- `Final` — maturity, full decentralization, sustainability.
+- `Final` — maturity, sustainable expert-governed protocol.
 
 ---
 
 ## MVP — First Launch
 
-Goal: a usable, end-to-end product where the team can list projects, the community
-can comment, gated voters can vote on-chain, and scores are displayed. Ships with a
-**minimal but real governance layer**.
+Goal: a usable, end-to-end product where users browse expert-reviewed projects,
+governors publish structured reports and scores, the public can comment and submit
+evidence, and protocol governance manages the reviewer council.
 
 ### Core
-- Project catalog: list, detail, lifecycle state (`In analysis → Ready → Voting →
-  Closed → Analyzed`).
-- Project score: computed from on-chain votes and shown to users.
+- Project catalog: list, detail, lifecycle state (`In analysis → Under review →
+  Report published`).
+- **Expert risk score:** published only by governor/admin reviewers; visible to all users.
+- Structured review reports (methodology, findings, risk factors, conflicts disclosed).
 - Public off-chain commenting on projects (read by everyone, post by authenticated users).
-- Wallet connection (RainbowKit/Wagmi) and SIWE-style authentication.
+- Evidence submission and incident reporting (feeds governor review queue).
+- Wallet connection (RainbowKit/Wagmi) and email/password authentication.
 
-### Voting
-- Per-project voting smart contract (deploy + cast vote + close + tally).
-- Backend-controlled project-submission factory: users request and pay for a
-  review off-chain; only the platform backend may emit (deploy) a project's
-  voting contract, recording the paying user as the on-chain submitter. The
-  backend address is rotatable by governance, which can also pause submissions.
-- Reputation-gated voting: only allow-listed / reputation-eligible wallets may vote.
-- Reputation weight applied to votes (basic, single-factor model).
+### Review authority (governors only)
+- Governor/admin role gating: only vetted reviewers may publish or amend official scores.
+- Reviewer expertise tags (security, tokenomics, compliance, infrastructure, etc.).
+- Backend workflow for review requests (users pay/request; platform queues for governors).
+- Per-project on-chain registry/contract to anchor published outcomes (audit trail).
+- Conflict-of-interest disclosure fields on published reports. `[MVP]`
 
-### Governance (launch requirement)
+### Governance (launch requirement — protocol, not project scores)
 - Governance token contract (ERC-20 votes / `ERC20Votes`) deployed.
-- Initial token distribution to a seed set of trustworthy users.
-- Basic on-chain governance: proposal + vote + execution via a minimal Governor +
-  Timelock, scoped to protocol parameters (e.g. voting duration, reputation threshold).
-- Admin/team multisig as the timelock owner for safety during launch.
+- Basic on-chain governance via Governor + Timelock scoped to **protocol** decisions:
+  reviewer roster changes, review methodology parameters, fee schedules, backend
+  submitter rotation, emergency pause.
+- Admin/team multisig as timelock owner for safety during launch.
+- CWT does **not** grant the right to vote on individual project risk scores.
 
 ### Platform
 - Auth, accounts, basic profile.
@@ -77,34 +95,31 @@ can comment, gated voters can vote on-chain, and scores are displayed. Ships wit
 
 ---
 
-## Phase 1 — Trust & Rewards
+## Phase 1 — Trust & Accountability
 
-Goal: make reputation and incentives real and tamper-resistant.
+Goal: make reviewer quality, accountability and transparency robust.
 
-- Reputation system v2: multi-factor scoring (voting accuracy, tenure, staking,
-  participation), decay over time.
-- Voter rewards: distribute governance tokens for honest/accurate votes.
-- Slashing / penalties for malicious or low-quality voting.
-- Reputation-based vote weight tiers (more trustworthy → more voting power).
-- Governance hardening: token-weighted proposals open to the community,
-  quorum + voting-delay parameters, on-chain parameter changes via Governor.
-- Project submission flow for the team with review queue.
+- Reviewer reputation system: track governor performance, report quality, timeliness,
+  overturn rate on appeals — **for council members only**, not public score voting.
+- Reviewer onboarding/offboarding workflow governed on-chain or via multisig + transparency log.
+- Formal review methodology versioning (published, immutable references per report).
+- Whistleblowing and community incident reporting with triage workflow for governors.
+- Appeals process for disputed reports (governor council re-review, not token vote).
+- Slashing / penalties for **governor misconduct** (not public voters). `[Phase 1]`
 - Notification center (in-app + email) for lifecycle and governance events.
 
 ---
 
 ## Phase 2 — Scale & Decentralization
 
-Goal: scale the platform and reduce reliance on the team.
+Goal: scale review throughput while keeping authority with the expert council.
 
-- Gated review / curation of community project submissions (the open submission
-  factory ships in MVP; this adds moderation, queues and economic gating).
-- Multi-chain support for project voting contracts.
-- Subgraph / indexer for on-chain data (replace direct RPC reads where needed).
-- Delegated governance (vote delegation, `ERC20Votes` delegation UX).
-- Reputation portability and richer analytics dashboards.
-- Caching, rate limiting, and read-scaling on the backend.
-- Role-based access control and team/admin console.
+- Expanded governor council with domain specializations and workload routing.
+- Multi-chain support for project registry contracts.
+- Subgraph / indexer for on-chain governance and published outcomes.
+- Delegated **protocol** governance (CWT delegation for parameter votes only).
+- Role-based access control and team/admin console for reviewer operations.
+- Economic gating and moderation for review requests (queue prioritization).
 
 ---
 
@@ -112,24 +127,23 @@ Goal: scale the platform and reduce reliance on the team.
 
 Goal: become a platform others build on.
 
-- Public API & API keys for third parties.
-- Webhooks for project/score/governance events.
-- Embeddable score widgets / badges.
-- Integrations: data providers (price/TVL/audit feeds) to enrich risk scoring.
+- Public API & API keys for third parties (read-only scores and reports).
+- Webhooks for project/report/governance events.
+- Embeddable score widgets / badges (expert-reviewed badge).
+- Integrations: data providers (price/TVL/audit feeds) to enrich governor analysis.
 - Mobile-friendly PWA / dedicated mobile experience.
-- Advanced risk models (automated signals combined with community votes).
+- Automated risk signals to **assist** governors (human-in-the-loop; never auto-score).
 
 ---
 
-## Final — Maturity & Full Decentralization
+## Final — Maturity & Sustainability
 
-Goal: a sustainable, community-owned protocol.
+Goal: a sustainable, transparent, expert-governed rating protocol.
 
-- Full DAO governance: treasury control, protocol upgrades, and parameter changes
-  governed entirely on-chain by token holders.
-- Decentralized reputation/identity (verifiable credentials).
-- Self-serve project onboarding with economic anti-spam guarantees.
-- Sustainable tokenomics and treasury management.
+- Mature DAO governance of **protocol** parameters and reviewer council policy.
+- Decentralized credentials for governor expertise verification.
+- Self-serve review request onboarding with economic anti-spam guarantees.
+- Sustainable treasury and reviewer compensation model (not vote-to-rate incentives).
 - Formal verification / audits of all core contracts.
 - High-availability, multi-region infrastructure with SLAs.
 
@@ -137,7 +151,8 @@ Goal: a sustainable, community-owned protocol.
 
 ## Cross-Cutting Concerns (all phases)
 
-- **Governance**: present from MVP, deepened each phase (see above).
+- **Governance**: present from MVP for protocol/council management; deepened each phase.
+- **Review authority**: always restricted to vetted governors — never opened to token-weighted public score voting.
 - **Security**: audits scale with phase; CI security scanning from MVP.
 - **Observability**: Sentry + Better Stack from MVP.
 - **Testing**: unit/integration/e2e from MVP (Vitest, Supertest, Testing Library,

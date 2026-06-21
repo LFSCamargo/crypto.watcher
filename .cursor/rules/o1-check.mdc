@@ -1,0 +1,53 @@
+---
+description: Production performance and complexity guardrails for generated code
+alwaysApply: true
+---
+
+# O1 Check — Performance & Complexity Rule
+
+Before returning non-trivial TypeScript/JavaScript code, evaluate **production performance risk**
+as if running `o1-check` against the change.
+
+## Evaluate before returning code
+
+- Cyclomatic complexity, nesting depth, and function length
+- Nested loops over user or database data
+- DB / ORM / network calls inside loops
+- Unbounded queries (missing `limit` / `take` / pagination)
+- Sequential awaits that could be batched with `Promise.all`
+- O(n²) lookups where a `Map` / `Set` would be O(n)
+
+## Avoid in production paths
+
+- SQL or ORM queries inside loops
+- `SELECT *` / `selectAll()` when only a few columns are needed
+- `LIKE '%term%'` on large tables without a full-text strategy
+- Offset pagination for large datasets when cursor pagination is viable
+- Fetching from the database then filtering in memory when SQL can filter
+- Deeply nested loops with `.includes()` / `.find()` on arrays
+
+## Prefer
+
+- Batch queries (`WHERE IN`, joins, single round-trip)
+- Pagination with enforced max page size on list endpoints
+- `Map` / `Set` pre-indexing before iteration
+- `Promise.all` (with concurrency limits when needed) for independent async work
+- Early returns to flatten nesting
+
+## When returning non-trivial code
+
+Include a **short complexity note** (e.g. “O(n) single query + O(n) in-memory map build”).
+
+If estimated risk is **high** or **critical**, refactor before returning the code.
+
+## Tooling
+
+Run locally:
+
+```bash
+pnpm run o1-check -- apps/api/src
+pnpm run o1-check -- apps/api/src --format json
+pnpm run o1-check -- apps/api/src --fail-below 70
+```
+
+Package: `packages/o1-check` (`o1-check.config.example.json` for rule toggles).

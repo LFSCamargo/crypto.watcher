@@ -3,7 +3,10 @@ import type { UsersTable } from '../../core/db/schema'
 import { usersRepository } from './users.repository'
 
 type UserRow = Selectable<UsersTable>
-type MappableUser = Omit<UserRow, 'password_hash'> & { password_hash?: string | null }
+type MappableUser = Omit<UserRow, 'password_hash'> & {
+  password_hash?: string | null
+  email_verified_at?: Date | null
+}
 
 export const mapUser = (user: MappableUser) => ({
   id: user.id,
@@ -17,6 +20,7 @@ export const mapUser = (user: MappableUser) => ({
   bio: user.bio,
   role: user.role,
   createdAt: user.created_at.toISOString(),
+  emailVerifiedAt: user.email_verified_at?.toISOString() ?? null,
 })
 
 export const usersService = {
@@ -80,6 +84,11 @@ export const usersService = {
     }>,
   ) {
     const user = await usersRepository.updateMe(id, input)
+    return user ? mapUser(user) : undefined
+  },
+
+  async markEmailVerified(userId: string) {
+    const user = await usersRepository.markEmailVerified(userId)
     return user ? mapUser(user) : undefined
   },
 }

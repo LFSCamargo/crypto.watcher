@@ -1,0 +1,12 @@
+{
+  "host": "127.0.0.1",
+  "port": 4173,
+  "paths": ["/", "/blog", "/docs"],
+  "outputDir": "lighthouse-reports",
+  "thresholds": {
+    "performance": 50,
+    "accessibility": 90,
+    "best-practices": 90,
+    "seo": 85
+  }
+}

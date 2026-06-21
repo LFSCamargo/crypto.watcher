@@ -35,10 +35,11 @@ export async function fetchProjectMarket(slug: string): Promise<MarketSnapshot> 
     const response = await apiFetch<MarketSnapshot>(`/market/projects/${slug}`)
     return parseMarketResponse(response)
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith('API 404')) {
+      throw new MarketUnavailableError()
+    }
+
     if (!isApiUnavailable(error)) {
-      if (error instanceof Error && error.message.startsWith('API 404')) {
-        throw new MarketUnavailableError()
-      }
       throw error
     }
 

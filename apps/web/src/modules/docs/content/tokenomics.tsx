@@ -6,7 +6,7 @@ import {
   Scales,
   ShieldWarning,
   Stack,
-  TrendUp,
+  UsersThree,
 } from '@phosphor-icons/react'
 import {
   DocsCardGrid,
@@ -18,7 +18,7 @@ import {
   DocsSection,
   DocsSubheading,
   DocsTable,
-} from '../components/docs-ui'
+} from '../components'
 
 export function DocsTokenomics() {
   return (
@@ -27,7 +27,7 @@ export function DocsTokenomics() {
         icon={Coins}
         eyebrow="Tokenomics"
         title="Tokenomics"
-        description="Understanding the economic model and token distribution of the Crypto Watcher governance token."
+        description="The CWT token powers protocol governance — reviewer council policy, methodology and accountability. It does not buy influence over project risk scores."
       />
 
       <DocsSection icon={Coins} title="Token Overview">
@@ -40,6 +40,12 @@ export function DocsTokenomics() {
             { label: 'Network', value: 'Base (Ethereum L2)' },
           ]}
         />
+        <DocsP>
+          CWT is a <strong className="text-foreground">protocol governance token</strong>.
+          Holding CWT lets you propose and vote on how the platform operates — not on
+          individual project ratings. We explicitly reject vote-to-rate models where
+          influence on scores can be purchased.
+        </DocsP>
       </DocsSection>
 
       <DocsSection icon={ChartLineDown} title="Token Distribution">
@@ -47,9 +53,9 @@ export function DocsTokenomics() {
         <DocsTable
           headers={['Category', 'Allocation', 'Vesting']}
           rows={[
-            ['Community Rewards', '40%', 'Released over 4 years'],
+            ['Protocol Treasury', '40%', 'Governed by DAO for reviewer ops + grants'],
             ['Team & Advisors', '20%', '2-year cliff, 4-year vest'],
-            ['Treasury', '20%', 'Governed by DAO'],
+            ['Community & Ecosystem', '20%', 'Governance participation incentives'],
             ['Early Supporters', '15%', '1-year cliff, 2-year vest'],
             ['Liquidity', '5%', 'Immediate'],
           ]}
@@ -57,86 +63,90 @@ export function DocsTokenomics() {
       </DocsSection>
 
       <DocsSection icon={Stack} title="Token Utility">
-        <DocsSubheading>Governance</DocsSubheading>
-        <DocsP>CWT holders can participate in protocol governance by:</DocsP>
+        <DocsSubheading>Protocol Governance</DocsSubheading>
+        <DocsP>CWT holders participate in protocol decisions by:</DocsP>
         <DocsList
           items={[
-            'Creating proposals for protocol changes',
-            'Voting on active proposals',
-            'Delegating voting power to other addresses',
+            'Voting on reviewer council roster and policy changes',
+            'Approving review methodology versions and fee schedules',
+            'Delegating voting power for protocol proposals',
+            'Funding treasury allocations for reviewer operations',
           ]}
         />
-        <DocsSubheading>Staking</DocsSubheading>
-        <DocsP>Tokens can be staked to:</DocsP>
+        <DocsSubheading>What CWT Does Not Do</DocsSubheading>
         <DocsList
           items={[
-            'Increase reputation weight',
-            'Earn additional rewards',
-            'Demonstrate long-term commitment',
+            'It does not grant the right to vote on individual project risk scores',
+            'It does not increase public voting weight on ratings',
+            'It is not a pay-to-rate mechanism',
           ]}
         />
-        <DocsSubheading>Rewards</DocsSubheading>
-        <DocsP>Tokens are distributed as rewards for:</DocsP>
-        <DocsList
-          items={[
-            'Accurate voting (aligned with final outcomes)',
-            'Active participation in analysis',
-            'Quality contributions to the community',
-          ]}
-        />
+        <DocsSubheading>Revenue model</DocsSubheading>
+        <DocsP>
+          The primary revenue source is fees paid by parties who request a formal review
+          (projects, teams, or interested users). These fees are directed to the protocol
+          treasury.
+        </DocsP>
+        <DocsSubheading>Reviewer Compensation</DocsSubheading>
+        <DocsP>
+          Governors are compensated from the treasury for completed reviews and high-quality
+          work. Compensation parameters, fee schedules and treasury allocations are decided
+          through CWT governance — not by individual projects or public token votes on scores.
+          This model is designed to align with professional audit and research practices. `[Phase 1]`
+        </DocsP>
       </DocsSection>
 
-      <DocsSection icon={TrendUp} title="Emission Schedule">
+      <DocsSection icon={UsersThree} title="Reviewer Economics">
         <DocsP>
-          Community rewards are distributed according to a declining emission schedule:
+          Reviewers are selected and vetted by the platform, with roster changes subject
+          to protocol governance. Compensation and accountability are designed around
+          professional audit norms — not crowd voting rewards.
         </DocsP>
         <DocsParams
           params={[
-            { label: 'Year 1', value: '40% of allocation' },
-            { label: 'Year 2', value: '30% of allocation' },
-            { label: 'Year 3', value: '20% of allocation' },
-            { label: 'Year 4', value: '10% of allocation' },
+            { label: 'Score authority', value: 'Governor council only' },
+            { label: 'Public score voting', value: 'Not supported' },
+            { label: 'Trust signal', value: 'Expertise + transparency' },
           ]}
         />
       </DocsSection>
 
-      <DocsSection icon={ShieldWarning} title="Economic Security">
-        <DocsSubheading>Slashing</DocsSubheading>
-        <DocsP>To discourage malicious behavior, staked tokens can be slashed for:</DocsP>
+      <DocsSection icon={ShieldWarning} title="Accountability">
+        <DocsSubheading>Governor Misconduct Penalties</DocsSubheading>
+        <DocsP>Reviewers can face penalties for:</DocsP>
         <DocsList
           items={[
-            'Coordinated voting manipulation',
-            'Sybil attack attempts',
-            'Spreading false information',
+            'Undisclosed conflicts of interest',
+            'Falsified or negligent reports',
+            'Failure to follow published methodology',
           ]}
         />
-        <DocsSubheading>Minimum Stake Requirements</DocsSubheading>
-        <DocsP>Certain actions require minimum token stakes:</DocsP>
+        <DocsSubheading>Proposal Thresholds (Protocol Only)</DocsSubheading>
         <DocsParams
           params={[
-            { label: 'Creating proposals', value: '10,000 CWT' },
-            { label: 'Enhanced voting weight', value: '1,000 CWT' },
-            { label: 'Becoming a validator', value: '50,000 CWT' },
+            { label: 'Creating protocol proposals', value: '10,000 CWT' },
+            { label: 'Quorum', value: '4% of total supply' },
           ]}
         />
       </DocsSection>
 
       <DocsSection icon={Scales} title="Future Considerations">
         <DocsP>
-          The tokenomics model may evolve through governance decisions, including:
+          Tokenomics may evolve through governance decisions focused on protocol
+          sustainability:
         </DocsP>
         <DocsCardGrid columns={2}>
-          <DocsFeatureCard icon={Gift} title="Adjusting reward rates">
-            Tune emission and reward distribution as the community grows.
+          <DocsFeatureCard icon={Gift} title="Reviewer compensation model">
+            Tune treasury allocations for sustainable expert review throughput.
           </DocsFeatureCard>
-          <DocsFeatureCard icon={ShieldWarning} title="Modifying slashing parameters">
-            Calibrate penalties to keep the system fair and secure.
+          <DocsFeatureCard icon={ShieldWarning} title="Accountability parameters">
+            Calibrate penalties for governor misconduct.
           </DocsFeatureCard>
-          <DocsFeatureCard icon={Stack} title="Adding new utility functions">
-            Expand what CWT can do across the protocol over time.
+          <DocsFeatureCard icon={Stack} title="Methodology governance">
+            On-chain references to review methodology versions.
           </DocsFeatureCard>
           <DocsFeatureCard icon={Lock} title="Cross-chain expansion">
-            Extend the token and voting to additional networks.
+            Extend protocol governance to additional networks.
           </DocsFeatureCard>
         </DocsCardGrid>
       </DocsSection>

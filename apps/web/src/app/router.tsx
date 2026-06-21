@@ -9,6 +9,7 @@ import {
   DocsGovernance,
   DocsFAQ,
 } from '../modules/docs/routes'
+import { BlogLayout, BlogIndexPage, BlogPostPage } from '../modules/blog/routes'
 import { GovernanceDetailPage, GovernancePage } from '../modules/governance/routes'
 import {
   AdminProjectsPage,
@@ -48,6 +49,14 @@ export const router = createBrowserRouter([
       { path: 'auth/forgot-password', element: <ForgotPasswordPage /> },
       { path: 'auth/reset-password', element: <ResetPasswordPage /> },
       { path: 'auth/onboarding', element: <OnboardingPage /> },
+      {
+        path: 'blog',
+        element: <BlogLayout />,
+        children: [
+          { index: true, element: <BlogIndexPage /> },
+          { path: ':slug', element: <BlogPostPage /> },
+        ],
+      },
       {
         path: 'docs',
         element: <DocsLayout />,

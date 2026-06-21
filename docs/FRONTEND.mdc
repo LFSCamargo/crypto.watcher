@@ -17,6 +17,10 @@ Shadcn/UI (fully rounded, Uber-inspired cream/yellow palette), Zustand, React Ho
 React Router, Sonner, Remix Icons, Raleway font. Web3: RainbowKit, Wagmi, Viem.
 Tests: Vitest + Testing Library (unit/integration) and Playwright (e2e). Monorepo via Nx + pnpm.
 
+> **Product model:** Official scores come from a vetted governor council. Regular users
+> browse reports, comment, submit evidence and participate in protocol governance — but
+> do not vote on project risk scores. Legacy project voting UI remains during migration.
+
 ## Modular Folder Structure
 
 The web app is feature-modular. Each feature owns its components, hooks, store
@@ -52,20 +56,33 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── marketing/           # Public landing page             [MVP]
     │   │   ├── docs/                # Product docs pages              [MVP]
+    │   │   ├── blog/                # News & launch articles (MD)     [MVP]
+    │   │   │   ├── content/         # Markdown article sources
+    │   │   │   ├── components/
+    │   │   │   ├── layouts/
+    │   │   │   ├── lib/             # Post registry + helpers
+    │   │   │   ├── pages/
+    │   │   │   ├── routes.tsx
+    │   │   │   └── __tests__/
     │   │   ├── comments/            # Public commenting               [MVP]
     │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
     │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
     │   │   ├── profile/             # Unified user profile page           [MVP]
-    │   │   ├── voting/              # On-chain voting UI               [MVP]
-    │   │   ├── scoring/             # Score display/visualization      [MVP]
+    │   │   ├── voting/              # Legacy project vote UI (deprecated) [MVP]
+    │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
-    │   │   ├── reputation/         # Reputation profile/eligibility    [MVP→Phase 1]
-    │   │   ├── rewards/            # Voter rewards UI                  [Phase 1]
+    │   │   ├── reputation/         # Reviewer credentials profile       [MVP→Phase 1]
+    │   │   ├── rewards/            # Reviewer compensation UI           [Phase 1]
     │   │   └── notifications/      # In-app notification center        [Phase 1]
     │   ├── styles/                  # Tailwind base + theme
     │   └── public/                  # Static assets (logos, `/icons/{slug}.png` coin logos)
     ├── e2e/                         # Playwright tests
+    ├── lighthouse.config.json       # Lighthouse URLs + score thresholds [MVP]
+    ├── lighthouse-reports/          # Generated audit JSON (gitignored)
+    ├── scripts/
+    │   ├── run-lighthouse.ts        # Production preview + Lighthouse CLI [MVP]
+    │   └── sync-crypto-icons.mjs
     └── package.json
 ```
 
@@ -79,8 +96,8 @@ apps/
 - Public safety index with top-nav/landing search and project detail page.
 - Curated market-reference assets inspired by widely tracked CoinMarketCap listings.
 - Local coin logos in `public/icons/{slug}.png` (synced from CoinGecko via `pnpm --filter web icons:sync`); `ProjectIcon` loads by slug with initials fallback.
-- Lifecycle status badges (`In analysis → Ready → Voting → Closed → Analyzed`).
-- Score visualization on the detail page.
+- Lifecycle status badges (`In analysis → Under review → Report published`).
+- Expert score and structured report on the detail page.
 - Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
 - Community submission form. `[Phase 2]`
 
@@ -90,6 +107,11 @@ apps/
 - SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
 - `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
 
+### blog `[MVP]`
+- Public blog at `/blog` with markdown-sourced articles (launch story, progress updates, roadmap).
+- Content in `modules/blog/content/*.md`; metadata in `lib/posts.ts`; rendered via internal markdown parser in `lib/render-markdown.tsx`.
+- Featured post on index, sidebar navigation, launch CTAs on article pages.
+
 ### comments `[MVP]`
 - Public comment thread (read by all, post when authenticated).
 - Small per-comment fee explained in UI (anti-spam); on-chain fee settlement `[MVP]` (UI + backend flag).
@@ -97,38 +119,36 @@ apps/
 ### auth `[MVP]`
 - Email/password registration and login with session cookies, on a split-panel branded auth shell.
 - Forgot-password and reset-password flow (token-based; dev surfaces the link until email infra ships).
-- Guided multi-step onboarding teaching search, safety scores, comments/reviews, and optional wallet linking.
-- Public-key (wallet) linking for governance-token voting.
+- Guided multi-step onboarding teaching search, expert safety scores, comments/evidence, and optional wallet linking for **protocol** governance.
+- Public-key (wallet) linking for CWT protocol governance votes (not project score voting).
 - Wallet connect via RainbowKit lives inside the logged-in profile dropdown (not the top nav).
 
 ### analysis `[MVP]`
-- **In Analysis** page: community review requests + on-chain projects awaiting POA authority votes.
-- **Analysis Request** page: authenticated users submit projects for paid protocol review.
+- **In Analysis** page: review requests + projects awaiting governor investigation.
+- **Analysis Request** page: authenticated users submit projects for paid expert review.
 
 ### profile `[MVP]`
-- Unified profile page (`/app/profile`): PFP, nickname, X account, bio, public key, governor badge for authorities.
+- Unified profile page (`/app/profile`): PFP, nickname, X account, bio, public key, governor badge for council members.
 
-### voting `[MVP]`
-- Cast votes on a project's contract via Wagmi/Viem.
-- Eligibility-aware UI (disable/explain when not eligible).
-- Tiered vote-weight display. `[Phase 1]`
+### voting `[MVP]` (legacy — deprecated)
+- Legacy project vote UI; being removed in favor of governor-only score publication.
 
 ### scoring `[MVP]`
-- Score breakdown + charts.
+- Expert score breakdown + charts from governor-published reports.
 - Enriched external-signal display. `[Phase 3]`
 
 ### governance — launch requirement
-- View proposals, cast governance votes, see results (Governor + token). `[MVP]`
+- View **protocol** proposals, cast CWT governance votes, see results (Governor + token). `[MVP]`
 - Community proposal creation UI. `[Phase 1]`
 - Vote delegation UX (`ERC20Votes`). `[Phase 2]`
 - Full DAO/treasury dashboards. `[Final]`
 
 ### reputation `[MVP → Phase 1]`
-- Show eligibility + basic reputation. `[MVP]`
-- Detailed multi-factor reputation profile. `[Phase 1]`
+- Show reviewer credentials for governor council members. `[MVP]`
+- Detailed multi-factor reviewer accountability profile. `[Phase 1]`
 
 ### rewards `[Phase 1]`
-- Display earned rewards and slashing history.
+- Display reviewer compensation and misconduct penalty history.
 
 ### notifications `[Phase 1]`
 - In-app notification center for lifecycle + governance events.
@@ -156,23 +176,21 @@ apps/
 ### auth `[MVP]`
 - R1: Connect wallet (RainbowKit), SIWE login, session-aware UI, logout.
 
-### voting `[MVP]`
-- R1: Show eligibility; enable voting only for eligible wallets.
-- R2: Cast votes through the project's contract (Wagmi/Viem) with tx feedback (Sonner).
-- R3: Display live tallies + reputation-weighted results.
+### voting `[MVP]` (legacy)
+- R1: Legacy project vote routes retained during migration; not available to regular users in target model.
 
 ### scoring `[MVP]`
-- R1: Visualize the score and its breakdown; show per-round history.
+- R1: Visualize governor-published score and report breakdown; show per-round history.
 
 ### governance `[MVP]` — launch requirement
-- R1: List proposals, view detail, cast governance votes, see results.
+- R1: List **protocol** proposals, view detail, cast CWT governance votes, see results.
 - R2: Create proposals. `[Phase 1]` Delegate votes. `[Phase 2]`
 
 ### reputation `[MVP → Phase 1]`
-- R1: Show eligibility + basic reputation `[MVP]`; full factor breakdown `[Phase 1]`.
+- R1: Show reviewer credentials for governors `[MVP]`; full accountability breakdown `[Phase 1]`.
 
 ### rewards / notifications `[Phase 1]`
-- R1: Show earned rewards/slashing; in-app notification center.
+- R1: Show reviewer compensation history; in-app notification center.
 
 ## Application Routes (React Router)
 
@@ -187,7 +205,7 @@ apps/
 | `/app/in-analysis` | analysis (POA review queue) | public | `MVP` |
 | `/app/analysis-request` | analysis (paid review request) | 🔒 | `MVP` |
 | `/app/profile` | profile (own profile) | 🔒 | `MVP` |
-| `/app/projects/:slug/vote` | voting | 🔒 eligible | `MVP` |
+| `/app/projects/:slug/vote` | voting (legacy) | 🔒 deprecated | `MVP` |
 | `/projects/submit` | projects | 🔒 | `Phase 2` |
 | `/app/governance` | governance (list) | public | `MVP` |
 | `/app/governance/:onchainId` | governance (detail) | public | `MVP` |
@@ -199,6 +217,8 @@ apps/
 | `/app/admin` | team/admin project actions | 👑 | `MVP` |
 | `/docs` | docs (introduction) | public | `MVP` |
 | `/docs/whitepaper` | docs (whitepaper) | public | `MVP` |
+| `/blog` | blog (index) | public | `MVP` |
+| `/blog/:slug` | blog (article) | public | `MVP` |
 
 ## Consumed API Endpoints (maps to BACKEND)
 
@@ -213,7 +233,7 @@ apps/
 | projects | `GET /projects`, `GET /projects/:slug`, `POST /projects` 👑, `PATCH /projects/:id` 👑, `POST /projects/:id/transition` 👑 | `MVP` |
 | projects | `POST /projects/submit` | `Phase 2` |
 | comments | `GET /projects/:id/comments`, `POST /projects/:id/comments`, `DELETE /comments/:id` | `MVP` |
-| voting | `GET /projects/:id/votes`, `GET /projects/:id/votes/eligibility`; on-chain `castVote` via `ProjectVoting` | `MVP` |
+| voting | legacy `GET /projects/:id/votes`; on-chain registry reads | `MVP` |
 | scoring | `GET /projects/:id/score`, `GET /projects/:id/score/history` | `MVP` |
 | governance | `GET /governance/proposals`, `GET /governance/proposals/:onchainId`; on-chain `propose`/`castVote` via Governor | `MVP` |
 | reputation | `GET /reputation/:address` | `MVP → Phase 1` |
@@ -229,7 +249,7 @@ apps/
 
 ```ts
 export type ProjectState =
-  | 'in_analysis' | 'ready' | 'voting' | 'closed' | 'analyzed'
+  | 'in_analysis' | 'under_review' | 'report_published'
 
 export interface Project {
   id: string
@@ -315,5 +335,10 @@ interface VotingState {
 - Global/shared state in Zustand (`store/`); feature state in the feature's slice.
 - All network calls through the typed client in `lib/api/`; on-chain calls through
   `lib/web3/`.
-- Tests: Vitest + Testing Library co-located in `__tests__/`; Playwright e2e in
-  `e2e/`. `[MVP]`
+- Tests: Vitest + Testing Library in `__tests__/` as `*.test.tsx` only (render
+  components/hooks — no plain `*.test.ts` lib unit tests); Playwright e2e in
+  `e2e/`. Coverage thresholds in `vite.config.ts`. `[MVP]`
+- Lighthouse: `pnpm --filter web lighthouse` builds the app, serves `vite preview`,
+  audits public routes from `lighthouse.config.json`, and fails when category
+  scores fall below configured thresholds. CI runs this after the web build
+  (`pnpm run lighthouse:web`). `[MVP]`
