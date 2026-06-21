@@ -4,6 +4,7 @@ import {
   RiCoinsLine,
   RiFileTextLine,
   RiGovernmentLine,
+  RiNewsLine,
   RiQuestionLine,
 } from '@remixicon/react'
 import {
@@ -15,6 +16,12 @@ import {
 } from '../ui/navigation-menu'
 
 const resources = [
+  {
+    to: '/blog',
+    icon: RiNewsLine,
+    title: 'Blog',
+    description: 'Launch story, updates and roadmap news.',
+  },
   {
     to: '/docs',
     icon: RiBookOpenLine,

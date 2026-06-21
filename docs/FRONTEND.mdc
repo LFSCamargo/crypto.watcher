@@ -56,6 +56,14 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── marketing/           # Public landing page             [MVP]
     │   │   ├── docs/                # Product docs pages              [MVP]
+    │   │   ├── blog/                # News & launch articles (MD)     [MVP]
+    │   │   │   ├── content/         # Markdown article sources
+    │   │   │   ├── components/
+    │   │   │   ├── layouts/
+    │   │   │   ├── lib/             # Post registry + helpers
+    │   │   │   ├── pages/
+    │   │   │   ├── routes.tsx
+    │   │   │   └── __tests__/
     │   │   ├── comments/            # Public commenting               [MVP]
     │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
     │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
@@ -93,6 +101,11 @@ apps/
 - `TopRatedProjectCard` on the landing hero (description, tags, price, 24h/7d/1m/1y changes, compact sparkline).
 - SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
 - `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
+
+### blog `[MVP]`
+- Public blog at `/blog` with markdown-sourced articles (launch story, progress updates, roadmap).
+- Content in `modules/blog/content/*.md`; metadata in `lib/posts.ts`; rendered via internal markdown parser in `lib/render-markdown.tsx`.
+- Featured post on index, sidebar navigation, launch CTAs on article pages.
 
 ### comments `[MVP]`
 - Public comment thread (read by all, post when authenticated).
@@ -199,6 +212,8 @@ apps/
 | `/app/admin` | team/admin project actions | 👑 | `MVP` |
 | `/docs` | docs (introduction) | public | `MVP` |
 | `/docs/whitepaper` | docs (whitepaper) | public | `MVP` |
+| `/blog` | blog (index) | public | `MVP` |
+| `/blog/:slug` | blog (article) | public | `MVP` |
 
 ## Consumed API Endpoints (maps to BACKEND)
 

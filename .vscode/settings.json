@@ -12,6 +12,9 @@
     "forge-std/=contracts/lib/forge-std/src/"
   ],
   "solidity.compileUsingRemoteVersion": "v0.8.26",
+  "wake.configuration.toml_path": "wake.toml",
+  "wake.configuration.use_toml_if_present": true,
+  "Tools-for-Solidity.wake.configuration.autoimport_remappings": false,
   "files.associations": {
     "*.mdc": "markdown"
   },
@@ -29,15 +32,5 @@
     "contracts/lib/**": true,
     "contracts/out/**": true,
     "contracts/cache/**": true
-  },
-  "wake.compiler.solc.remappings": [],
-  "wake.compiler.solc.include_paths": ["contracts/lib"],
-  "wake.compiler.solc.exclude_paths": [
-    "node_modules",
-    "contracts/lib",
-    "contracts/out",
-    "contracts/cache"
-  ],
-  "wake.detectors.ignore_paths": ["contracts/test", "test"],
-  "wake.detectors.exclude_paths": ["contracts/lib", "lib", "node_modules"]
+  }
 }

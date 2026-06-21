@@ -1,0 +1,19 @@
+# Wake IDE config when contracts/ is opened as the workspace root.
+# Remappings mirror remappings.txt in this directory.
+
+[compiler.solc]
+target_version = "0.8.26"
+remappings = [
+  "@openzeppelin/=lib/openzeppelin-contracts/",
+  "forge-std/=lib/forge-std/src/",
+  "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+]
+exclude_paths = ["node_modules", "out", "cache", "lib", "script"]
+
+[compiler.solc.optimizer]
+enabled = true
+runs = 200
+
+[detectors]
+ignore_paths = ["test"]
+exclude_paths = ["node_modules", "lib", "script"]

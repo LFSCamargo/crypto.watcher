@@ -4,5 +4,8 @@
     "@openzeppelin/=lib/openzeppelin-contracts/",
     "forge-std/=lib/forge-std/src/"
   ],
-  "solidity.compileUsingRemoteVersion": "v0.8.26"
+  "solidity.compileUsingRemoteVersion": "v0.8.26",
+  "wake.configuration.toml_path": "wake.toml",
+  "wake.configuration.use_toml_if_present": true,
+  "Tools-for-Solidity.wake.configuration.autoimport_remappings": false
 }

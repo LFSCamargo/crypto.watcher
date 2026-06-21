@@ -15,6 +15,7 @@ const productLinks = [
 ]
 
 const resourceLinks = [
+  { to: '/blog', label: 'Blog' },
   { to: '/docs', label: 'Documentation' },
   { to: '/docs/whitepaper', label: 'Whitepaper' },
   { to: '/docs/governance', label: 'Governance' },

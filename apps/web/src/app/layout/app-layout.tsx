@@ -29,7 +29,8 @@ export function AppLayout() {
   const { open, setOpen } = useCommandPalette()
   const isLanding = location.pathname === '/'
   const isDocsPage = location.pathname.startsWith('/docs')
-  const isFullWidthPage = isLanding || isDocsPage
+  const isBlogPage = location.pathname.startsWith('/blog')
+  const isFullWidthPage = isLanding || isDocsPage || isBlogPage
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background">
@@ -67,7 +68,7 @@ export function AppLayout() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="flex h-10 w-full items-center gap-2 rounded-full border border-border bg-card px-4 text-sm text-muted-foreground transition-colors hover:border-foreground/30"
+              className="flex h-10 w-full items-center gap-2 rounded-full border border-border bg-card px-4 pr-2.5 text-sm text-muted-foreground transition-colors hover:border-foreground/30"
             >
               <RiSearchLine className="h-4 w-4" />
               <span className="flex-1 text-left">Search projects…</span>
@@ -102,7 +103,7 @@ export function AppLayout() {
           isFullWidthPage ? 'pb-0 pt-0' : 'container-wide pb-24 pt-8 lg:pb-12',
         )}
       >
-        {isDocsPage ? (
+        {isDocsPage || isBlogPage ? (
           <Outlet />
         ) : (
           <motion.div

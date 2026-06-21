@@ -1,0 +1,26 @@
+# Wake IDE config for the Foundry project in contracts/.
+# Remappings mirror contracts/remappings.txt with a contracts/ prefix (paths resolve
+# from the monorepo root). Update both files when remappings change.
+
+[compiler.solc]
+target_version = "0.8.26"
+remappings = [
+  "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
+  "forge-std/=contracts/lib/forge-std/src/",
+  "openzeppelin-contracts/=contracts/lib/openzeppelin-contracts/",
+]
+exclude_paths = [
+  "node_modules",
+  "contracts/out",
+  "contracts/cache",
+  "contracts/lib",
+  "contracts/script",
+]
+
+[compiler.solc.optimizer]
+enabled = true
+runs = 200
+
+[detectors]
+ignore_paths = ["contracts/test"]
+exclude_paths = ["node_modules", "contracts/lib", "contracts/script"]
