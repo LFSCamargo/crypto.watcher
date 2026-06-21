@@ -62,20 +62,19 @@ forge test
 
 ## CI (GitHub Actions)
 
-`.github/workflows/ci.yml` validates the monorepo in parallel, scoped by path on pull
-requests and full on pushes to `main`:
+`.github/workflows/ci.yml` runs on every pull request and push to `main`. PR checks
+always validate `apps/*` and `packages/*`:
 
 | Job | Scope | Gates |
 |-----|-------|-------|
-| `workspace` | `scripts/`, root config | `check:spaghetti` |
-| `packages/o1-check` | `packages/*` | lint, typecheck, test, build |
-| `apps/api` | `apps/api` | lint, typecheck, test, build, `o1-check:api` |
-| `apps/web` | `apps/web` | lint, typecheck, test, build, `o1-check:web` |
-| `contracts` | `contracts/` | `forge build`, `forge test` |
-| `CI` | aggregation | fails if any required job failed |
+| `Spaghetti detector` | `apps/api`, `apps/web` modules | `check:spaghetti` |
+| `packages/o1-check` | `packages/o1-check` | lint, typecheck, test (coverage), build |
+| `apps/api` | `apps/api` | lint, typecheck, test (coverage), build, `o1-check:api` |
+| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web` |
+| `contracts` | `contracts/` | `forge build`, `forge test` (push to `main` only) |
 
-Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run
-in `.github/workflows/security.yml`.
+Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run on
+`main` pushes and weekly schedule in `.github/workflows/security.yml` (not on PRs).
 
 ## Conventions
 

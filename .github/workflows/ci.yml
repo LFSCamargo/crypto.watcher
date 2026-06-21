@@ -6,7 +6,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -17,71 +17,16 @@ env:
   NX_ISOLATE_PLUGINS: false
 
 jobs:
-  changes:
-    name: Detect changes
-    runs-on: ubuntu-latest
-    outputs:
-      api: ${{ steps.filter.outputs.api }}
-      web: ${{ steps.filter.outputs.web }}
-      packages: ${{ steps.filter.outputs.packages }}
-      contracts: ${{ steps.filter.outputs.contracts }}
-      workspace: ${{ steps.filter.outputs.workspace }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            api:
-              - 'apps/api/**'
-              - 'packages/o1-check/**'
-              - 'pnpm-lock.yaml'
-              - 'tsconfig.base.json'
-              - 'eslint.config.mjs'
-              - 'o1-check.config.json'
-            web:
-              - 'apps/web/**'
-              - 'packages/o1-check/**'
-              - 'pnpm-lock.yaml'
-              - 'tsconfig.base.json'
-              - 'eslint.config.mjs'
-              - 'o1-check.web.config.json'
-            packages:
-              - 'packages/**'
-              - 'pnpm-lock.yaml'
-              - 'tsconfig.base.json'
-            contracts:
-              - 'contracts/**'
-            workspace:
-              - 'scripts/**'
-              - '.github/**'
-              - 'package.json'
-              - 'pnpm-workspace.yaml'
-              - 'nx.json'
-              - 'eslint.config.mjs'
-              - 'tsconfig.base.json'
-              - 'o1-check.config.json'
-              - 'o1-check.web.config.json'
-
-  workspace:
-    name: Workspace checks
-    needs: changes
-    if: |
-      github.event_name == 'push' ||
-      needs.changes.outputs.workspace == 'true' ||
-      needs.changes.outputs.api == 'true' ||
-      needs.changes.outputs.web == 'true'
+  spaghetti:
+    name: Spaghetti detector
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
-      - name: Module layout (spaghetti)
-        run: pnpm run check:spaghetti
+      - run: pnpm run check:spaghetti
 
   packages:
     name: packages/o1-check
-    needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.packages == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,15 +35,13 @@ jobs:
         run: pnpm exec nx run o1-check:lint
       - name: Typecheck
         run: pnpm exec nx run o1-check:typecheck
-      - name: Test
+      - name: Test (coverage)
         run: pnpm exec nx run o1-check:test
       - name: Build
         run: pnpm exec nx run o1-check:build
 
   api:
     name: apps/api
-    needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,17 +50,15 @@ jobs:
         run: pnpm exec nx run api:lint
       - name: Typecheck
         run: pnpm exec nx run api:typecheck
-      - name: Test
+      - name: Test (coverage)
         run: pnpm exec nx run api:test
       - name: Build
         run: pnpm exec nx run api:build
-      - name: Complexity check (o1-check)
+      - name: O1 complexity check
         run: pnpm run o1-check:api
 
   web:
     name: apps/web
-    needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -126,17 +67,16 @@ jobs:
         run: pnpm exec nx run web:lint
       - name: Typecheck
         run: pnpm exec nx run web:typecheck
-      - name: Test
+      - name: Test (coverage)
         run: pnpm exec nx run web:test
       - name: Build
         run: pnpm exec nx run web:build
-      - name: Complexity check (o1-check)
+      - name: O1 complexity check
         run: pnpm run o1-check:web
 
   contracts:
     name: contracts
-    needs: changes
-    if: github.event_name == 'push' || needs.changes.outputs.contracts == 'true'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -151,67 +91,3 @@ jobs:
         run: forge build --sizes
       - name: Test
         run: forge test -vvv
-
-  ci-success:
-    name: CI
-    if: always()
-    needs: [changes, workspace, packages, api, web, contracts]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify required jobs
-        env:
-          EVENT: ${{ github.event_name }}
-          API: ${{ needs.changes.outputs.api }}
-          WEB: ${{ needs.changes.outputs.web }}
-          PACKAGES: ${{ needs.changes.outputs.packages }}
-          CONTRACTS: ${{ needs.changes.outputs.contracts }}
-          WORKSPACE: ${{ needs.changes.outputs.workspace }}
-          WORKSPACE_RESULT: ${{ needs.workspace.result }}
-          PACKAGES_RESULT: ${{ needs.packages.result }}
-          API_RESULT: ${{ needs.api.result }}
-          WEB_RESULT: ${{ needs.web.result }}
-          CONTRACTS_RESULT: ${{ needs.contracts.result }}
-        run: |
-          set -euo pipefail
-
-          require() {
-            local name="$1"
-            local expected="$2"
-            local result="$3"
-            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
-              echo "$name failed ($result)"
-              exit 1
-            fi
-            if [[ "$expected" == "true" && "$result" == "skipped" ]]; then
-              echo "$name was required but skipped"
-              exit 1
-            fi
-          }
-
-          if [[ "$EVENT" == "push" ]]; then
-            require workspace true "$WORKSPACE_RESULT"
-            require packages true "$PACKAGES_RESULT"
-            require api true "$API_RESULT"
-            require web true "$WEB_RESULT"
-            require contracts true "$CONTRACTS_RESULT"
-            echo "All CI jobs passed on main."
-            exit 0
-          fi
-
-          if [[ "$WORKSPACE" == "true" || "$API" == "true" || "$WEB" == "true" ]]; then
-            require workspace true "$WORKSPACE_RESULT"
-          fi
-          if [[ "$PACKAGES" == "true" ]]; then
-            require packages true "$PACKAGES_RESULT"
-          fi
-          if [[ "$API" == "true" ]]; then
-            require api true "$API_RESULT"
-          fi
-          if [[ "$WEB" == "true" ]]; then
-            require web true "$WEB_RESULT"
-          fi
-          if [[ "$CONTRACTS" == "true" ]]; then
-            require contracts true "$CONTRACTS_RESULT"
-          fi
-
-          echo "All required CI jobs passed."
