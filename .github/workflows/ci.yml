@@ -32,13 +32,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
       - name: Lint
-        run: pnpm exec nx run o1-check:lint
+        run: pnpm exec nx run-many -t lint --projects=o1-check,email-templates
       - name: Typecheck
-        run: pnpm exec nx run o1-check:typecheck
+        run: pnpm exec nx run-many -t typecheck --projects=o1-check,email-templates
       - name: Test (coverage)
-        run: pnpm exec nx run o1-check:test
+        run: pnpm exec nx run-many -t test --projects=o1-check,email-templates
       - name: Build
-        run: pnpm exec nx run o1-check:build
+        run: pnpm exec nx run-many -t build --projects=o1-check,email-templates
 
   api:
     name: apps/api
@@ -71,8 +71,11 @@ jobs:
         run: pnpm exec nx run web:test
       - name: Build
         run: pnpm exec nx run web:build
+      - uses: browser-actions/setup-chrome@v1
       - name: O1 complexity check
         run: pnpm run o1-check:web
+      - name: Lighthouse
+        run: pnpm run lighthouse:web -- --skip-build
 
   contracts:
     name: contracts

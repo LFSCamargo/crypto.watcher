@@ -33,6 +33,8 @@ services:
       LOG_LEVEL: debug
       SMTP_HOST: mailhog
       SMTP_PORT: '1025'
+      MAIL_FROM: 'Crypto Watcher <noreply@localhost>'
+      WEB_URL: http://localhost:5173
       RPC_URL: ${RPC_URL:-https://sepolia.base.org}
       CORS_ORIGINS: http://localhost:5173
       # tsx/chokidar file watching inside the container (HMR).

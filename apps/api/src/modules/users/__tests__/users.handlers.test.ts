@@ -29,6 +29,7 @@ const user = {
   bio: null,
   role: 'user' as const,
   createdAt: '2024-01-01T00:00:00.000Z',
+  emailVerifiedAt: null,
 }
 
 describe('users handlers', () => {

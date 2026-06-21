@@ -78,6 +78,11 @@ apps/
     │   ├── styles/                  # Tailwind base + theme
     │   └── public/                  # Static assets (logos, `/icons/{slug}.png` coin logos)
     ├── e2e/                         # Playwright tests
+    ├── lighthouse.config.json       # Lighthouse URLs + score thresholds [MVP]
+    ├── lighthouse-reports/          # Generated audit JSON (gitignored)
+    ├── scripts/
+    │   ├── run-lighthouse.ts        # Production preview + Lighthouse CLI [MVP]
+    │   └── sync-crypto-icons.mjs
     └── package.json
 ```
 
@@ -333,3 +338,7 @@ interface VotingState {
 - Tests: Vitest + Testing Library in `__tests__/` as `*.test.tsx` only (render
   components/hooks — no plain `*.test.ts` lib unit tests); Playwright e2e in
   `e2e/`. Coverage thresholds in `vite.config.ts`. `[MVP]`
+- Lighthouse: `pnpm --filter web lighthouse` builds the app, serves `vite preview`,
+  audits public routes from `lighthouse.config.json`, and fails when category
+  scores fall below configured thresholds. CI runs this after the web build
+  (`pnpm run lighthouse:web`). `[MVP]`

@@ -15,7 +15,11 @@ Crypto Watcher is a risk analysis tool for crypto assets, projects and protocols
 
 ## Getting started
 
+Requires **Node 22.13** (see `.nvmrc`). With [nvm](https://github.com/nvm-sh/nvm):
+
 ```bash
+nvm install    # reads .nvmrc (22.13)
+nvm use
 pnpm install
 docker compose up -d          # Postgres + MailHog
 pnpm --filter api db:migrate  # run DB migrations

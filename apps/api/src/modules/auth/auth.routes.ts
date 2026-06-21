@@ -4,13 +4,17 @@ import { asyncHandler, validate } from '../../core/http/validation'
 import {
   createNonceHandler,
   forgotPasswordHandler,
+  forgotPasswordOtpHandler,
   getMeHandler,
   linkPublicKeyHandler,
   loginHandler,
   logoutHandler,
   registerHandler,
   resetPasswordHandler,
+  resetPasswordOtpHandler,
+  resendEmailOtpHandler,
   verifyHandler,
+  verifyEmailOtpHandler,
 } from './handlers'
 import {
   ForgotPasswordBodySchema,
@@ -19,7 +23,10 @@ import {
   NonceBodySchema,
   RegisterBodySchema,
   ResetPasswordBodySchema,
+  ResetPasswordOtpBodySchema,
+  ResendEmailOtpBodySchema,
   VerifyBodySchema,
+  VerifyEmailOtpBodySchema,
 } from './schemas'
 
 export const authRoutes = Router()
@@ -62,9 +69,33 @@ authRoutes.post(
 )
 
 authRoutes.post(
+  '/forgot-password-otp',
+  validate({ body: ForgotPasswordBodySchema }),
+  asyncHandler(forgotPasswordOtpHandler),
+)
+
+authRoutes.post(
   '/reset-password',
   validate({ body: ResetPasswordBodySchema }),
   asyncHandler(resetPasswordHandler),
+)
+
+authRoutes.post(
+  '/reset-password-otp',
+  validate({ body: ResetPasswordOtpBodySchema }),
+  asyncHandler(resetPasswordOtpHandler),
+)
+
+authRoutes.post(
+  '/verify-email-otp',
+  validate({ body: VerifyEmailOtpBodySchema }),
+  asyncHandler(verifyEmailOtpHandler),
+)
+
+authRoutes.post(
+  '/resend-email-otp',
+  validate({ body: ResendEmailOtpBodySchema }),
+  asyncHandler(resendEmailOtpHandler),
 )
 
 authRoutes.post('/logout', requireAuth, asyncHandler(logoutHandler))

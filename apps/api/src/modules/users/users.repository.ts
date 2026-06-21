@@ -74,6 +74,15 @@ export const usersRepository = {
       .executeTakeFirst()
   },
 
+  async markEmailVerified(userId: string) {
+    return db
+      .updateTable('users')
+      .set({ email_verified_at: new Date(), updated_at: new Date() })
+      .where('id', '=', userId)
+      .returningAll()
+      .executeTakeFirst()
+  },
+
   async linkPublicKey(userId: string, walletAddress: string) {
     return db
       .updateTable('users')

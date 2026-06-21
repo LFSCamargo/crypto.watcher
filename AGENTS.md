@@ -46,7 +46,7 @@ docs/         # Design docs (source of truth)
 ## Common commands
 
 ```bash
-pnpm install                # install all workspaces
+pnpm install                # install all workspaces (Node 22.13 — run `nvm use` first)
 pnpm run dev                # run web + api in parallel (nx)
 pnpm run lint               # eslint across the monorepo
 pnpm run check:spaghetti    # module layout (handlers, schemas, pages, __tests__)
@@ -54,6 +54,8 @@ pnpm run o1-check -- apps/api/src --config o1-check.config.json  # complexity/pe
 pnpm run typecheck          # tsc --noEmit across packages
 pnpm run test               # unit/integration tests
 pnpm run build              # build all apps
+pnpm run lighthouse:web
+pnpm run email:dev          # React Email preview at http://localhost:3030     # Lighthouse audits on production preview (apps/web)
 
 # contracts (run inside contracts/)
 forge build
@@ -69,8 +71,9 @@ always validate `apps/*` and `packages/*`:
 |-----|-------|-------|
 | `Spaghetti detector` | `apps/api`, `apps/web` modules | `check:spaghetti` |
 | `packages/o1-check` | `packages/o1-check` | lint, typecheck, test (coverage), build |
+| `packages/email-templates` | `packages/email-templates` | lint, typecheck, test, build |
 | `apps/api` | `apps/api` | lint, typecheck, test (coverage), build, `o1-check:api` |
-| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web` |
+| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web`, Lighthouse |
 | `contracts` | `contracts/` | `forge build`, `forge test` (push to `main` only) |
 
 Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run on

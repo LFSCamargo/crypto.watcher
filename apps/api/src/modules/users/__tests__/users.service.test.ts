@@ -33,6 +33,7 @@ const row = {
   role: 'user' as const,
   created_at: now,
   updated_at: null,
+  email_verified_at: null,
 }
 
 describe('usersService', () => {
@@ -53,6 +54,7 @@ describe('usersService', () => {
       bio: row.bio,
       role: row.role,
       createdAt: now.toISOString(),
+      emailVerifiedAt: null,
     })
   })
 

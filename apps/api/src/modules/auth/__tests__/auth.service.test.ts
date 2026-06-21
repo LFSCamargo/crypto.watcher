@@ -1,6 +1,20 @@
 import bcrypt from 'bcryptjs'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { buildSignInMessage, extractNonce, authService } from '../auth.service'
+import { buildSignInMessage, extractNonce, authService, generateOtpCode } from '../auth.service'
+
+vi.mock('../../../core/config', () => ({
+  config: {
+    env: 'development',
+    webUrl: 'http://localhost:5173',
+  },
+}))
+
+vi.mock('../../../core/mail/mail.service', () => ({
+  mailService: {
+    sendOtpEmail: vi.fn().mockResolvedValue(undefined),
+    sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+  },
+}))
 
 vi.mock('viem', async (importOriginal) => {
   const actual = await importOriginal<typeof import('viem')>()
@@ -18,6 +32,8 @@ vi.mock('../auth.repository', () => ({
     getActiveSessionById: vi.fn(),
     getActiveResetByToken: vi.fn(),
     revokeUserResetTokens: vi.fn(),
+    revokeUserOtpTokens: vi.fn(),
+    getActiveOtpForEmail: vi.fn(),
     revokeSession: vi.fn(),
   },
 }))
@@ -48,6 +64,7 @@ vi.mock('../../users/users.service', () => ({
     bio: user.bio,
     role: user.role,
     createdAt: user.created_at.toISOString(),
+    emailVerifiedAt: null,
   }),
   usersService: {
     upsertByAddress: vi.fn(),
@@ -58,12 +75,14 @@ vi.mock('../../users/users.service', () => ({
     linkPublicKey: vi.fn(),
     updatePassword: vi.fn(),
     getByAddress: vi.fn(),
+    markEmailVerified: vi.fn(),
   },
 }))
 
 import { authRepository } from '../auth.repository'
 import { usersService } from '../../users/users.service'
 import { verifyMessage } from 'viem'
+import { mailService } from '../../../core/mail/mail.service'
 
 const walletAddress = '0x1234567890123456789012345678901234567890'
 
@@ -83,6 +102,7 @@ const walletSessionRow = {
   role: 'user' as const,
   created_at: new Date(),
   updated_at: null,
+  email_verified_at: null,
 }
 
 describe('auth message helpers', () => {
@@ -118,12 +138,14 @@ describe('authService email/password', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     }))
     vi.mocked(authRepository.createSession).mockResolvedValue({
       id: 'session-1',
       user_id: 'user-1',
       session_type: 'email',
       nonce: null,
+      otp_purpose: null,
       expires_at: new Date(),
       revoked_at: null,
       created_at: new Date(),
@@ -148,6 +170,12 @@ describe('authService email/password', () => {
     expect(createCall).toBeDefined()
     const passwordHash = createCall!.passwordHash
     expect(await bcrypt.compare('secret-password', passwordHash)).toBe(true)
+    expect(mailService.sendOtpEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+        purpose: 'verify_email',
+      }),
+    )
   })
 
   it('logs in when the password matches', async () => {
@@ -166,12 +194,14 @@ describe('authService email/password', () => {
       role: 'user',
       created_at: new Date(),
       updated_at: null,
+      email_verified_at: null,
     })
     vi.mocked(authRepository.createSession).mockResolvedValue({
       id: 'session-2',
       user_id: 'user-1',
       session_type: 'email',
       nonce: null,
+      otp_purpose: null,
       expires_at: new Date(),
       revoked_at: null,
       created_at: new Date(),
@@ -202,6 +232,7 @@ describe('authService email/password', () => {
       role: 'user',
       created_at: new Date(),
       updated_at: null,
+      email_verified_at: null,
     })
 
     const result = await authService.login({
@@ -233,12 +264,14 @@ describe('authService password reset', () => {
       role: 'user',
       created_at: new Date(),
       updated_at: null,
+      email_verified_at: null,
     })
     vi.mocked(authRepository.createSession).mockResolvedValue({
       id: 'reset-1',
       user_id: 'user-1',
       session_type: 'reset',
       nonce: 'token',
+      otp_purpose: null,
       expires_at: new Date(),
       revoked_at: null,
       created_at: new Date(),
@@ -247,6 +280,13 @@ describe('authService password reset', () => {
     const result = await authService.requestPasswordReset('user@example.com')
 
     expect(result.ok).toBe(true)
+    expect(result.token).toBeDefined()
+    expect(mailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+        resetUrl: expect.stringContaining('/auth/reset-password?token='),
+      }),
+    )
     expect(authRepository.revokeUserResetTokens).toHaveBeenCalledWith('user-1')
     expect(authRepository.createSession).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'user-1', sessionType: 'reset' }),
@@ -308,12 +348,14 @@ describe('authService wallet', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     })
     vi.mocked(authRepository.createSession).mockResolvedValue({
       id: 'session-wallet',
       user_id: 'user-wallet',
       session_type: 'wallet',
       nonce: 'abc123',
+      otp_purpose: null,
       expires_at: new Date(),
       revoked_at: null,
       created_at: new Date(),
@@ -406,6 +448,7 @@ describe('authService linkPublicKey', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     })
 
     const result = await authService.linkPublicKey('user-1', walletAddress)
@@ -430,6 +473,7 @@ describe('authService linkPublicKey', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     })
 
     await expect(authService.linkPublicKey('user-1', walletAddress)).rejects.toThrow('WALLET_TAKEN')
@@ -461,6 +505,7 @@ describe('authService email conflicts', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     })
 
     await expect(
@@ -485,6 +530,7 @@ describe('authService email conflicts', () => {
       bio: null,
       role: 'user',
       createdAt: new Date().toISOString(),
+      emailVerifiedAt: null,
     })
 
     await expect(
@@ -494,5 +540,85 @@ describe('authService email conflicts', () => {
         nickname: 'alice',
       }),
     ).rejects.toThrow('NICKNAME_TAKEN')
+  })
+})
+
+describe('authService OTP emails', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('generateOtpCode returns a 6-digit code', () => {
+    expect(generateOtpCode()).toMatch(/^\d{6}$/)
+  })
+
+  it('verifies email OTP and marks the user verified', async () => {
+    vi.mocked(authRepository.getActiveOtpForEmail).mockResolvedValue({
+      id: 'otp-1',
+      user_id: 'user-1',
+      expires_at: new Date(Date.now() + 60_000),
+    })
+    vi.mocked(usersService.markEmailVerified).mockResolvedValue({
+      id: 'user-1',
+      walletAddress: null,
+      email: 'user@example.com',
+      publicKey: null,
+      xAccount: null,
+      nickname: null,
+      displayName: null,
+      avatarUrl: null,
+      bio: null,
+      role: 'user',
+      createdAt: new Date().toISOString(),
+      emailVerifiedAt: new Date().toISOString(),
+    })
+
+    const result = await authService.verifyEmailOtp({
+      email: 'user@example.com',
+      code: '123456',
+    })
+
+    expect(result?.ok).toBe(true)
+    expect(usersService.markEmailVerified).toHaveBeenCalledWith('user-1')
+    expect(authRepository.revokeUserOtpTokens).toHaveBeenCalledWith('user-1', 'verify_email')
+  })
+
+  it('sends password reset OTP emails for password accounts', async () => {
+    vi.mocked(usersService.getRowByEmail).mockResolvedValue({
+      id: 'user-1',
+      wallet_address: null,
+      email: 'user@example.com',
+      password_hash: 'hash',
+      public_key: null,
+      x_account: null,
+      nickname: null,
+      display_name: null,
+      avatar_url: null,
+      bio: null,
+      role: 'user',
+      created_at: new Date(),
+      updated_at: null,
+      email_verified_at: null,
+    })
+    vi.mocked(authRepository.createSession).mockResolvedValue({
+      id: 'otp-1',
+      user_id: 'user-1',
+      session_type: 'otp',
+      nonce: '123456',
+      otp_purpose: 'password_reset',
+      expires_at: new Date(),
+      revoked_at: null,
+      created_at: new Date(),
+    })
+
+    const result = await authService.sendPasswordResetOtp('user@example.com')
+
+    expect(result.ok).toBe(true)
+    expect(mailService.sendOtpEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+        purpose: 'password_reset',
+      }),
+    )
   })
 })

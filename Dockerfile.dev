@@ -1,19 +1,22 @@
 # Shared dev image for the web + api workspaces (HMR via mounted source).
 # Build context is the repo root. node_modules are installed here and preserved
 # at runtime via anonymous volumes in docker-compose.yml.
-FROM node:20-alpine
+FROM node:22.13-alpine
 
 # Build toolchain for native node addons (e.g. utf-8-validate, bufferutil
 # pulled in by the web3/ws stack), which node-gyp compiles during install.
 RUN apk add --no-cache python3 make g++
 
-RUN corepack enable
+RUN corepack enable \
+  && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 # Install workspace dependencies using only the manifests for better layer caching.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
+COPY packages/email-templates/package.json packages/email-templates/package.json
+COPY packages/o1-check/package.json packages/o1-check/package.json
 RUN pnpm install --frozen-lockfile
 
 # Source is bind-mounted at runtime; copy as a fallback for one-off runs.

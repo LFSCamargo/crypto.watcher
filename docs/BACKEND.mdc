@@ -29,6 +29,15 @@ service, repository (Kysely), Zod schemas and tests. Shared concerns live under
 `core/` and `shared/`.
 
 ```
+packages/
+└── email-templates/               # React Email transactional templates [MVP]
+    ├── src/
+    │   ├── components/            # shared layout
+    │   ├── emails/                # preview entrypoints (`pnpm email:dev`)
+    │   ├── templates/             # otp-email, password-reset-email
+    │   └── __tests__/
+    └── package.json
+
 apps/
 └── api/
     ├── src/
@@ -39,6 +48,7 @@ apps/
     │   │   │   ├── migrations/
     │   │   │   └── schema.ts
     │   │   ├── config/              # env loading + validation
+    │   │   ├── mail/                # Nodemailer transport + send helpers [MVP]
     │   │   ├── logger/              # Pino + pino-pretty
     │   │   ├── auth/                # SIWE/session auth middleware  [MVP]
     │   │   ├── http/                # validation + error handling   [MVP]
@@ -73,7 +83,6 @@ apps/
     │   │   ├── notifications/     # In-app + email notifications    [Phase 1]
     │   │   └── webhooks/          # Outbound webhooks               [Phase 3]
     │   ├── shared/                # Shared utils, types, guards
-    │   └── emails/                # React Email templates           [MVP]
     ├── test/                      # integration/e2e (Vitest + Supertest)
     ├── Dockerfile
     └── package.json
@@ -96,6 +105,7 @@ apps/
 ### auth + users `[MVP]`
 - Wallet connect + SIWE-style verification, session issuance.
 - Email/password registration and login with bcrypt-hashed passwords.
+- Email verification and password-reset OTP emails via `packages/email-templates` + `core/mail` (Nodemailer/MailHog).
 - Link wallet public key to email account.
 - Profile management (nickname, X account, avatar, bio).
 - Role-based access control + admin console. `[Phase 2]`
@@ -214,14 +224,16 @@ apps/
 | avatar_url | text | |
 | bio | text | |
 | role | text not null default 'user' | `user` \| `team` \| `admin` `[Phase 2]` |
+| email_verified_at | timestamptz | nullable; set after OTP email verification |
 
 ### `sessions` `[MVP]`
 | column | type | notes |
 | --- | --- | --- |
 | id | uuid pk | |
 | user_id | uuid fk → users(id) on delete cascade | |
-| session_type | text not null default 'wallet' | `wallet` \| `email` |
-| nonce | text | SIWE nonce; null for email sessions |
+| session_type | text not null default 'wallet' | `wallet` \| `email` \| `reset` \| `otp` |
+| nonce | text | SIWE nonce, reset token, or OTP code |
+| otp_purpose | text | `verify_email` \| `password_reset` when `session_type='otp'` |
 | expires_at | timestamptz not null | |
 | revoked_at | timestamptz | nullable |
 
@@ -339,8 +351,12 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 - `POST /auth/register` → email/password registration, set session cookie.
 - `POST /auth/login` → email/password login, set session cookie.
 - `POST /auth/link-public-key` 🔒 → link wallet address to account.
-- `POST /auth/forgot-password` → issue a reset token (reuses `sessions` with `session_type='reset'`); always 200 to avoid email enumeration. Returns the token in non-production until email infra ships.
+- `POST /auth/forgot-password` → issue a reset token and email a reset link (`PasswordResetEmail` template); always 200 to avoid email enumeration. Returns the token in non-production for local testing.
+- `POST /auth/forgot-password-otp` → email a 6-digit password-reset OTP; always 200.
 - `POST /auth/reset-password` → consume a valid reset token, set the new password hash, revoke outstanding reset tokens.
+- `POST /auth/reset-password-otp` → consume a valid password-reset OTP.
+- `POST /auth/verify-email-otp` → verify a 6-digit email verification OTP and set `users.email_verified_at`.
+- `POST /auth/resend-email-otp` → resend the email verification OTP.
 - `POST /auth/logout` 🔒 → revoke session.
 - `GET  /auth/me` 🔒 → current user.
 
