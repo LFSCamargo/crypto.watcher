@@ -1,0 +1,407 @@
+{
+  "generatedAt": "2026-06-21T01:43:56.733Z",
+  "icons": {
+    "bitcoin": {
+      "source": "existing",
+      "symbol": "BTC"
+    },
+    "ethereum": {
+      "source": "existing",
+      "symbol": "ETH"
+    },
+    "solana": {
+      "source": "existing",
+      "symbol": "SOL"
+    },
+    "avalanche": {
+      "source": "existing",
+      "symbol": "AVAX"
+    },
+    "stellar": {
+      "source": "existing",
+      "symbol": "XLM"
+    },
+    "xrp": {
+      "source": "existing",
+      "symbol": "XRP"
+    },
+    "cardano": {
+      "source": "existing",
+      "symbol": "ADA"
+    },
+    "polkadot": {
+      "source": "existing",
+      "symbol": "DOT"
+    },
+    "cosmos": {
+      "source": "existing",
+      "symbol": "ATOM"
+    },
+    "near-protocol": {
+      "source": "existing",
+      "symbol": "NEAR"
+    },
+    "tezos": {
+      "source": "existing",
+      "symbol": "XTZ"
+    },
+    "algorand": {
+      "source": "existing",
+      "symbol": "ALGO"
+    },
+    "arbitrum": {
+      "source": "existing",
+      "symbol": "ARB"
+    },
+    "optimism": {
+      "source": "existing",
+      "symbol": "OP"
+    },
+    "starknet": {
+      "source": "existing",
+      "symbol": "STRK"
+    },
+    "zksync": {
+      "source": "existing",
+      "symbol": "ZK"
+    },
+    "polygon-ecosystem-token": {
+      "source": "existing",
+      "symbol": "POL"
+    },
+    "aave": {
+      "source": "existing",
+      "symbol": "AAVE"
+    },
+    "uniswap": {
+      "source": "existing",
+      "symbol": "UNI"
+    },
+    "lido-dao": {
+      "source": "existing",
+      "symbol": "LDO"
+    },
+    "sky": {
+      "source": "existing",
+      "symbol": "SKY"
+    },
+    "spark": {
+      "source": "existing",
+      "symbol": "SPK"
+    },
+    "morpho": {
+      "source": "existing",
+      "symbol": "MORPHO"
+    },
+    "compound-governance-token": {
+      "source": "existing",
+      "symbol": "COMP"
+    },
+    "curve-dao-token": {
+      "source": "existing",
+      "symbol": "CRV"
+    },
+    "rocket-pool": {
+      "source": "existing",
+      "symbol": "RPL"
+    },
+    "eigenlayer": {
+      "source": "existing",
+      "symbol": "EIGEN"
+    },
+    "ether-fi": {
+      "source": "existing",
+      "symbol": "ETHFI"
+    },
+    "balancer": {
+      "source": "existing",
+      "symbol": "BAL"
+    },
+    "convex-finance": {
+      "source": "existing",
+      "symbol": "CVX"
+    },
+    "1inch": {
+      "source": "existing",
+      "symbol": "1INCH"
+    },
+    "pancakeswap-token": {
+      "source": "existing",
+      "symbol": "CAKE"
+    },
+    "jupiter-exchange-solana": {
+      "source": "existing",
+      "symbol": "JUP"
+    },
+    "orca": {
+      "source": "existing",
+      "symbol": "ORCA"
+    },
+    "jito-governance-token": {
+      "source": "existing",
+      "symbol": "JTO"
+    },
+    "marinade": {
+      "source": "existing",
+      "symbol": "MNDE"
+    },
+    "kamino": {
+      "source": "existing",
+      "symbol": "KMNO"
+    },
+    "chainlink": {
+      "source": "existing",
+      "symbol": "LINK"
+    },
+    "pyth-network": {
+      "source": "existing",
+      "symbol": "PYTH"
+    },
+    "the-graph": {
+      "source": "existing",
+      "symbol": "GRT"
+    },
+    "ethereum-name-service": {
+      "source": "existing",
+      "symbol": "ENS"
+    },
+    "safe": {
+      "source": "existing",
+      "symbol": "SAFE"
+    },
+    "filecoin": {
+      "source": "existing",
+      "symbol": "FIL"
+    },
+    "arweave": {
+      "source": "existing",
+      "symbol": "AR"
+    },
+    "usd-coin": {
+      "source": "existing",
+      "symbol": "USDC"
+    },
+    "tether": {
+      "source": "existing",
+      "symbol": "USDT"
+    },
+    "celestia": {
+      "source": "existing",
+      "symbol": "TIA"
+    },
+    "mantle": {
+      "source": "existing",
+      "symbol": "MNT"
+    },
+    "blast": {
+      "source": "existing",
+      "symbol": "BLAST"
+    },
+    "bnb": {
+      "source": "existing",
+      "symbol": "BNB"
+    },
+    "aptos": {
+      "source": "existing",
+      "symbol": "APT"
+    },
+    "sui": {
+      "source": "existing",
+      "symbol": "SUI"
+    },
+    "injective-protocol": {
+      "source": "existing",
+      "symbol": "INJ"
+    },
+    "sei-network": {
+      "source": "existing",
+      "symbol": "SEI"
+    },
+    "berachain-bera": {
+      "source": "existing",
+      "symbol": "BERA"
+    },
+    "ronin": {
+      "source": "existing",
+      "symbol": "RON"
+    },
+    "flow": {
+      "source": "existing",
+      "symbol": "FLOW"
+    },
+    "hedera-hashgraph": {
+      "source": "existing",
+      "symbol": "HBAR"
+    },
+    "internet-computer": {
+      "source": "existing",
+      "symbol": "ICP"
+    },
+    "fantom": {
+      "source": "existing",
+      "symbol": "FTM"
+    },
+    "sonic-3": {
+      "source": "existing",
+      "symbol": "S"
+    },
+    "gnosis": {
+      "source": "existing",
+      "symbol": "GNO"
+    },
+    "celo": {
+      "source": "existing",
+      "symbol": "CELO"
+    },
+    "moonbeam": {
+      "source": "existing",
+      "symbol": "GLMR"
+    },
+    "kusama": {
+      "source": "existing",
+      "symbol": "KSM"
+    },
+    "zcash": {
+      "source": "existing",
+      "symbol": "ZEC"
+    },
+    "monero": {
+      "source": "existing",
+      "symbol": "XMR"
+    },
+    "litecoin": {
+      "source": "existing",
+      "symbol": "LTC"
+    },
+    "bitcoin-cash": {
+      "source": "existing",
+      "symbol": "BCH"
+    },
+    "dogecoin": {
+      "source": "existing",
+      "symbol": "DOGE"
+    },
+    "the-open-network": {
+      "source": "existing",
+      "symbol": "TON"
+    },
+    "crypto-com-chain": {
+      "source": "existing",
+      "symbol": "CRO"
+    },
+    "kava": {
+      "source": "existing",
+      "symbol": "KAVA"
+    },
+    "osmosis": {
+      "source": "existing",
+      "symbol": "OSMO"
+    },
+    "dydx-chain": {
+      "source": "existing",
+      "symbol": "DYDX"
+    },
+    "gmx": {
+      "source": "existing",
+      "symbol": "GMX"
+    },
+    "havven": {
+      "source": "existing",
+      "symbol": "SNX"
+    },
+    "pendle": {
+      "source": "existing",
+      "symbol": "PENDLE"
+    },
+    "frax-share": {
+      "source": "existing",
+      "symbol": "FXS"
+    },
+    "ethena": {
+      "source": "existing",
+      "symbol": "ENA"
+    },
+    "ondo-finance": {
+      "source": "existing",
+      "symbol": "ONDO"
+    },
+    "goldfinch": {
+      "source": "existing",
+      "symbol": "GFI"
+    },
+    "centrifuge": {
+      "source": "existing",
+      "symbol": "CFG"
+    },
+    "truefi": {
+      "source": "existing",
+      "symbol": "TRU"
+    },
+    "layerzero": {
+      "source": "existing",
+      "symbol": "ZRO"
+    },
+    "wormhole": {
+      "source": "existing",
+      "symbol": "W"
+    },
+    "axelar": {
+      "source": "existing",
+      "symbol": "AXL"
+    },
+    "across-protocol": {
+      "source": "existing",
+      "symbol": "ACX"
+    },
+    "hop-protocol": {
+      "source": "existing",
+      "symbol": "HOP"
+    },
+    "stargate-finance": {
+      "source": "existing",
+      "symbol": "STG"
+    },
+    "render-token": {
+      "source": "existing",
+      "symbol": "RENDER"
+    },
+    "akash-network": {
+      "source": "existing",
+      "symbol": "AKT"
+    },
+    "livepeer": {
+      "source": "existing",
+      "symbol": "LPT"
+    },
+    "helium": {
+      "source": "existing",
+      "symbol": "HNT"
+    },
+    "audius": {
+      "source": "existing",
+      "symbol": "AUDIO"
+    },
+    "base": {
+      "source": "coingecko-api",
+      "coinId": "base",
+      "symbol": "BASE",
+      "url": "https://coin-images.coingecko.com/coins/images/31199/large/59302ba8-022e-45a4-8d00-e29fe2ee768c-removebg-preview.png?1696530026"
+    },
+    "linea": {
+      "source": "coingecko-api",
+      "coinId": "linea",
+      "symbol": "LINEA",
+      "url": "https://coin-images.coingecko.com/coins/images/68507/large/linea-logo.jpeg?1756025484"
+    },
+    "scroll": {
+      "source": "coingecko-api",
+      "coinId": "scroll",
+      "symbol": "SCR",
+      "url": "https://coin-images.coingecko.com/coins/images/50571/large/scroll.jpg?1728376125"
+    }
+  },
+  "pending": [
+    "walletconnect",
+    "maple"
+  ]
+}
