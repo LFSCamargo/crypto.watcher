@@ -106,11 +106,14 @@ export function ProjectsPage() {
       </div>
 
       <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            {filteredCuratedProjects.length} safe projects
-          </h2>
-          <Button asChild variant="ghost" size="sm" className="rounded-full gap-1">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">
+              {filteredCuratedProjects.length} safe projects
+            </h2>
+            <p className="text-sm text-muted-foreground">Sorted by credit rating (best first)</p>
+          </div>
+          <Button asChild variant="ghost" size="sm" className="rounded-full gap-1 shrink-0">
             <Link to="/app/analysis-request">
               <RiAddLine className="h-4 w-4" />
               Request review

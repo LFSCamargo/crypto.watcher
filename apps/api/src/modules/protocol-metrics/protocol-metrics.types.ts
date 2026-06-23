@@ -1,6 +1,6 @@
-export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 4
+export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 6
 
-export type MetricsEntityType = 'protocol' | 'chain'
+export type MetricsEntityType = 'protocol' | 'chain' | 'stablecoin'
 
 export interface TvlPoint {
   timestamp: number
@@ -22,6 +22,22 @@ export interface TokenComposition {
   symbol: string
   usd: number
   share: number
+}
+
+export interface ProtocolValuation {
+  feesAnnualizedUsd: number | null
+  revenueAnnualizedUsd: number | null
+  revenueCaptureRate: number | null
+  revenueGrowth30d: number | null
+  revenueGrowth1y: number | null
+  feeSustainabilityScore: number | null
+  governanceQualityScore: number | null
+  securityScore: number | null
+  compositeScore: number | null
+  revenueToTvlRatio: number | null
+  feeToTvlRatio: number | null
+  priceToSalesRatio: number | null
+  methodologyVersion: string
 }
 
 export interface ExploitRecord {
@@ -66,6 +82,7 @@ export interface ProtocolMetricsSnapshot {
   exploits: ExploitRecord[]
   exploitCount: number
   totalExploitLossUsd: number | null
+  valuation: ProtocolValuation | null
   snapshotVersion: number
   cachedAt: string
   expiresAt: string

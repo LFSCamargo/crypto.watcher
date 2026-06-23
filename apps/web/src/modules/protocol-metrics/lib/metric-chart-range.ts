@@ -14,8 +14,6 @@ const BASE_METRIC_CHART_RANGE_OPTIONS = [
   durationMs: number
 }>
 
-export const TVL_CHART_RANGE_OPTIONS = BASE_METRIC_CHART_RANGE_OPTIONS
-
 export const METRIC_CHART_RANGE_OPTIONS: ReadonlyArray<{
   id: ChartRange
   label: string
@@ -24,6 +22,8 @@ export const METRIC_CHART_RANGE_OPTIONS: ReadonlyArray<{
   ...BASE_METRIC_CHART_RANGE_OPTIONS,
   { id: '1y', label: '1Y', durationMs: 365 * DAY_MS },
 ]
+
+export const TVL_CHART_RANGE_OPTIONS = METRIC_CHART_RANGE_OPTIONS
 
 export function filterMetricHistory(
   history: TimeSeriesPoint[],

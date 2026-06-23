@@ -179,3 +179,55 @@ export function sumChainTvls(
     0,
   )
 }
+
+type StablecoinChainBalance = {
+  peggedUSD?: number
+}
+
+type StablecoinSupplyPoint = {
+  date: number
+  circulating?: StablecoinChainBalance
+}
+
+export function extractStablecoinChainBreakdown(
+  currentChainBalances: Record<string, StablecoinChainBalance> | undefined,
+): ChainTvlBreakdown[] {
+  if (!currentChainBalances) return []
+
+  const sorted = Object.entries(currentChainBalances)
+    .map(([chain, balance]) => ({ chain, usd: balance?.peggedUSD ?? 0 }))
+    .filter((item) => Number.isFinite(item.usd) && item.usd > 0)
+    .sort((a, b) => b.usd - a.usd)
+
+  const total = sorted.reduce((sum, item) => sum + item.usd, 0)
+  const withShare = withShares(sorted).map(({ chain, usd, share }) => ({
+    chain,
+    tvl: usd,
+    share,
+  }))
+
+  return collapseBreakdown(withShare, total, (rest) => {
+    const otherTvl = rest.reduce((sum, item) => sum + item.tvl, 0)
+    return {
+      chain: 'Other',
+      tvl: otherTvl,
+      share: total > 0 ? (otherTvl / total) * 100 : 0,
+    }
+  })
+}
+
+export function normalizeStablecoinHistory(
+  tokens: StablecoinSupplyPoint[] | undefined,
+): TvlPoint[] {
+  if (!Array.isArray(tokens)) return []
+
+  const points = tokens
+    .filter((point) => Number.isFinite(point.circulating?.peggedUSD))
+    .map((point) => ({
+      timestamp: toMs(point.date),
+      tvl: point.circulating!.peggedUSD!,
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp)
+
+  return downsampleDailyHistory(points)
+}

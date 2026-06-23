@@ -29,9 +29,25 @@ export interface ExploitRecord {
   returnedFunds: number | null
 }
 
+export interface ProtocolValuation {
+  feesAnnualizedUsd: number | null
+  revenueAnnualizedUsd: number | null
+  revenueCaptureRate: number | null
+  revenueGrowth30d: number | null
+  revenueGrowth1y: number | null
+  feeSustainabilityScore: number | null
+  governanceQualityScore: number | null
+  securityScore: number | null
+  compositeScore: number | null
+  revenueToTvlRatio: number | null
+  feeToTvlRatio: number | null
+  priceToSalesRatio: number | null
+  methodologyVersion: string
+}
+
 export interface ProtocolMetricsSnapshot {
   slug: string
-  entityType: 'protocol' | 'chain'
+  entityType: 'protocol' | 'chain' | 'stablecoin'
   defillamaId: string
   name: string
   category: string | null
@@ -62,6 +78,7 @@ export interface ProtocolMetricsSnapshot {
   exploits: ExploitRecord[]
   exploitCount: number
   totalExploitLossUsd: number | null
+  valuation: ProtocolValuation | null
   cachedAt: string
   expiresAt: string
   stale?: boolean

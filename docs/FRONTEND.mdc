@@ -119,7 +119,10 @@ apps/
 
 ### protocol-metrics `[MVP]`
 - `ProtocolMetricsPanel` on reference and live project detail pages below the price panel.
-- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts, chain + token bar breakdowns, security incidents).
+- Dev server proxies `GET /protocol-metrics/*` to the API (`vite.config.ts`); without this, the browser receives SPA HTML and metrics fail silently.
+- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts with **1W/1M/3M/1Y** ranges, chain + token bar breakdowns, **on-chain valuation model**, security incidents).
+- **On-chain valuation:** always surfaced via `ProtocolValuationSection` — shows computed metrics when DeFi Llama fee/revenue data exists, or an explanatory empty state (stablecoin, missing fees, missing revenue).
+- **Stablecoin** projects (USDC, USDT): circulating supply, supply history, and supply-by-chain bar chart.
 - **Chain** projects (L1/L2): TVL plus network-wide DEX volume and fees paid — DeFi activity locked on the network, not a single protocol entity.
 - Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
 
@@ -151,6 +154,7 @@ apps/
 
 ### scoring `[MVP]`
 - Expert score breakdown + charts from governor-published reports.
+- **Credit-style ratings:** each safety score maps to paired **S&P** and **Moody's** letter grades (`AAA`/`Aaa` … `D`) and a top-level group — **Investment grade** (`AAA`–`BBB`) or **Speculative grade** (`BB`–`D`). See `lib/ratings/credit-rating.ts`.
 - Enriched external-signal display. `[Phase 3]`
 
 ### governance — launch requirement

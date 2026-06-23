@@ -1,5 +1,6 @@
 import type { Selectable } from 'kysely'
 import type { ScoresTable } from '../../core/db/schema'
+import { resolveCreditRatingFromSafetyScore } from '../../lib/ratings/credit-rating'
 import { votingService } from '../voting/voting.service'
 import { scoringRepository } from './scoring.repository'
 
@@ -16,6 +17,7 @@ const mapScore = (score: ScoreRow) => ({
   round: score.round,
   value: score.value,
   breakdown: score.breakdown,
+  creditRating: resolveCreditRatingFromSafetyScore(score.value),
 })
 
 export const scoringService = {

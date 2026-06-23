@@ -12,9 +12,11 @@ import {
 import {
   aggregateTvlHistoryFromChains,
   extractChainBreakdown,
+  extractStablecoinChainBreakdown,
   extractTokenComposition,
   normalizeChainTvlHistory,
   normalizeChartHistory,
+  normalizeStablecoinHistory,
   normalizeTvlHistory,
   sumChainTvls,
   toMs,
@@ -26,8 +28,10 @@ import {
 } from './protocol-metrics.repository'
 import type { ExploitRecord, ProtocolMetricsSnapshot } from './protocol-metrics.types'
 import { PROTOCOL_METRICS_SNAPSHOT_VERSION } from './protocol-metrics.types'
+import { computeProtocolValuation } from './protocol-valuation'
 
 const DEFILLAMA_BASE_URL = 'https://api.llama.fi'
+const DEFILLAMA_STABLECOINS_URL = 'https://stablecoins.llama.fi'
 
 type DefiLlamaTvlPoint = {
   date: number
@@ -94,6 +98,26 @@ type DefiLlamaChainTvlPoint = {
   tvl: number
 }
 
+type DefiLlamaStablecoin = {
+  id: string
+  name: string
+  symbol?: string
+  url?: string
+  pegMechanism?: string
+  price?: number
+  currentChainBalances?: Record<string, { peggedUSD?: number }>
+  tokens?: { date: number; circulating?: { peggedUSD?: number } }[]
+}
+
+function formatStablecoinCategory(pegMechanism: string | undefined): string {
+  if (!pegMechanism) return 'Stablecoin'
+  const label = pegMechanism
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('-')
+  return `${label} stablecoin`
+}
+
 function normalizeExploits(raw: DefiLlamaHack[] | undefined): ExploitRecord[] {
   if (!Array.isArray(raw)) return []
 
@@ -120,6 +144,26 @@ function resolveTvlHistory(protocol: DefiLlamaProtocol) {
   const fromRoot = normalizeTvlHistory(protocol.tvl)
   if (fromRoot.length > 0) return fromRoot
   return aggregateTvlHistoryFromChains(protocol.chainTvls)
+}
+
+function attachValuation(
+  snapshot: Omit<ProtocolMetricsSnapshot, 'valuation'>,
+): ProtocolMetricsSnapshot {
+  const valuation = computeProtocolValuation({
+    entityType: snapshot.entityType,
+    tvl: snapshot.tvl,
+    mcap: snapshot.mcap,
+    fees30d: snapshot.fees30d,
+    revenue30d: snapshot.revenue30d,
+    feesHistory: snapshot.feesHistory,
+    revenueHistory: snapshot.revenueHistory,
+    chainBreakdown: snapshot.chainBreakdown,
+    chainCount: snapshot.chains.length,
+    exploitCount: snapshot.exploitCount,
+    totalExploitLossUsd: snapshot.totalExploitLossUsd,
+  })
+
+  return { ...snapshot, valuation }
 }
 
 function emptyFinancials() {
@@ -164,6 +208,38 @@ function buildTvlTrends(tvlHistory: { timestamp: number; tvl: number }[], cached
   }
 }
 
+export function buildStablecoinMetricsSnapshot(
+  slug: string,
+  stablecoinId: string,
+  stablecoin: DefiLlamaStablecoin,
+  cachedAt = new Date(),
+): ProtocolMetricsSnapshot | null {
+  const tvlHistory = normalizeStablecoinHistory(stablecoin.tokens)
+  const chainBreakdown = extractStablecoinChainBreakdown(stablecoin.currentChainBalances)
+  const hasSupply = tvlHistory.length > 0 || chainBreakdown.length > 0
+  if (!hasSupply) return null
+
+  const trends = buildTvlTrends(tvlHistory, cachedAt)
+  const expiresAt = new Date(cachedAt.getTime() + PROTOCOL_METRICS_CACHE_TTL_MS)
+
+  return attachValuation({
+    slug,
+    entityType: 'stablecoin',
+    defillamaId: metricsTargetKey({ type: 'stablecoin', id: stablecoinId }),
+    name: stablecoin.name,
+    category: formatStablecoinCategory(stablecoin.pegMechanism),
+    website: stablecoin.url ?? null,
+    chains: chainBreakdown.map((item) => item.chain),
+    mcap: null,
+    ...trends,
+    ...emptyFinancials(),
+    chainBreakdown,
+    snapshotVersion: PROTOCOL_METRICS_SNAPSHOT_VERSION,
+    cachedAt: cachedAt.toISOString(),
+    expiresAt: expiresAt.toISOString(),
+  })
+}
+
 export function buildChainMetricsSnapshot(
   slug: string,
   chainId: string,
@@ -178,7 +254,7 @@ export function buildChainMetricsSnapshot(
   const trends = buildTvlTrends(tvlHistory, cachedAt)
   const expiresAt = new Date(cachedAt.getTime() + PROTOCOL_METRICS_CACHE_TTL_MS)
 
-  return {
+  return attachValuation({
     slug,
     entityType: 'chain',
     defillamaId: metricsTargetKey({ type: 'chain', id: chainId }),
@@ -198,7 +274,7 @@ export function buildChainMetricsSnapshot(
     snapshotVersion: PROTOCOL_METRICS_SNAPSHOT_VERSION,
     cachedAt: cachedAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
-  }
+  })
 }
 
 export function buildProtocolMetricsSnapshot(
@@ -218,7 +294,7 @@ export function buildProtocolMetricsSnapshot(
   const exploits = normalizeExploits(protocol.hacks)
   const expiresAt = new Date(cachedAt.getTime() + PROTOCOL_METRICS_CACHE_TTL_MS)
 
-  return {
+  return attachValuation({
     slug,
     entityType: 'protocol',
     defillamaId: metricsTargetKey({ type: 'protocol', id: defillamaId }),
@@ -246,11 +322,11 @@ export function buildProtocolMetricsSnapshot(
     snapshotVersion: PROTOCOL_METRICS_SNAPSHOT_VERSION,
     cachedAt: cachedAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
-  }
+  })
 }
 
 function memoryCacheKey(slug: string): string {
-  return `protocol-metrics:v4:${slug}`
+  return `protocol-metrics:v6:${slug}`
 }
 
 async function fetchJsonSafe<T>(fetchImpl: typeof fetch, url: string): Promise<T | null> {
@@ -300,6 +376,14 @@ async function fetchProtocolDexSummary(
   return fetchJsonSafe<DefiLlamaDexSummary>(fetchImpl, url)
 }
 
+async function fetchStablecoin(
+  fetchImpl: typeof fetch,
+  stablecoinId: string,
+): Promise<DefiLlamaStablecoin | null> {
+  const url = `${DEFILLAMA_STABLECOINS_URL}/stablecoin/${encodeURIComponent(stablecoinId)}`
+  return fetchJsonSafe<DefiLlamaStablecoin>(fetchImpl, url)
+}
+
 async function fetchChainHistory(
   fetchImpl: typeof fetch,
   chainId: string,
@@ -320,15 +404,27 @@ export class ProtocolMetricsService {
     this.memory.clear()
   }
 
+  private enrichSnapshot(snapshot: ProtocolMetricsSnapshot): ProtocolMetricsSnapshot {
+    const { valuation: _ignored, ...rest } = snapshot
+    return attachValuation(rest)
+  }
+
   private remember(slug: string, snapshot: ProtocolMetricsSnapshot): ProtocolMetricsSnapshot {
-    this.memory.set(memoryCacheKey(slug), snapshot)
-    return snapshot
+    const enriched = this.enrichSnapshot(snapshot)
+    this.memory.set(memoryCacheKey(slug), enriched)
+    return enriched
   }
 
   private async fetchTargetSnapshot(
     slug: string,
     target: MetricsTarget,
   ): Promise<ProtocolMetricsSnapshot | null> {
+    if (target.type === 'stablecoin') {
+      const stablecoin = await fetchStablecoin(this.fetchImpl, target.id)
+      if (!stablecoin) return null
+      return buildStablecoinMetricsSnapshot(slug, target.id, stablecoin)
+    }
+
     if (target.type === 'chain') {
       const [history, dex, fees] = await Promise.all([
         fetchChainHistory(this.fetchImpl, target.id),
@@ -374,7 +470,7 @@ export class ProtocolMetricsService {
       return snapshot
     } catch (error) {
       const staleInDb = await this.repository.getAny(slug)
-      if (staleInDb) return { ...staleInDb, stale: true }
+      if (staleInDb) return this.enrichSnapshot({ ...staleInDb, stale: true })
 
       if (error instanceof HttpError) throw error
       throw new HttpError(502, 'Unable to fetch protocol metrics right now')
@@ -387,7 +483,7 @@ export class ProtocolMetricsService {
     }
 
     const cachedInMemory = this.memory.get(memoryCacheKey(slug))
-    if (cachedInMemory) return cachedInMemory
+    if (cachedInMemory) return this.enrichSnapshot(cachedInMemory)
 
     const freshInDb = await this.repository.getFresh(slug)
     if (freshInDb) return this.remember(slug, freshInDb)

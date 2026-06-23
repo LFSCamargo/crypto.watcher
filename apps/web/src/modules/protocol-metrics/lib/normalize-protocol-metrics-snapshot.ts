@@ -1,5 +1,6 @@
 import type { ProtocolMetricsSnapshot } from './protocol-metrics.types'
 import { EMPTY_PROTOCOL_METRICS } from './protocol-metrics.types'
+import { enrichProtocolMetricsSnapshot } from './enrich-protocol-metrics-snapshot'
 
 export function normalizeProtocolMetricsSnapshot(raw: unknown): ProtocolMetricsSnapshot | null {
   if (!raw || typeof raw !== 'object') return null
@@ -7,7 +8,7 @@ export function normalizeProtocolMetricsSnapshot(raw: unknown): ProtocolMetricsS
   if (typeof snapshot.slug !== 'string' || typeof snapshot.tvl !== 'number') return null
   if (!Array.isArray(snapshot.tvlHistory)) return null
 
-  return {
+  const normalized: ProtocolMetricsSnapshot = {
     ...snapshot,
     entityType: snapshot.entityType ?? 'protocol',
     mcap: snapshot.mcap ?? null,
@@ -20,5 +21,8 @@ export function normalizeProtocolMetricsSnapshot(raw: unknown): ProtocolMetricsS
     dexVolume30d: snapshot.dexVolume30d ?? null,
     dexVolumeChange1d: snapshot.dexVolumeChange1d ?? null,
     dexVolumeHistory: snapshot.dexVolumeHistory ?? EMPTY_PROTOCOL_METRICS.dexVolumeHistory,
+    valuation: snapshot.valuation ?? null,
   }
+
+  return enrichProtocolMetricsSnapshot(normalized)
 }

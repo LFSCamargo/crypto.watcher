@@ -4,6 +4,12 @@ import { normalizeProtocolMetricsSnapshot } from '../lib/normalize-protocol-metr
 import type { ProtocolMetricsSnapshot } from '../lib/protocol-metrics.types'
 
 function parseProtocolMetricsResponse(raw: unknown): ProtocolMetricsSnapshot {
+  if (typeof raw === 'string' && raw.trimStart().startsWith('<!')) {
+    throw new Error(
+      'Protocol metrics API returned HTML instead of JSON. Check that the dev proxy includes /protocol-metrics.',
+    )
+  }
+
   const snapshot = normalizeProtocolMetricsSnapshot(raw)
   if (!snapshot) {
     throw new Error('Invalid protocol metrics response')

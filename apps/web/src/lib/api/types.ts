@@ -99,6 +99,11 @@ export interface Score {
     weightAgainst: string
     totalWeight: string
   }
+  creditRating: {
+    sp: 'AAA' | 'AA' | 'A' | 'BBB' | 'BB' | 'B' | 'CCC' | 'CC' | 'C' | 'D'
+    moodys: 'Aaa' | 'Aa' | 'A' | 'Baa' | 'Ba' | 'B' | 'Caa' | 'Ca' | 'C' | 'D'
+    group: 'investment_grade' | 'speculative_grade'
+  }
 }
 
 export interface Reputation {

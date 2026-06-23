@@ -9,6 +9,7 @@ import {
   ProtocolMetricsService,
   buildChainMetricsSnapshot,
   buildProtocolMetricsSnapshot,
+  buildStablecoinMetricsSnapshot,
 } from '../protocol-metrics.service'
 
 describe('buildProtocolMetricsSnapshot', () => {
@@ -51,6 +52,39 @@ describe('buildProtocolMetricsSnapshot', () => {
     expect(snapshot?.tvlChange7d).toBeCloseTo(14.545, 2)
     expect(snapshot?.fees24h).toBe(100_000)
     expect(snapshot?.exploitCount).toBe(1)
+    expect(snapshot?.valuation).not.toBeNull()
+    expect(snapshot?.valuation?.securityScore).toBeLessThan(100)
+  })
+})
+
+describe('buildStablecoinMetricsSnapshot', () => {
+  it('builds circulating supply metrics with chain breakdown', () => {
+    const now = Math.floor(Date.now() / 1000)
+    const snapshot = buildStablecoinMetricsSnapshot(
+      'usd-coin',
+      '2',
+      {
+        id: '2',
+        name: 'USD Coin',
+        symbol: 'USDC',
+        url: 'https://www.circle.com/usdc/',
+        pegMechanism: 'fiat-backed',
+        currentChainBalances: {
+          Ethereum: { peggedUSD: 40_000_000_000 },
+          Base: { peggedUSD: 10_000_000_000 },
+        },
+        tokens: [
+          { date: now - 30 * 86_400, circulating: { peggedUSD: 70_000_000_000 } },
+          { date: now, circulating: { peggedUSD: 74_000_000_000 } },
+        ],
+      },
+    )
+
+    expect(snapshot?.entityType).toBe('stablecoin')
+    expect(snapshot?.tvl).toBe(74_000_000_000)
+    expect(snapshot?.category).toBe('Fiat-Backed stablecoin')
+    expect(snapshot?.chainBreakdown[0]?.chain).toBe('Ethereum')
+    expect(snapshot?.fees24h).toBeNull()
   })
 })
 
@@ -135,7 +169,7 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
       new Date(now),
     )
 
-    service['memory'].set('protocol-metrics:v4:aave', cached!, PROTOCOL_METRICS_CACHE_TTL_MS)
+    service['memory'].set('protocol-metrics:v6:aave', cached!, PROTOCOL_METRICS_CACHE_TTL_MS)
 
     const snapshot = await service.getProjectProtocolMetrics('aave')
 
@@ -216,6 +250,35 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
     expect(snapshot.tvl).toBe(39_000_000_000)
     expect(snapshot.dexVolume24h).toBe(880_000_000)
     expect(snapshot.fees24h).toBe(7_500_000)
+    expect(repository.upsert).toHaveBeenCalledOnce()
+  })
+
+  it('uses stablecoin supply data for tether', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: '1',
+        name: 'Tether',
+        pegMechanism: 'fiat-backed',
+        currentChainBalances: {
+          Ethereum: { peggedUSD: 100_000_000_000 },
+        },
+        tokens: [
+          { date: now - 86_400, circulating: { peggedUSD: 180_000_000_000 } },
+          { date: now, circulating: { peggedUSD: 186_000_000_000 } },
+        ],
+      }),
+    })
+    const repository = createRepositoryMock()
+    const service = new ProtocolMetricsService(fetchImpl, repository)
+
+    const snapshot = await service.getProjectProtocolMetrics('tether')
+
+    expect(fetchImpl).toHaveBeenCalledOnce()
+    expect(snapshot.entityType).toBe('stablecoin')
+    expect(snapshot.tvl).toBe(186_000_000_000)
     expect(repository.upsert).toHaveBeenCalledOnce()
   })
 

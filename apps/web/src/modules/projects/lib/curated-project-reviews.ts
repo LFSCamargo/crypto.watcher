@@ -1,9 +1,12 @@
 import type { CuratedProject } from './curated-projects'
 import type { ExternalSecurityReview, ProjectReviewProfile, SafetyVerdict } from './project-review-types'
+import { resolveCreditRatingFromSafetyScore } from '../../../lib/ratings/credit-rating'
 
 const METHODOLOGY_VERSION = 'CW-Review-v1.2'
 
-const REVIEW_OVERRIDES: Partial<Record<string, Omit<ProjectReviewProfile, 'lastReviewedAt' | 'methodologyVersion'>>> = {
+const REVIEW_OVERRIDES: Partial<
+  Record<string, Omit<ProjectReviewProfile, 'lastReviewedAt' | 'methodologyVersion' | 'creditRating'>>
+> = {
   bitcoin: {
     verdict: 'low_risk',
     headline: 'Battle-tested monetary network with no smart-contract attack surface',
@@ -503,6 +506,12 @@ function defaultExternalReviews(_project: CuratedProject): ExternalSecurityRevie
   return []
 }
 
+function resolveCreditRatingForProject(project: CuratedProject) {
+  return resolveCreditRatingFromSafetyScore(project.score, {
+    forceDefault: project.status === 'watch',
+  })
+}
+
 function buildDefaultReview(project: CuratedProject): ProjectReviewProfile {
   const verdict = verdictFromProject(project)
   const statusLabel =
@@ -514,6 +523,7 @@ function buildDefaultReview(project: CuratedProject): ProjectReviewProfile {
 
   return {
     verdict,
+    creditRating: resolveCreditRatingForProject(project),
     headline: headlineFromProject(project, verdict),
     summary: `Our governor council rated ${project.name} as ${statusLabel} (${project.score}/100) after reviewing public audit disclosures, operational history, liquidity depth and ${projectCategoriesLabel(project)}-specific risk factors. This is analytical guidance — not investment advice.`,
     strengths: CATEGORY_STRENGTHS[project.category].slice(0, 3),
@@ -531,10 +541,12 @@ function projectCategoriesLabel(project: CuratedProject): string {
 }
 
 export function getProjectReviewProfile(project: CuratedProject): ProjectReviewProfile {
+  const creditRating = resolveCreditRatingForProject(project)
   const override = REVIEW_OVERRIDES[project.slug]
   if (override) {
     return {
       ...override,
+      creditRating,
       lastReviewedAt: '2025-06-01',
       methodologyVersion: METHODOLOGY_VERSION,
     }

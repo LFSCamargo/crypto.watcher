@@ -12,12 +12,23 @@ describe('resolveMetricsTargets', () => {
     expect(CHAIN_PRIMARY_SLUGS.has('ethereum')).toBe(true)
   })
 
+  it('prefers stablecoin supply data for stablecoin slugs', () => {
+    expect(resolveMetricsTargets('usd-coin')[0]).toEqual({
+      type: 'stablecoin',
+      id: '2',
+    })
+    expect(resolveMetricsTargets('tether')[0]).toEqual({
+      type: 'stablecoin',
+      id: '1',
+    })
+  })
+
   it('maps DeFi token slugs to protocol ids', () => {
     expect(resolveMetricsTargets('lido-dao')[0]).toEqual({
       type: 'protocol',
       id: 'lido',
     })
-    expect(resolveMetricsTargets('usd-coin')[0]).toEqual({
+    expect(resolveMetricsTargets('usd-coin')[1]).toEqual({
       type: 'protocol',
       id: 'circle-usdc',
     })

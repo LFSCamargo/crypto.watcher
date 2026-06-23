@@ -1,3 +1,5 @@
+import type { CreditRating } from '../../../lib/ratings/credit-rating'
+
 export type SecurityReviewProvider =
   | 'CertiK'
   | 'Trail of Bits'
@@ -31,6 +33,7 @@ export interface ExternalSecurityReview {
 
 export interface ProjectReviewProfile {
   verdict: SafetyVerdict
+  creditRating: CreditRating
   headline: string
   summary: string
   strengths: string[]

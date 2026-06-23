@@ -1,5 +1,7 @@
 export const DAY_MS = 24 * 60 * 60 * 1000
-export const TVL_HISTORY_DAYS = 90
+/** Trailing window retained in API snapshots — supports 1Y chart ranges. */
+export const TVL_HISTORY_DAYS = 365
+export const METRIC_HISTORY_DAYS = 365
 
 export function computePercentChange(current: number, past: number | null): number | null {
   if (past === null || past <= 0) return null
@@ -64,7 +66,7 @@ export function downsampleDailyHistory(
 
 export function downsampleDailyValues(
   points: { timestamp: number; value: number }[],
-  maxDays = TVL_HISTORY_DAYS,
+  maxDays = METRIC_HISTORY_DAYS,
 ): { timestamp: number; value: number }[] {
   return downsampleByDay(points, maxDays, (_, next) => next)
 }

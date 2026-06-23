@@ -1,4 +1,4 @@
-export type MetricsEntityType = 'protocol' | 'chain'
+export type MetricsEntityType = 'protocol' | 'chain' | 'stablecoin'
 
 export interface MetricsTarget {
   type: MetricsEntityType
@@ -117,6 +117,12 @@ export const CHAIN_ID_OVERRIDES: Record<string, string> = {
   filecoin: 'Filecoin',
 }
 
+/** Curated slug → DeFi Llama stablecoin id for `stablecoins.llama.fi/stablecoin/{id}`. */
+export const STABLECOIN_ID_OVERRIDES: Record<string, string> = {
+  'usd-coin': '2',
+  tether: '1',
+}
+
 /** Curated slug → DeFi Llama protocol slug for `/protocol/{id}`. */
 export const PROTOCOL_ID_OVERRIDES: Record<string, string> = {
   'lido-dao': 'lido',
@@ -159,7 +165,12 @@ export function resolveMetricsTargets(slug: string): MetricsTarget[] {
 
   const chainId = CHAIN_ID_OVERRIDES[slug]
   const protocolId = PROTOCOL_ID_OVERRIDES[slug] ?? slug
+  const stablecoinId = STABLECOIN_ID_OVERRIDES[slug]
   const candidates: MetricsTarget[] = []
+
+  if (stablecoinId) {
+    candidates.push({ type: 'stablecoin', id: stablecoinId })
+  }
 
   if (CHAIN_PRIMARY_SLUGS.has(slug) && chainId) {
     candidates.push({ type: 'chain', id: chainId })

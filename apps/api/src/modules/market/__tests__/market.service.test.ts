@@ -9,14 +9,18 @@ describe('resolveCoingeckoId', () => {
   it('maps known slug overrides', () => {
     expect(resolveCoingeckoId('xrp')).toBe('ripple')
     expect(resolveCoingeckoId('bnb')).toBe('binancecoin')
+    expect(resolveCoingeckoId('avalanche')).toBe('avalanche-2')
+    expect(resolveCoingeckoId('marinade')).toBe('marinade')
   })
 
-  it('returns null for unsupported slugs', () => {
-    expect(resolveCoingeckoId('base')).toBeNull()
+  it('resolves base and linea network tokens', () => {
+    expect(resolveCoingeckoId('base')).toBe('base')
+    expect(resolveCoingeckoId('linea')).toBe('linea')
   })
 
   it('falls back to slug when no override exists', () => {
     expect(resolveCoingeckoId('bitcoin')).toBe('bitcoin')
+    expect(resolveCoingeckoId('monero')).toBe('monero')
   })
 })
 

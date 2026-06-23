@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { DAY_MS } from '../protocol-metrics-changes'
 import {
   extractChainBreakdown,
+  extractStablecoinChainBreakdown,
   extractTokenComposition,
   normalizeChartHistory,
+  normalizeStablecoinHistory,
 } from '../protocol-metrics-extractors'
 
 describe('protocol-metrics extractors', () => {
@@ -55,6 +57,27 @@ describe('protocol-metrics extractors', () => {
     ])
 
     expect(history.length).toBeLessThanOrEqual(2)
+  })
+
+  it('builds stablecoin chain breakdown from pegged balances', () => {
+    const breakdown = extractStablecoinChainBreakdown({
+      Ethereum: { peggedUSD: 50_000_000_000 },
+      Base: { peggedUSD: 10_000_000_000 },
+    })
+
+    expect(breakdown[0]?.chain).toBe('Ethereum')
+    expect(breakdown[0]?.share).toBeCloseTo(83.33, 1)
+  })
+
+  it('normalizes stablecoin circulating supply history', () => {
+    const now = Math.floor(Date.now() / 1000)
+    const history = normalizeStablecoinHistory([
+      { date: now - 86_400, circulating: { peggedUSD: 70_000_000_000 } },
+      { date: now, circulating: { peggedUSD: 74_000_000_000 } },
+    ])
+
+    expect(history).toHaveLength(2)
+    expect(history.at(-1)?.tvl).toBe(74_000_000_000)
   })
 })
 

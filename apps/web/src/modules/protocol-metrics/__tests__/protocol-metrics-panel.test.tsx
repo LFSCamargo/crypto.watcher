@@ -56,6 +56,21 @@ const mockSnapshot = {
   exploits: [],
   exploitCount: 0,
   totalExploitLossUsd: null,
+  valuation: {
+    feesAnnualizedUsd: 36_500_000,
+    revenueAnnualizedUsd: 18_250_000,
+    revenueCaptureRate: 50,
+    revenueGrowth30d: 0,
+    revenueGrowth1y: null,
+    feeSustainabilityScore: 72,
+    governanceQualityScore: 68,
+    securityScore: 100,
+    compositeScore: 75,
+    revenueToTvlRatio: 1.4,
+    feeToTvlRatio: 2.9,
+    priceToSalesRatio: 27.4,
+    methodologyVersion: 'CW-Valuation-v1',
+  },
   cachedAt: '2024-01-01T00:00:00.000Z',
   expiresAt: '2024-01-01T03:00:00.000Z',
 }
@@ -102,6 +117,7 @@ describe('ProtocolMetricsPanel', () => {
     expect(screen.getByText('TVL by chain')).toBeInTheDocument()
     expect(screen.getByText('TVL token composition')).toBeInTheDocument()
     expect(screen.getByText('Daily fees')).toBeInTheDocument()
+    expect(screen.getByText('On-chain valuation model')).toBeInTheDocument()
     expect(screen.getAllByTestId('metric-chart').length).toBeGreaterThan(0)
   })
 })

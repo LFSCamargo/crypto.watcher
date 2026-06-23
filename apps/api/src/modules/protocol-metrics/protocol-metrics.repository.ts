@@ -18,6 +18,7 @@ function parseSnapshot(raw: unknown): ProtocolMetricsSnapshot | null {
     feesHistory: snapshot.feesHistory ?? [],
     revenueHistory: snapshot.revenueHistory ?? [],
     dexVolumeHistory: snapshot.dexVolumeHistory ?? [],
+    valuation: snapshot.valuation ?? null,
   }
 }
 

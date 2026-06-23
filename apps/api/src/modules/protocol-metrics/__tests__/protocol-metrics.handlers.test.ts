@@ -53,7 +53,8 @@ describe('protocol-metrics handlers', () => {
       exploits: [],
       exploitCount: 0,
       totalExploitLossUsd: null,
-      snapshotVersion: 2,
+      valuation: null,
+      snapshotVersion: 6,
       cachedAt: '2024-01-01T00:00:00.000Z',
       expiresAt: '2024-01-01T01:00:00.000Z',
     }

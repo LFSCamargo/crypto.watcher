@@ -23,8 +23,9 @@ import {
 } from '../lib/format-metrics'
 import type { ProtocolMetricsSnapshot } from '../lib/protocol-metrics.types'
 import { BreakdownBarChart } from './breakdown-bar-chart'
-import { TVL_CHART_RANGE_OPTIONS } from '../lib/metric-chart-range'
+import { METRIC_CHART_RANGE_OPTIONS } from '../lib/metric-chart-range'
 import { MetricHistoryChart } from './metric-history-chart'
+import { ProtocolValuationSection } from './protocol-valuation-section'
 
 function MetricBadge({ label, value }: { label: string; value: number | null }) {
   const tone = changeTone(value)
@@ -52,28 +53,37 @@ function StatCell({ label, value }: { label: string; value: string }) {
 
 function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
   const isChain = data.entityType === 'chain'
+  const isStablecoin = data.entityType === 'stablecoin'
+  const isProtocol = data.entityType === 'protocol'
   const showChainBreakdown = data.chainBreakdown.length > 0
   const showTokenComposition = data.tokenComposition.length > 0
+  const metricLabel = isStablecoin
+    ? 'Circulating supply'
+    : isChain
+      ? 'DeFi TVL on network'
+      : 'Total value locked'
+  const changePrefix = isStablecoin ? 'Supply' : 'TVL'
+  const historyTitle = isStablecoin ? 'Circulating supply history' : 'TVL history'
+  const chainBreakdownTitle = isStablecoin ? 'Supply by chain' : 'TVL by chain'
   const showFinancials =
-    data.fees24h != null ||
-    data.fees7d != null ||
-    data.fees30d != null ||
-    data.revenue24h != null ||
-    data.revenue7d != null ||
-    data.revenue30d != null ||
-    data.dexVolume24h != null ||
-    data.dexVolume7d != null ||
-    data.dexVolume30d != null
+    !isStablecoin &&
+    (data.fees24h != null ||
+      data.fees7d != null ||
+      data.fees30d != null ||
+      data.revenue24h != null ||
+      data.revenue7d != null ||
+      data.revenue30d != null ||
+      data.dexVolume24h != null ||
+      data.dexVolume7d != null ||
+      data.dexVolume30d != null)
 
   return (
     <>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-3xl font-bold">{formatCompactUsd(data.tvl)}</p>
-          <p className="text-sm text-muted-foreground">
-            {isChain ? 'DeFi TVL on network' : 'Total value locked'}
-          </p>
-          {!isChain && data.mcap != null ? (
+          <p className="text-sm text-muted-foreground">{metricLabel}</p>
+          {isProtocol && data.mcap != null ? (
             <p className="mt-1 text-xs text-muted-foreground">
               Protocol mcap {formatCompactUsd(data.mcap)}
             </p>
@@ -90,16 +100,16 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <MetricBadge label="TVL 24h" value={data.tvlChange24h} />
-        <MetricBadge label="TVL 7d" value={data.tvlChange7d} />
-        <MetricBadge label="TVL 30d" value={data.tvlChange30d} />
+        <MetricBadge label={`${changePrefix} 24h`} value={data.tvlChange24h} />
+        <MetricBadge label={`${changePrefix} 7d`} value={data.tvlChange7d} />
+        <MetricBadge label={`${changePrefix} 30d`} value={data.tvlChange30d} />
       </div>
 
       <MetricHistoryChart
-        title="TVL history"
+        title={historyTitle}
         history={data.tvlHistory}
         valueKey="tvl"
-        rangeOptions={TVL_CHART_RANGE_OPTIONS}
+        rangeOptions={METRIC_CHART_RANGE_OPTIONS}
       />
 
       {showChainBreakdown || showTokenComposition ? (
@@ -111,7 +121,7 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
         >
           {showChainBreakdown ? (
             <BreakdownBarChart
-              title="TVL by chain"
+              title={chainBreakdownTitle}
               items={data.chainBreakdown.map((item) => ({
                 key: item.chain,
                 label: item.chain,
@@ -156,7 +166,7 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
             <StatCell label="Fees 24h" value={formatCompactUsd(data.fees24h)} />
             <StatCell label="Fees 7d" value={formatCompactUsd(data.fees7d)} />
             <StatCell label="Fees 30d" value={formatCompactUsd(data.fees30d)} />
-            {!isChain ? (
+            {!isChain && !isStablecoin ? (
               <>
                 <StatCell label="Revenue 24h" value={formatCompactUsd(data.revenue24h)} />
                 <StatCell label="Revenue 7d" value={formatCompactUsd(data.revenue7d)} />
@@ -177,6 +187,8 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
         </div>
       ) : null}
 
+      <ProtocolValuationSection data={data} />
+
       {data.dexVolumeHistory.length >= 2 ? (
         <MetricHistoryChart title="DEX volume" history={data.dexVolumeHistory} />
       ) : null}
@@ -189,7 +201,7 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
         <MetricHistoryChart title="Daily revenue" history={data.revenueHistory} />
       ) : null}
 
-      {!isChain ? (
+      {isProtocol ? (
         <div className="rounded-xl border border-border bg-muted/20 p-4">
           <div className="mb-2 flex items-center gap-2">
             {data.exploitCount > 0 ? (
@@ -242,7 +254,11 @@ export function ProtocolMetricsPanel({ slug }: { slug: string }) {
   const { data, isLoading, isError, error } = useProtocolMetrics(slug)
   const unavailable = error instanceof ProtocolMetricsUnavailableError
   const panelTitle =
-    data?.entityType === 'chain' ? 'On-chain DeFi activity' : 'Protocol fundamentals'
+    data?.entityType === 'chain'
+      ? 'On-chain DeFi activity'
+      : data?.entityType === 'stablecoin'
+        ? 'Stablecoin fundamentals'
+        : 'Protocol fundamentals'
 
   if (unavailable) {
     return null

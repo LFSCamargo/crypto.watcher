@@ -13,6 +13,8 @@ describe('ProjectSafetyVerdict', () => {
     renderWithProviders(<ProjectSafetyVerdict profile={profile} />)
 
     expect(screen.getByText('Low risk')).toBeInTheDocument()
+    expect(screen.getByText('S&P AA')).toBeInTheDocument()
+    expect(screen.getByText("Moody's Aa")).toBeInTheDocument()
     expect(screen.getByText(profile.headline)).toBeInTheDocument()
     expect(screen.getByText(profile.summary)).toBeInTheDocument()
   })

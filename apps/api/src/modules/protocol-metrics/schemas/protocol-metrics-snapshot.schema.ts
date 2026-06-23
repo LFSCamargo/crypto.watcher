@@ -1,4 +1,5 @@
 import { z } from '../../../core/openapi/zod'
+import { ProtocolValuationSchema } from './protocol-valuation.schema'
 
 export const TvlPointSchema = z
   .object({
@@ -44,7 +45,7 @@ export const ExploitRecordSchema = z
 export const ProtocolMetricsSnapshotSchema = z
   .object({
     slug: z.string(),
-    entityType: z.enum(['protocol', 'chain']),
+    entityType: z.enum(['protocol', 'chain', 'stablecoin']),
     defillamaId: z.string(),
     name: z.string(),
     category: z.string().nullable(),
@@ -75,6 +76,7 @@ export const ProtocolMetricsSnapshotSchema = z
     exploits: z.array(ExploitRecordSchema),
     exploitCount: z.number().int(),
     totalExploitLossUsd: z.number().nullable(),
+    valuation: ProtocolValuationSchema.nullable(),
     snapshotVersion: z.number().int(),
     cachedAt: z.string().datetime(),
     expiresAt: z.string().datetime(),

@@ -1,5 +1,6 @@
 import { Badge, Card, CardContent } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
+import { CreditRatingBadge } from '../../scoring/components/credit-rating-badge'
 import { getVerdictLabel } from '../lib/curated-project-reviews'
 import type { ProjectReviewProfile, SafetyVerdict } from '../lib/project-review-types'
 
@@ -32,6 +33,7 @@ export function ProjectSafetyVerdict({ profile }: { profile: ProjectReviewProfil
           <Badge variant={verdictBadgeVariant(profile.verdict)}>
             {getVerdictLabel(profile.verdict)}
           </Badge>
+          <CreditRatingBadge rating={profile.creditRating} />
           <span className="text-xs text-muted-foreground">
             Reviewed {profile.lastReviewedAt} · {profile.methodologyVersion}
           </span>
