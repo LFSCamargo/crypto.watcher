@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express'
-import { sql } from 'kysely'
-import { db } from '../../db'
+import { checkDatabaseHealth } from '../../db/health'
 import { openApiDocument } from '../../openapi/document'
 
 /**
@@ -8,7 +7,7 @@ import { openApiDocument } from '../../openapi/document'
  */
 export async function getHealth(_req: Request, res: Response) {
   try {
-    await sql`select 1 as ok`.execute(db)
+    await checkDatabaseHealth()
     res.json({ status: 'ok' })
   } catch {
     res.status(503).json({ status: 'degraded', message: 'Database unavailable' })
