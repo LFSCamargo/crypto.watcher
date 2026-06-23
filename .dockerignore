@@ -1,18 +1,40 @@
+# Dependencies & build output (reinstalled/built in image)
 node_modules
 **/node_modules
 dist
 **/dist
 .nx
+coverage
+
+# Secrets & local env
+.env
+.env.*
+!.env.example
+
+# VCS & editor
 .git
 .github
-contracts/out
-contracts/cache
-contracts/lib
-**/.env
-**/.env.*
-!**/.env.example
-*.log
-.DS_Store
-apps/web/.vite
+.cursor
+*.md
+!apps/web/nginx.conf
+
+# Tests & reports
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+coverage
 playwright-report
 test-results
+lighthouse-reports
+e2e
+
+# Contracts (not needed for app images)
+contracts/out
+contracts/cache
+contracts/broadcast
+contracts/lib
+
+# Misc
+*.log
+.DS_Store
+.husky

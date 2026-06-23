@@ -59,6 +59,8 @@ pnpm run test               # unit/integration tests
 pnpm run build              # build all apps
 pnpm run lighthouse:web     # Lighthouse audits on production preview (apps/web)
 pnpm run email:dev          # React Email preview at http://localhost:3030
+pnpm run docker:dev         # local HMR stack (docker-compose.dev.yml + MailHog)
+docker compose up -d --build  # production stack (docker-compose.yml — Coolify default)
 
 # contracts (run inside contracts/)
 forge build

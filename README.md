@@ -21,7 +21,7 @@ Requires **Node 22.13** (see `.nvmrc`). With [nvm](https://github.com/nvm-sh/nvm
 nvm install    # reads .nvmrc (22.13)
 nvm use
 pnpm install
-docker compose up -d          # Postgres + MailHog
+docker compose -f docker-compose.dev.yml up -d postgres mailhog
 pnpm --filter api db:migrate  # run DB migrations
 pnpm run dev                  # web (5173) + api (3000)
 ```
@@ -29,13 +29,16 @@ pnpm run dev                  # web (5173) + api (3000)
 For a full run/test/deploy guide (local dev, Docker, contract tests, and Base
 Sepolia deployment) see [RUNNING.md](./RUNNING.md).
 
+For production secrets, env layout, and a pre-launch checklist see
+[PROVISIONING.md](./PROVISIONING.md).
+
 ### Run everything in Docker (with HMR)
 
 Spin up Postgres, MailHog, the API and the web app in containers; source is
 bind-mounted so edits hot-reload (Vite HMR + `tsx watch`):
 
 ```bash
-pnpm run docker:dev   # = docker compose up --build
+pnpm run docker:dev   # = docker compose -f docker-compose.dev.yml up --build
 # web → http://localhost:5173, api → http://localhost:3000, MailHog → http://localhost:8025
 ```
 

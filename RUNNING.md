@@ -1,7 +1,8 @@
 # Running Crypto Watcher
 
 How to run and test the stack locally, and how to deploy the contracts to the
-**Base Sepolia** testnet.
+**Base Sepolia** testnet. For safe production setup (secrets, env, checklist) see
+[PROVISIONING.md](./PROVISIONING.md).
 
 - Apps: `apps/web` (Vite/React, port `5173`) and `apps/api` (Express, port `3000`).
 - Contracts: `contracts/` (Solidity + Foundry), deploy target **Base Sepolia** (chain `84532`).
@@ -33,7 +34,7 @@ git submodule update --init --recursive   # fetch Foundry libs (forge-std, openz
 ```bash
 cp .env.example .env   # single central env shared by api, web and contracts
 
-docker compose up -d postgres mailhog   # Postgres (5432) + MailHog (1025/8025)
+docker compose -f docker-compose.dev.yml up -d postgres mailhog   # Postgres (5432) + MailHog (1025/8025)
 pnpm --filter api run db:migrate         # run DB migrations
 pnpm run dev                             # web (5173) + api (3000) in parallel
 pnpm --filter web icons:sync             # fetch curated coin logos (first time / after catalog changes)
@@ -49,15 +50,35 @@ Runs Postgres, MailHog, the API (`tsx watch`) and the web app (Vite) in
 containers. Source is bind-mounted, so file edits hot-reload.
 
 ```bash
-pnpm run docker:dev          # = docker compose up --build
+pnpm run docker:dev          # = docker compose -f docker-compose.dev.yml up --build
 # in another shell, run migrations against the containerized DB:
-docker compose exec api pnpm --filter api run db:migrate
+docker compose -f docker-compose.dev.yml exec api pnpm --filter api run db:migrate
 ```
 
 - Web: <http://localhost:5173> · API: <http://localhost:3000> · MailHog: <http://localhost:8025>
 
 > HMR in containers uses polling (`VITE_USE_POLLING` / `CHOKIDAR_USEPOLLING` are
-> set in `docker-compose.yml`).
+> set in `docker-compose.dev.yml`).
+
+---
+
+## Run in Docker (production)
+
+Default **`docker-compose.yml`** — used by Coolify. Postgres, API (migrations on
+start), and nginx serving the built SPA with same-origin API proxy. No MailHog.
+
+```bash
+cp .env.example .env
+# Required: POSTGRES_PASSWORD, WEB_URL, VITE_SITE_URL, CORS_ORIGINS, SMTP_HOST, MAIL_FROM
+
+docker compose up -d --build
+```
+
+- Web: `http://localhost:80` (override with `WEB_PORT` in `.env`)
+- API: internal only — reached via nginx proxy on the web container
+- Postgres: internal only — not published to the host
+
+See [PROVISIONING.md](./PROVISIONING.md) for the Coolify setup and full production checklist.
 
 ---
 

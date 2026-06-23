@@ -25,7 +25,7 @@
     "format": "prettier --write . && pnpm run format:contracts",
     "format:contracts": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:format",
     "deploy:testnet": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:deploy:testnet",
-    "docker:dev": "docker compose up --build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -1,81 +1,79 @@
+# Production stack (default) — Postgres + API + web (nginx). No MailHog.
+#
+# Used by Coolify and local prod smoke tests: docker compose up -d --build
+#
+# Set env in Coolify (or root `.env` locally). The web container serves the SPA
+# and reverse-proxies API routes to the api service. Leave VITE_API_URL empty
+# so the browser uses same-origin requests through nginx.
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: crypto_watcher
-    ports:
-      - '5432:5432'
+      POSTGRES_USER: ${POSTGRES_USER:-cw_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-crypto_watcher}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 5s
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
       timeout: 5s
       retries: 5
-
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - '1025:1025'
-      - '8025:8025'
+    networks:
+      - internal
 
   api:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    command: pnpm --filter api run dev
-    # Central env file (optional). Values below override it for container
-    # networking (DB/SMTP hostnames differ from local dev).
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
     env_file:
       - path: .env
         required: false
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: '3000'
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/crypto_watcher
-      LOG_LEVEL: debug
-      SMTP_HOST: mailhog
-      SMTP_PORT: '1025'
-      MAIL_FROM: 'Crypto Watcher <noreply@localhost>'
-      WEB_URL: http://localhost:5173
+      DATABASE_URL: postgres://${POSTGRES_USER:-cw_app}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-crypto_watcher}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      WEB_URL: ${WEB_URL:?Set WEB_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS:?Set CORS_ORIGINS}
       RPC_URL: ${RPC_URL:-https://sepolia.base.org}
-      CORS_ORIGINS: http://localhost:5173
-      # tsx/chokidar file watching inside the container (HMR).
-      CHOKIDAR_USEPOLLING: 'true'
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/api/node_modules
+      SMTP_HOST: ${SMTP_HOST:?Set SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:?Set MAIL_FROM}
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - internal
+    expose:
+      - '3000'
 
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    command: pnpm --filter web run dev -- --host 0.0.0.0
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
-      VITE_WALLETCONNECT_PROJECT_ID: ${VITE_WALLETCONNECT_PROJECT_ID:-}
-      VITE_DEFAULT_CHAIN_ID: '84532'
-      # Vite HMR file watching inside the container.
-      VITE_USE_POLLING: 'true'
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_SITE_URL: ${VITE_SITE_URL:?Set VITE_SITE_URL}
+        VITE_WALLETCONNECT_PROJECT_ID: ${VITE_WALLETCONNECT_PROJECT_ID:-}
+        VITE_DEFAULT_CHAIN_ID: ${VITE_DEFAULT_CHAIN_ID:-84532}
+    restart: unless-stopped
     ports:
-      - '5173:5173'
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/web/node_modules
+      - '${WEB_PORT:-80}:80'
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
 
 volumes:
   pgdata:
