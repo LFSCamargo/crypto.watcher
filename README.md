@@ -106,7 +106,7 @@ pnpm run format
 
 ### Deployment
 
-- Hetzner
+- Hostinger + Coolify
 - Docker
 - Nginx
 - SSL
