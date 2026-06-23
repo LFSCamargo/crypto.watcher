@@ -20,14 +20,18 @@ const formatZodError = (error: ZodError) =>
 export const validate =
   (schemas: { body?: ZodType; query?: ZodType; params?: ZodType }): RequestHandler =>
   (req, _res, next) => {
-    try {
-      if (schemas.body) schemas.body.parse(req.body)
-      if (schemas.query) schemas.query.parse(req.query)
-      if (schemas.params) schemas.params.parse(req.params)
-      next()
-    } catch (error) {
-      next(new HttpError(400, 'Invalid request', formatZodError(error as ZodError)))
+    const failed = [
+      schemas.body?.safeParse(req.body),
+      schemas.query?.safeParse(req.query),
+      schemas.params?.safeParse(req.params),
+    ].find((result) => result?.success === false)
+
+    if (failed?.success === false) {
+      next(new HttpError(400, 'Invalid request', formatZodError(failed.error)))
+      return
     }
+
+    next()
   }
 
 export const asyncHandler =

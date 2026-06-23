@@ -9,19 +9,24 @@ export const AvatarUrlSchema = z
   .string()
   .max(MAX_AVATAR_URL_LENGTH)
   .superRefine((value, ctx) => {
-    if (value.startsWith('data:')) {
-      if (!BASE64_DATA_URI.test(value)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'avatarUrl must be a base64 image data URI (jpeg, png, webp, or gif)',
-        })
-      }
-      return
-    }
-    if (!z.string().url().safeParse(value).success) {
+    const isDataUri = value.startsWith('data:')
+    const isValidDataUri = BASE64_DATA_URI.test(value)
+    if (isDataUri && isValidDataUri) return
+
+    if (isDataUri) {
       ctx.addIssue({
         code: 'custom',
-        message: 'avatarUrl must be a valid http(s) URL or base64 image data URI',
+        message: 'avatarUrl must be a base64 image data URI (jpeg, png, webp, or gif)',
       })
+      return
     }
+
+    if (z.string().url().safeParse(value).success) {
+      return
+    }
+
+    ctx.addIssue({
+      code: 'custom',
+      message: 'avatarUrl must be a valid http(s) URL or base64 image data URI',
+    })
   })

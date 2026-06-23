@@ -7,6 +7,15 @@ type ErrorWithStatus = {
   type?: string
   code?: string
   message?: string
+  cause?: unknown
+}
+
+type ErrorResponse = {
+  status: number
+  body: {
+    message: string
+    details?: unknown
+  }
 }
 
 const isEntityTooLarge = (error: unknown): error is ErrorWithStatus =>
@@ -25,14 +34,16 @@ const PG_UNAVAILABLE_CODES = new Set([
 ])
 
 const NODE_UNAVAILABLE_CODES = new Set(['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ECONNRESET'])
+const MAX_ERROR_CAUSE_DEPTH = 8
+
+const asErrorWithStatus = (error: unknown): ErrorWithStatus | undefined =>
+  typeof error === 'object' && error !== null ? (error as ErrorWithStatus) : undefined
 
 const findPgCode = (error: unknown): string | undefined => {
-  let current: unknown = error
-  while (typeof current === 'object' && current !== null) {
-    if ('code' in current && typeof (current as ErrorWithStatus).code === 'string') {
-      return (current as ErrorWithStatus).code
-    }
-    current = (current as { cause?: unknown }).cause
+  let current = asErrorWithStatus(error)
+  for (let depth = 0; current && depth < MAX_ERROR_CAUSE_DEPTH; depth += 1) {
+    if (typeof current.code === 'string') return current.code
+    current = asErrorWithStatus(current.cause)
   }
   return undefined
 }
@@ -43,47 +54,58 @@ const isPgUniqueViolation = (error: unknown): boolean => findPgCode(error) === '
 
 const isDatabaseUnavailable = (error: unknown): boolean => {
   const pgCode = findPgCode(error)
-  if (pgCode && PG_UNAVAILABLE_CODES.has(pgCode)) return true
+  if (pgCode) return PG_UNAVAILABLE_CODES.has(pgCode)
 
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    const nodeCode = (error as ErrorWithStatus).code
-    if (nodeCode && NODE_UNAVAILABLE_CODES.has(nodeCode)) return true
+  const nodeCode = asErrorWithStatus(error)?.code
+  if (!nodeCode) return false
+
+  return NODE_UNAVAILABLE_CODES.has(nodeCode)
+}
+
+const ERROR_RESPONSE_MAPPERS: Array<{
+  matches: (error: unknown) => boolean
+  response: ErrorResponse
+}> = [
+  {
+    matches: (error) => error instanceof SyntaxError && 'body' in error,
+    response: { status: 400, body: { message: 'Invalid JSON body' } },
+  },
+  {
+    matches: isEntityTooLarge,
+    response: { status: 413, body: { message: 'Request body is too large' } },
+  },
+  {
+    matches: isPgUniqueViolation,
+    response: {
+      status: 409,
+      body: { message: 'A profile field must be unique (nickname or wallet already taken)' },
+    },
+  },
+  {
+    matches: isPgCheckViolation,
+    response: { status: 400, body: { message: 'Profile image exceeds the maximum allowed size' } },
+  },
+  {
+    matches: isDatabaseUnavailable,
+    response: { status: 503, body: { message: 'Database temporarily unavailable' } },
+  },
+]
+
+const getErrorResponse = (error: unknown): ErrorResponse | undefined => {
+  if (error instanceof HttpError) {
+    return {
+      status: error.statusCode,
+      body: { message: error.message, details: error.details },
+    }
   }
 
-  return false
+  return ERROR_RESPONSE_MAPPERS.find(({ matches }) => matches(error))?.response
 }
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  if (error instanceof HttpError) {
-    res.status(error.statusCode).json({
-      message: error.message,
-      details: error.details,
-    })
-    return
-  }
-
-  if (error instanceof SyntaxError && 'body' in error) {
-    res.status(400).json({ message: 'Invalid JSON body' })
-    return
-  }
-
-  if (isEntityTooLarge(error)) {
-    res.status(413).json({ message: 'Request body is too large' })
-    return
-  }
-
-  if (isPgUniqueViolation(error)) {
-    res.status(409).json({ message: 'A profile field must be unique (nickname or wallet already taken)' })
-    return
-  }
-
-  if (isPgCheckViolation(error)) {
-    res.status(400).json({ message: 'Profile image exceeds the maximum allowed size' })
-    return
-  }
-
-  if (isDatabaseUnavailable(error)) {
-    res.status(503).json({ message: 'Database temporarily unavailable' })
+  const response = getErrorResponse(error)
+  if (response) {
+    res.status(response.status).json(response.body)
     return
   }
 

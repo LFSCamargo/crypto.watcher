@@ -3,6 +3,11 @@ import { HttpError } from '../../../core/http/validation'
 import { analysisRequestsService } from '../analysis-requests.service'
 import { CreateAnalysisRequestBodySchema } from '../schemas'
 
+const analysisRequestError = (error: unknown) =>
+  error instanceof Error && error.message.startsWith('INVALID_')
+    ? new HttpError(400, 'Invalid analysis request')
+    : error
+
 export async function createAnalysisRequestHandler(req: Request, res: Response) {
   const body = CreateAnalysisRequestBodySchema.parse(req.body)
   try {
@@ -14,9 +19,6 @@ export async function createAnalysisRequestHandler(req: Request, res: Response) 
     })
     res.status(201).json(request)
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('INVALID_')) {
-      throw new HttpError(400, 'Invalid analysis request')
-    }
-    throw error
+    throw analysisRequestError(error)
   }
 }
