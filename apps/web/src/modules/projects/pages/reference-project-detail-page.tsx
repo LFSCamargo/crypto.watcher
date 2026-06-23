@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '../../../components/ui'
 import { ProjectIcon } from '../../../components/brand/project-icon'
 import { ProjectPricePanel } from '../../market/components/project-price-panel'
+import { ProtocolMetricsPanel } from '../../protocol-metrics/components/protocol-metrics-panel'
 import { ProjectDetailBackButton } from '../components/project-detail-back-button'
 import { ProjectReviewDetail } from '../components/project-review-detail'
 import { getProjectReviewProfile, getVerdictLabel } from '../lib/curated-project-reviews'
@@ -83,6 +84,7 @@ export function ReferenceProjectDetailPage() {
         </div>
 
         <ProjectPricePanel slug={project.slug} />
+        <ProtocolMetricsPanel slug={project.slug} />
         <ProjectReviewDetail profile={review} />
 
         <Card className="rounded-2xl">

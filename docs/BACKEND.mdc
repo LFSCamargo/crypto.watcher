@@ -78,6 +78,14 @@ apps/
     │   │   │   ├── market.repository.ts
     │   │   │   ├── market.schema.ts
     │   │   │   └── __tests__/         # market.service.test.ts, etc.
+    │   │   ├── protocol-metrics/   # Protocol + chain fundamentals [MVP]
+    │   │   │   ├── protocol-metrics.routes.ts
+    │   │   │   ├── protocol-metrics.service.ts
+    │   │   │   ├── protocol-metrics.repository.ts
+    │   │   │   ├── metrics-target.ts
+    │   │   │   ├── handlers/
+    │   │   │   ├── schemas/
+    │   │   │   └── __tests__/
     │   │   ├── governance/        # Governance proposals/events    [MVP]
     │   │   ├── reputation/        # Reviewer credentials / council    [MVP→Phase 1]
     │   │   ├── rewards/           # Reviewer compensation             [Phase 1]
@@ -129,6 +137,13 @@ apps/
 - `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
 - Data sourced from CoinGecko (free public API); responses cached in PostgreSQL (`market_cache`) for 3 hours, with in-memory L1 cache and stale DB fallback when CoinGecko is unavailable.
 - Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`).
+
+### protocol-metrics `[MVP]`
+- `GET /protocol-metrics/projects/:slug` — fundamentals for curated projects via a resolver that tries **protocol** entities first (DeFi, infrastructure, stablecoins) and **chain DeFi TVL** for L1/L2 networks.
+- Protocol snapshots include TVL trends/history, fees/revenue/DEX volume charts, chain/token breakdown, mcap, and exploit incidents when available.
+- Chain snapshots include TVL trends/history plus network-wide DEX volume and fees paid (overview endpoints).
+- Ordered fallback targets per slug (`metrics-target.ts`); explicit unavailable list for assets with no feed.
+- Cached in PostgreSQL (`protocol_metrics_cache`) for 3 hours with in-memory L1 cache and stale DB fallback.
 
 ### governance — launch requirement
 - Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`

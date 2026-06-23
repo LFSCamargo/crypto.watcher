@@ -78,6 +78,7 @@ apps/
     │   │   ├── voting/              # Legacy project vote UI (deprecated) [MVP]
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
+    │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
     │   │   ├── reputation/         # Reviewer credentials profile       [MVP→Phase 1]
     │   │   ├── rewards/            # Reviewer compensation UI           [Phase 1]
@@ -107,6 +108,7 @@ apps/
 - Lifecycle status badges (`In analysis → Under review → Report published`).
 - Expert score and structured report on the detail page.
 - Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
+- Protocol fundamentals panel on project detail (TVL trend, fees/revenue, exploit history; hidden when unavailable e.g. pure L1 networks).
 - Community submission form. `[Phase 2]`
 
 ### market `[MVP]`
@@ -114,6 +116,12 @@ apps/
 - `TopRatedProjectCard` on the landing hero (description, tags, price, 24h/7d/1m/1y changes, compact sparkline).
 - SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
 - `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
+
+### protocol-metrics `[MVP]`
+- `ProtocolMetricsPanel` on reference and live project detail pages below the price panel.
+- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts, chain bar breakdown with chain icons, token composition, security incidents).
+- **Chain** projects (L1/L2): TVL plus network-wide DEX volume and fees paid — DeFi activity locked on the network, not a single protocol entity.
+- Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
 
 ### blog `[MVP]`
 - Public blog at `/blog` with markdown-sourced articles (launch story, progress updates, roadmap).

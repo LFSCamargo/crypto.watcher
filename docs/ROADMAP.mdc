@@ -91,6 +91,8 @@ evidence, and protocol governance manages the reviewer council.
 - Auth, accounts, basic profile.
 - Transactional emails (verification, notifications) via React Email + Nodemailer/MailHog.
 - API documentation via Zod-generated OpenAPI + Swagger UI.
+- **Protocol fundamentals:** TVL, fees, revenue, and exploit history from DeFi Llama for
+  curated DeFi protocols (cached snapshots; assists governor analysis and user context).
 - CI/CD, security scanning (GitHub Actions), observability (Sentry, Better Stack).
 
 ---
@@ -131,6 +133,8 @@ Goal: become a platform others build on.
 - Webhooks for project/report/governance events.
 - Embeddable score widgets / badges (expert-reviewed badge).
 - Integrations: data providers (price/TVL/audit feeds) to enrich governor analysis.
+  MVP ships DeFi Llama protocol fundamentals (TVL, fees, revenue, exploits); Phase 3 adds
+  governance feeds (Tally), bug-bounty posture (Immunefi), and automated risk signals.
 - Mobile-friendly PWA / dedicated mobile experience.
 - Automated risk signals to **assist** governors (human-in-the-loop; never auto-score).
 
