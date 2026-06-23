@@ -6,6 +6,8 @@ import { AuthorityVotePanel } from '../../voting/components/authority-vote-panel
 import { ProjectIcon } from '../../../components/brand/project-icon'
 import { ProjectDetailBackButton } from '../components/project-detail-back-button'
 import { ProjectReviewDetail } from '../components/project-review-detail'
+import { ProjectPricePanel } from '../../market/components/project-price-panel'
+import { ProtocolMetricsPanel } from '../../protocol-metrics/components/protocol-metrics-panel'
 import { useProject } from '../hooks/use-projects'
 import { formatProjectState } from '../lib/format'
 import { getCuratedProject } from '../lib/curated-projects'
@@ -80,6 +82,8 @@ export function ProjectDetailPage() {
             </p>
           </div>
         </div>
+        <ProjectPricePanel slug={project.slug} />
+        <ProtocolMetricsPanel slug={project.slug} />
         {review ? (
           <ProjectReviewDetail profile={review} />
         ) : (

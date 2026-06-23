@@ -115,7 +115,7 @@ export function HeroSection() {
             <div>
               <h2 className="text-xl font-bold">Top rated projects</h2>
               <p className="text-sm text-muted-foreground">
-                Highest safety scores from our review authority
+                Top credit ratings from our review authority
               </p>
             </div>
             <Button asChild variant="ghost" size="sm">

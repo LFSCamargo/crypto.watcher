@@ -10,6 +10,7 @@ import { useMarketPrice } from '../../market/hooks/use-market-price'
 import { changeTone, formatPercentChange, formatUsd } from '../../market/lib/format-price'
 import { MiniSparkline } from '../../market/components/mini-sparkline'
 import { PriceChart } from '../../market/components/price-chart'
+import { resolveCreditRatingFromSafetyScore } from '../../../lib/ratings/credit-rating'
 
 function scoreTone(score: number) {
   if (score >= 85) return 'success' as const
@@ -110,6 +111,9 @@ export function CuratedProjectCard({
   const { data, isLoading } = useMarketPrice(isVisible ? project.slug : undefined)
   const marketPending = !isVisible || isLoading
   const tone = scoreTone(project.score)
+  const creditRating = resolveCreditRatingFromSafetyScore(project.score, {
+    forceDefault: project.status === 'watch',
+  })
 
   return (
     <motion.div
@@ -142,9 +146,10 @@ export function CuratedProjectCard({
                 </div>
                 <Badge
                   variant={tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'destructive'}
-                  className="shrink-0 rounded-full"
+                  className="shrink-0 rounded-full font-semibold tabular-nums"
+                  title={`Moody's ${creditRating.moodys}`}
                 >
-                  {project.score}%
+                  {creditRating.sp}
                 </Badge>
               </div>
             </div>

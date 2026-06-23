@@ -74,6 +74,7 @@ export default defineConfig({
       '/market': apiProxy(),
       '/auth': apiProxy(),
       '/projects': apiProxy(),
+      '/protocol-metrics': apiProxy(),
       '/analysis-requests': apiProxy(),
       '/users': apiProxy(),
       '/reputation': apiProxy(),

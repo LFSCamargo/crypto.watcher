@@ -26,6 +26,10 @@
     "format:contracts": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:format",
     "deploy:testnet": "NX_DAEMON=false NX_ISOLATE_PLUGINS=false nx run contracts:deploy:testnet",
     "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
+    "db:migrate": "pnpm --filter api run db:migrate",
+    "protocol-metrics:refresh": "pnpm --filter api run protocol-metrics:refresh-cache",
+    "protocol-metrics:smoke": "node scripts/smoke-protocol-metrics.mjs",
+    "protocol-metrics:local": "pnpm run db:migrate && pnpm run protocol-metrics:refresh && pnpm run protocol-metrics:smoke",
     "prepare": "husky"
   },
   "devDependencies": {

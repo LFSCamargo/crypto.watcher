@@ -78,6 +78,16 @@ apps/
     │   │   │   ├── market.repository.ts
     │   │   │   ├── market.schema.ts
     │   │   │   └── __tests__/         # market.service.test.ts, etc.
+    │   │   ├── protocol-metrics/   # Protocol + chain fundamentals [MVP]
+    │   │   │   ├── protocol-metrics.routes.ts
+    │   │   │   ├── protocol-metrics.service.ts
+    │   │   │   ├── protocol-metrics.repository.ts
+    │   │   │   ├── protocol-valuation.ts      # On-chain valuation model [MVP]
+    │   │   │   └── protocol-metrics-changes.ts
+    │   │   │   ├── metrics-target.ts
+    │   │   │   ├── handlers/
+    │   │   │   ├── schemas/
+    │   │   │   └── __tests__/
     │   │   ├── governance/        # Governance proposals/events    [MVP]
     │   │   ├── reputation/        # Reviewer credentials / council    [MVP→Phase 1]
     │   │   ├── rewards/           # Reviewer compensation             [Phase 1]
@@ -122,13 +132,23 @@ apps/
 
 ### scoring `[MVP]`
 - Serve governor-published project scores and structured report breakdown.
+- Map numeric safety scores to paired **S&P** / **Moody's** letter ratings and an **Investment grade** vs **Speculative grade** group (`lib/ratings/credit-rating.ts`).
 - Scores immutable per review round; methodology version referenced.
 - Enrich with external risk-data providers to assist governors. `[Phase 3]`
 
 ### market `[MVP]`
 - `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
 - Data sourced from CoinGecko (free public API); responses cached in PostgreSQL (`market_cache`) for 3 hours, with in-memory L1 cache and stale DB fallback when CoinGecko is unavailable.
-- Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`).
+- Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`, `avalanche` → `avalanche-2`).
+
+### protocol-metrics `[MVP]`
+- `GET /protocol-metrics/projects/:slug` — fundamentals for curated projects via a resolver that tries **stablecoin supply** (USDC/USDT), **protocol** entities (DeFi, infrastructure), and **chain DeFi TVL** for L1/L2 networks.
+- Protocol snapshots include TVL trends/history (365-day retention), fees/revenue/DEX volume charts, chain/token breakdown, mcap, exploit incidents, and an **on-chain valuation model** (`protocol-valuation.ts`, methodology `CW-Valuation-v1`).
+- Valuation computes annualized fees/revenue, revenue capture rate, revenue growth (30d/1y), fee sustainability, governance-quality proxy (chain diversification), security score, composite score, and P/S — using `lib/safe-math/` guards (no divide-by-zero).
+- **Stablecoin** snapshots (USDC, USDT) use DeFi Llama stablecoin supply data: circulating supply history and supply-by-chain breakdown — not protocol TVL.
+- Chain snapshots include TVL trends/history plus network-wide DEX volume and fees paid (overview endpoints).
+- Ordered fallback targets per slug (`metrics-target.ts`); explicit unavailable list for assets with no feed.
+- Cached in PostgreSQL (`protocol_metrics_cache`) for 3 hours with in-memory L1 cache and stale DB fallback.
 
 ### governance — launch requirement
 - Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`

@@ -36,7 +36,11 @@ export async function fetchProjectMarket(slug: string): Promise<MarketSnapshot> 
     return parseMarketResponse(response)
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('API 404')) {
-      throw new MarketUnavailableError()
+      try {
+        return await fetchProjectMarketDirect(slug, coingeckoId)
+      } catch {
+        throw new MarketUnavailableError()
+      }
     }
 
     if (!isApiUnavailable(error)) {

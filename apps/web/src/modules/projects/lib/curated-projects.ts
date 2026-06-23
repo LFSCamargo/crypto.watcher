@@ -1,3 +1,8 @@
+import {
+  compareCreditRatings,
+  resolveCreditRatingFromSafetyScore,
+} from '../../../lib/ratings/credit-rating'
+
 export interface CuratedProject {
   slug: string
   name: string
@@ -1338,6 +1343,25 @@ export const curatedProjects: CuratedProject[] = [
   },
 ]
 
+function creditRatingForProject(project: CuratedProject) {
+  return resolveCreditRatingFromSafetyScore(project.score, {
+    forceDefault: project.status === 'watch',
+  })
+}
+
+/** Best credit ratings first (AAA → D), then higher safety score, then name. */
+export function sortCuratedProjectsByRating(projects: CuratedProject[]): CuratedProject[] {
+  return [...projects].sort((a, b) => {
+    const ratingCompare = compareCreditRatings(
+      creditRatingForProject(a),
+      creditRatingForProject(b),
+    )
+    if (ratingCompare !== 0) return ratingCompare
+    if (b.score !== a.score) return b.score - a.score
+    return a.name.localeCompare(b.name)
+  })
+}
+
 export function filterCuratedProjects(
   query: string,
   projects: CuratedProject[] = curatedProjects,
@@ -1349,17 +1373,19 @@ export function filterCuratedProjects(
     : projects
 
   if (!normalizedQuery) {
-    return scopedProjects
+    return sortCuratedProjectsByRating(scopedProjects)
   }
 
-  return scopedProjects.filter((project) =>
-    [
-      project.name,
-      project.symbol,
-      project.network,
-      project.description,
-      project.category,
-    ].some((value) => value.toLowerCase().includes(normalizedQuery)),
+  return sortCuratedProjectsByRating(
+    scopedProjects.filter((project) =>
+      [
+        project.name,
+        project.symbol,
+        project.network,
+        project.description,
+        project.category,
+      ].some((value) => value.toLowerCase().includes(normalizedQuery)),
+    ),
   )
 }
 
@@ -1368,5 +1394,5 @@ export function getCuratedProject(slug: string): CuratedProject | undefined {
 }
 
 export function getTopRatedProjects(limit: number): CuratedProject[] {
-  return [...curatedProjects].sort((a, b) => b.score - a.score).slice(0, limit)
+  return sortCuratedProjectsByRating(curatedProjects).slice(0, limit)
 }

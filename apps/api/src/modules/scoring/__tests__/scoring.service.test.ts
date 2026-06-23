@@ -58,6 +58,7 @@ describe('scoringService', () => {
       round: 1,
       value: '7500',
       breakdown: scoreRow.breakdown,
+      creditRating: { sp: 'B', moodys: 'B', group: 'speculative_grade' },
     })
   })
 

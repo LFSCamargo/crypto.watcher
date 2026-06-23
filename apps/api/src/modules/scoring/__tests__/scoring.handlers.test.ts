@@ -20,6 +20,7 @@ const score = {
   round: 1,
   value: '7500',
   breakdown: { weightFor: '75', weightAgainst: '25', totalWeight: '100' },
+  creditRating: { sp: 'B' as const, moodys: 'B' as const, group: 'speculative_grade' as const },
 }
 
 describe('scoring handlers', () => {

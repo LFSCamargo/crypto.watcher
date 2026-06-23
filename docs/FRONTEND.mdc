@@ -78,6 +78,7 @@ apps/
     │   │   ├── voting/              # Legacy project vote UI (deprecated) [MVP]
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
+    │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
     │   │   ├── reputation/         # Reviewer credentials profile       [MVP→Phase 1]
     │   │   ├── rewards/            # Reviewer compensation UI           [Phase 1]
@@ -107,6 +108,7 @@ apps/
 - Lifecycle status badges (`In analysis → Under review → Report published`).
 - Expert score and structured report on the detail page.
 - Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
+- Protocol fundamentals panel on project detail (TVL trend, fees/revenue, exploit history; hidden when unavailable e.g. pure L1 networks).
 - Community submission form. `[Phase 2]`
 
 ### market `[MVP]`
@@ -114,6 +116,15 @@ apps/
 - `TopRatedProjectCard` on the landing hero (description, tags, price, 24h/7d/1m/1y changes, compact sparkline).
 - SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
 - `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
+
+### protocol-metrics `[MVP]`
+- `ProtocolMetricsPanel` on reference and live project detail pages below the price panel.
+- Dev server proxies `GET /protocol-metrics/*` to the API (`vite.config.ts`); without this, the browser receives SPA HTML and metrics fail silently.
+- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts with **1W/1M/3M/1Y** ranges, chain + token bar breakdowns, **on-chain valuation model**, security incidents).
+- **On-chain valuation:** always surfaced via `ProtocolValuationSection` — shows computed metrics when DeFi Llama fee/revenue data exists, or an explanatory empty state (stablecoin, missing fees, missing revenue).
+- **Stablecoin** projects (USDC, USDT): circulating supply, supply history, and supply-by-chain bar chart.
+- **Chain** projects (L1/L2): TVL plus network-wide DEX volume and fees paid — DeFi activity locked on the network, not a single protocol entity.
+- Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
 
 ### blog `[MVP]`
 - Public blog at `/blog` with markdown-sourced articles (launch story, progress updates, roadmap).
@@ -143,6 +154,7 @@ apps/
 
 ### scoring `[MVP]`
 - Expert score breakdown + charts from governor-published reports.
+- **Credit-style ratings:** each safety score maps to paired **S&P** and **Moody's** letter grades (`AAA`/`Aaa` … `D`) and a top-level group — **Investment grade** (`AAA`–`BBB`) or **Speculative grade** (`BB`–`D`). See `lib/ratings/credit-rating.ts`.
 - Enriched external-signal display. `[Phase 3]`
 
 ### governance — launch requirement

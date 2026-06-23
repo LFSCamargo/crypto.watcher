@@ -21,6 +21,10 @@ import {
   MarketSnapshotSchema,
 } from '../../modules/market/schemas'
 import {
+  ProtocolMetricsProjectParamsSchema,
+  ProtocolMetricsSnapshotSchema,
+} from '../../modules/protocol-metrics/schemas'
+import {
   CreateProjectBodySchema,
   ErrorResponseSchema,
   ProjectIdParamsSchema,
@@ -299,6 +303,33 @@ registry.registerPath({
     },
     404: {
       description: 'Price data unavailable for this project',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+registry.registerPath({
+  method: 'get',
+  path: '/protocol-metrics/projects/{slug}',
+  tags: ['protocol-metrics'],
+  request: {
+    params: ProtocolMetricsProjectParamsSchema,
+  },
+  responses: {
+    200: {
+      description: 'Cached protocol fundamentals snapshot (TVL, fees, revenue, exploits)',
+      content: {
+        'application/json': {
+          schema: ProtocolMetricsSnapshotSchema,
+        },
+      },
+    },
+    404: {
+      description: 'Protocol metrics unavailable for this project',
       content: {
         'application/json': {
           schema: ErrorResponseSchema,

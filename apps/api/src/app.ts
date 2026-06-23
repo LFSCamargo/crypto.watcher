@@ -12,6 +12,7 @@ import { authRoutes } from './modules/auth/auth.routes'
 import { commentsRoutes } from './modules/comments/comments.routes'
 import { governanceRoutes } from './modules/governance/governance.routes'
 import { marketRoutes } from './modules/market/market.routes'
+import { protocolMetricsRoutes } from './modules/protocol-metrics/protocol-metrics.routes'
 import { projectsRoutes } from './modules/projects/projects.routes'
 import { reputationRoutes } from './modules/reputation/reputation.routes'
 import { scoringRoutes } from './modules/scoring/scoring.routes'
@@ -39,6 +40,7 @@ app.use(votingRoutes)
 app.use(scoringRoutes)
 app.use('/projects', projectsRoutes)
 app.use('/market', marketRoutes)
+app.use('/protocol-metrics', protocolMetricsRoutes)
 app.use('/users', usersRoutes)
 app.use('/reputation', reputationRoutes)
 app.use('/governance', governanceRoutes)

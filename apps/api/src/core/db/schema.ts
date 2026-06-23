@@ -177,6 +177,19 @@ export interface MarketCacheTable {
   updated_at: Generated<Date>
 }
 
+export interface ProtocolMetricsCacheTable {
+  slug: string
+  defillama_id: string
+  snapshot: JSONColumnType<
+    Record<string, unknown>,
+    Record<string, unknown>,
+    Record<string, unknown>
+  >
+  fetched_at: Date
+  expires_at: Date
+  updated_at: Generated<Date>
+}
+
 export interface Database {
   users: UsersTable
   sessions: SessionsTable
@@ -189,4 +202,5 @@ export interface Database {
   governance_proposals: GovernanceProposalsTable
   chain_events: ChainEventsTable
   market_cache: MarketCacheTable
+  protocol_metrics_cache: ProtocolMetricsCacheTable
 }
