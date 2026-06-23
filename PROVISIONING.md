@@ -103,8 +103,8 @@ docker compose up -d --build
 3. Expose the **`web`** service on **container port `80`** — Coolify’s proxy handles public HTTP/HTTPS (do not bind host `:80` in compose; Coolify already uses it).
 4. Set `WEB_URL` and `VITE_SITE_URL` to your public `https://` domain (rebuild
    when `VITE_*` build args change).
-5. Leave `VITE_API_URL` empty — nginx on the web container proxies API routes
-   same-origin.
+5. Leave `VITE_API_URL` empty — production builds call the API at `/api/*` (nginx
+   proxy); SPA routes like `/auth/reset-password` stay on the web app.
 6. Postgres and API stay on the internal network; do not publish them publicly.
 
 Production images:
@@ -114,9 +114,9 @@ Production images:
 | API | `apps/api/Dockerfile` | Runs DB migrations on start, non-root user, health check |
 | Web | `apps/web/Dockerfile` | Vite build + nginx; proxies `/auth`, `/projects`, etc. to API |
 
-Leave `VITE_API_URL` empty so the browser hits the API through nginx on the same
-origin. Put TLS in front (Coolify / host nginx) and set `WEB_URL` / `VITE_SITE_URL`
-to your public `https://` URL.
+Leave `VITE_API_URL` empty so production uses the `/api` prefix (no path clash with
+SPA routes like `/auth/*` or `/docs/*`). Put TLS in front (Coolify) and set
+`WEB_URL` / `VITE_SITE_URL` to your public `https://` URL.
 
 Inject configuration through **Coolify environment variables** (or your orchestrator’s
 secret store), not checked-in files. Build the web app with production `VITE_*` values
@@ -135,7 +135,7 @@ Work through this before exposing the app on the public internet.
 - [ ] `WEB_URL` = public HTTPS URL of the web app (used in email links).
 - [ ] `VITE_SITE_URL` = same public HTTPS URL (SEO, canonical links, sitemap).
 - [ ] `CORS_ORIGINS` = exact production web origin(s) only — no `*` , no stray localhost entries.
-- [ ] `VITE_API_URL` empty when using the default `docker-compose.yml` (nginx same-origin proxy), or set to a public API URL if split across hosts.
+- [ ] `VITE_API_URL` empty when using the default `docker-compose.yml` (client uses `/api`; rebuild web after change), or set to a full API URL if split across hosts.
 - [ ] `LOG_LEVEL=info` (or `warn`) — avoid `debug` in production.
 - [ ] `VITE_WALLETCONNECT_PROJECT_ID` set (create a project at [WalletConnect Cloud](https://cloud.walletconnect.com)).
 

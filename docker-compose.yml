@@ -7,8 +7,8 @@
 #   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 #
 # Set env in Coolify (or root `.env` locally). The web container serves the SPA
-# and reverse-proxies API routes to the api service. Leave VITE_API_URL empty
-# so the browser uses same-origin requests through nginx.
+# and reverse-proxies /api/* to the api service. Leave VITE_API_URL empty so the
+# client uses /api in production (SPA routes like /auth/* stay on the web app).
 services:
   postgres:
     image: postgres:16-alpine

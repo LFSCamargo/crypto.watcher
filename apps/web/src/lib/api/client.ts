@@ -1,5 +1,11 @@
-/** Empty string uses same-origin requests (Vite dev proxy → API). */
-const BASE_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '' : 'http://localhost:3000')
+/** Dev: same-origin + Vite proxy. Prod (Docker/Coolify): /api via nginx. */
+const resolveApiBaseUrl = (): string => {
+  const fromEnv = import.meta.env.VITE_API_URL?.trim()
+  if (fromEnv) return fromEnv
+  return import.meta.env.DEV ? '' : '/api'
+}
+
+const BASE_URL = resolveApiBaseUrl()
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
