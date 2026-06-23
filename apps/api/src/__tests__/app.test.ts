@@ -19,6 +19,7 @@ describe('api app', () => {
       '/auth/nonce',
       '/auth/verify',
       '/auth/me',
+      '/users/me',
       '/projects',
       '/projects/{slug}',
       '/projects/{id}/comments',

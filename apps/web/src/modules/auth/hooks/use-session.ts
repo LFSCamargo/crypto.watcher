@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useAccount, useSignMessage } from 'wagmi'
 import { authApi } from '../api/auth.api'
+import { usersApi } from '../../users/api/users.api'
 import type { LoginBody, RegisterBody } from '../../../lib/api/types'
 import { useSession } from '../../../store/session'
 
@@ -10,7 +11,8 @@ export function useAuthMeQuery() {
     queryKey: ['auth', 'me'],
     queryFn: async () => {
       try {
-        return await authApi.me()
+        const user = await usersApi.getMe()
+        return { user }
       } catch {
         return null
       }

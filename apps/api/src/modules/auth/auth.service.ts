@@ -39,7 +39,6 @@ const sessionUserFromRow = (session: {
   x_account: string | null
   nickname: string | null
   display_name: string | null
-  avatar_url: string | null
   bio: string | null
   role: 'user' | 'team' | 'admin'
   email_verified_at: Date | null
@@ -54,7 +53,7 @@ const sessionUserFromRow = (session: {
     x_account: session.x_account,
     nickname: session.nickname,
     display_name: session.display_name,
-    avatar_url: session.avatar_url,
+    avatar_url: null,
     bio: session.bio,
     role: session.role,
     email_verified_at: session.email_verified_at,

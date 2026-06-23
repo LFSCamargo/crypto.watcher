@@ -148,6 +148,13 @@ registry.registerPath({
 })
 
 registry.registerPath({
+  method: 'get',
+  path: '/users/me',
+  tags: ['users'],
+  responses: { 200: { description: 'Current user profile (includes avatar)', ...json(UserSchema) } },
+})
+
+registry.registerPath({
   method: 'patch',
   path: '/users/me',
   tags: ['users'],

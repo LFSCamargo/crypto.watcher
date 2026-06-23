@@ -12,7 +12,6 @@ const userSessionSelect = [
   'users.x_account',
   'users.nickname',
   'users.display_name',
-  'users.avatar_url',
   'users.bio',
   'users.role',
   'users.email_verified_at',

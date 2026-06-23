@@ -2,8 +2,10 @@ import cors from 'cors'
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
 import { config } from './core/config'
+import { MAX_PROFILE_REQUEST_BYTES } from './shared/avatar-limits'
 import { getHealth, getOpenApiDocument } from './core/http/handlers/system.handlers'
 import { errorHandler } from './core/http/error-handler'
+import { asyncHandler } from './core/http/validation'
 import { openApiDocument } from './core/openapi/document'
 import { analysisRequestsRoutes } from './modules/analysis-requests/analysis-requests.routes'
 import { authRoutes } from './modules/auth/auth.routes'
@@ -24,9 +26,9 @@ app.use(
     credentials: true,
   }),
 )
-app.use(express.json())
+app.use(express.json({ limit: MAX_PROFILE_REQUEST_BYTES }))
 
-app.get('/health', getHealth)
+app.get('/health', asyncHandler(getHealth))
 app.get('/openapi.json', getOpenApiDocument)
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument))

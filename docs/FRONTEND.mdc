@@ -69,6 +69,12 @@ apps/
     │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
     │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
     │   │   ├── profile/             # Unified user profile page           [MVP]
+    │   │   │   ├── components/      # profile-avatar-upload.tsx
+    │   │   │   ├── hooks/           # use-compress-avatar.ts
+    │   │   │   ├── lib/             # compress-avatar-image.ts
+    │   │   │   ├── workers/         # compress-avatar.worker.ts
+    │   │   │   ├── pages/
+    │   │   │   └── __tests__/
     │   │   ├── voting/              # Legacy project vote UI (deprecated) [MVP]
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
@@ -130,7 +136,7 @@ apps/
 - **Analysis Request** page: authenticated users submit projects for paid expert review.
 
 ### profile `[MVP]`
-- Unified profile page (`/app/profile`): PFP, nickname, X account, bio, public key, governor badge for council members.
+- Unified profile page (`/app/profile`): PFP upload (Web Worker compresses to base64 data URI before save), nickname, X account, bio, public key, governor badge for council members.
 
 ### voting `[MVP]` (legacy — deprecated)
 - Legacy project vote UI; being removed in favor of governor-only score publication.
