@@ -6,6 +6,7 @@ import {
   Head,
   Html,
   Img,
+  Link,
   Preview,
   Row,
   Section,
@@ -63,14 +64,20 @@ export function EmailShell({ preview, children }: EmailShellProps) {
       <Tailwind
         config={emailTailwindConfig as React.ComponentProps<typeof Tailwind>['config']}
       >
-        <Body className="m-0 bg-background py-6 font-sans text-foreground">
+        <Body className="m-0 py-24 font-sans text-foreground bg-[#F2f2f2]">
           <Container className="mx-auto max-w-[560px] px-4">
             <Section className="rounded-2xl border border-solid border-border bg-card px-8 py-8">
               <EmailBrandHeader />
               {children}
             </Section>
-            <Text className="mt-6 text-center text-xs leading-5 text-muted-foreground">
-              Crypto Watcher - expert-reviewed blockchain risk analysis
+            <Text className="mt-6 text-center text-xs leading-5 text-background">
+              <Link
+                href="https://testnet.cryptowatcher.pro"
+                className="text-black underline"
+              >
+                Crypto Watcher
+              </Link>{' '}
+              - expert-reviewed blockchain risk analysis
             </Text>
           </Container>
         </Body>

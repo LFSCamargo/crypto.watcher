@@ -10,6 +10,7 @@ export const emailTailwindConfig = {
         foreground: '#f5f2e8',
         primary: {
           DEFAULT: '#ffd633',
+          darker: '#ffc802',
           foreground: '#0a0a0a',
         },
         secondary: {
