@@ -13,7 +13,7 @@ import {
   Text,
 } from '@react-email/components'
 import type { ReactNode } from 'react'
-import { resolveLogoUrl, type EmailBrandProps } from '../lib/brand'
+import { type EmailBrandProps } from '../lib/brand'
 import { emailTailwindConfig } from '../lib/tailwind-config'
 
 type EmailShellProps = EmailBrandProps & {
@@ -21,15 +21,13 @@ type EmailShellProps = EmailBrandProps & {
   children: ReactNode
 }
 
-export function EmailBrandHeader({ logoUrl }: EmailBrandProps) {
-  const src = resolveLogoUrl(logoUrl)
-
+export function EmailBrandHeader() {
   return (
     <Section className="mb-6">
       <Row>
         <Column className="w-[72px] align-middle">
           <Img
-            src={src}
+            src={'https://testnet.cryptowatcher.pro/logo.png'}
             alt="Crypto Watcher"
             width={64}
             height={64}
@@ -46,7 +44,7 @@ export function EmailBrandHeader({ logoUrl }: EmailBrandProps) {
   )
 }
 
-export function EmailShell({ preview, logoUrl, children }: EmailShellProps) {
+export function EmailShell({ preview, children }: EmailShellProps) {
   return (
     <Html lang="en">
       <Head>
@@ -68,7 +66,7 @@ export function EmailShell({ preview, logoUrl, children }: EmailShellProps) {
         <Body className="m-0 bg-background py-6 font-sans text-foreground">
           <Container className="mx-auto max-w-[560px] px-4">
             <Section className="rounded-2xl border border-solid border-border bg-card px-8 py-8">
-              <EmailBrandHeader logoUrl={logoUrl} />
+              <EmailBrandHeader />
               {children}
             </Section>
             <Text className="mt-6 text-center text-xs leading-5 text-muted-foreground">
