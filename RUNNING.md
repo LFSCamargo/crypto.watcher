@@ -74,7 +74,8 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-- Web: `http://localhost:80` (override with `WEB_PORT` in `.env`)
+- Web: assign your domain in Coolify → **web** service, port **80** (container)
+- Local without Coolify: `docker compose -f docker-compose.yml -f docker-compose.local.yml up -d` → `http://localhost:8080`
 - API: internal only — reached via nginx proxy on the web container
 - Postgres: internal only — not published to the host
 

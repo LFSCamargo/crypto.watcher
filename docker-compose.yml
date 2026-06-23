@@ -2,6 +2,10 @@
 #
 # Used by Coolify and local prod smoke tests: docker compose up -d --build
 #
+# web is not bound to host :80 (Coolify's proxy uses it). In Coolify, point your
+# domain at the web service on container port 80. Local smoke test without Coolify:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+#
 # Set env in Coolify (or root `.env` locally). The web container serves the SPA
 # and reverse-proxies API routes to the api service. Leave VITE_API_URL empty
 # so the browser uses same-origin requests through nginx.
@@ -63,8 +67,8 @@ services:
         VITE_WALLETCONNECT_PROJECT_ID: ${VITE_WALLETCONNECT_PROJECT_ID:-}
         VITE_DEFAULT_CHAIN_ID: ${VITE_DEFAULT_CHAIN_ID:-84532}
     restart: unless-stopped
-    ports:
-      - '${WEB_PORT:-80}:80'
+    expose:
+      - '80'
     depends_on:
       api:
         condition: service_healthy

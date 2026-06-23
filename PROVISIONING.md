@@ -100,7 +100,7 @@ docker compose up -d --build
 1. Point Coolify at this repo — it uses `docker-compose.yml` by default.
 2. Set **all required env vars** in the Coolify UI (see checklist below). A root
    `.env` file is optional; Coolify injects vars as process environment.
-3. Expose the **`web`** service — Coolify’s proxy handles TLS in front of port `80`.
+3. Expose the **`web`** service on **container port `80`** — Coolify’s proxy handles public HTTP/HTTPS (do not bind host `:80` in compose; Coolify already uses it).
 4. Set `WEB_URL` and `VITE_SITE_URL` to your public `https://` domain (rebuild
    when `VITE_*` build args change).
 5. Leave `VITE_API_URL` empty — nginx on the web container proxies API routes
