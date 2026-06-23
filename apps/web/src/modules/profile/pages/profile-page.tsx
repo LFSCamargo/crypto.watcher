@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
@@ -24,6 +24,7 @@ import {
   Label,
   Textarea,
 } from '../../../components/ui'
+import { ProfileAvatarUpload } from '../components/profile-avatar-upload'
 
 export function ProfilePage() {
   const user = useSession((state) => state.user)
@@ -35,11 +36,24 @@ export function ProfilePage() {
   const [xAccount, setXAccount] = useState(user?.xAccount ?? '')
   const [publicKey, setPublicKey] = useState(user?.publicKey ?? user?.walletAddress ?? '')
 
+  useEffect(() => {
+    if (!user) return
+    setDisplayName(user.displayName ?? '')
+    setNickname(user.nickname ?? '')
+    setBio(user.bio ?? '')
+    setAvatarUrl(user.avatarUrl ?? '')
+    setXAccount(user.xAccount ?? '')
+    setPublicKey(user.publicKey ?? user.walletAddress ?? '')
+  }, [user])
+
   const updateMe = useMutation({
     mutationFn: usersApi.updateMe,
     onSuccess: (updated) => {
       setUser(updated)
       toast.success('Profile saved')
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Could not save profile')
     },
   })
 
@@ -55,13 +69,13 @@ export function ProfilePage() {
     )
   }
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    await updateMe.mutateAsync({
+    updateMe.mutate({
       displayName: displayName || undefined,
       nickname: nickname || undefined,
       bio: bio || undefined,
-      avatarUrl: avatarUrl || undefined,
+      avatarUrl: avatarUrl.trim() ? avatarUrl : null,
       xAccount: xAccount || undefined,
       publicKey: publicKey || undefined,
     })
@@ -120,17 +134,11 @@ export function ProfilePage() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="avatarUrl">Profile picture URL</Label>
-              <Input
-                id="avatarUrl"
-                type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://..."
-                className="rounded-xl"
-              />
-            </div>
+            <ProfileAvatarUpload
+              avatarUrl={avatarUrl}
+              onAvatarChange={setAvatarUrl}
+              onClear={() => setAvatarUrl('')}
+            />
             <div className="space-y-2">
               <Label htmlFor="xAccount" className="flex items-center gap-1">
                 <RiTwitterXLine className="h-4 w-4" />

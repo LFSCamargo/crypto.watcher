@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { HttpError } from '../../../core/http/validation'
 import { mockRequest, mockResponse } from '../../../test/http-mocks'
+import { getMeHandler } from '../handlers/get-me.handler'
 import { getUserByIdentifierHandler } from '../handlers/get-user-by-identifier.handler'
 import { updateMeHandler } from '../handlers/update-me.handler'
 
@@ -8,6 +9,7 @@ vi.mock('../users.service', () => ({
   usersService: {
     getByAddress: vi.fn(),
     getByNickname: vi.fn(),
+    getById: vi.fn(),
     updateMe: vi.fn(),
   },
 }))
@@ -70,6 +72,29 @@ describe('users handlers', () => {
     await expect(getUserByIdentifierHandler(req, res)).rejects.toEqual(
       new HttpError(404, 'User not found'),
     )
+  })
+
+  it('getMeHandler returns the authenticated user profile', async () => {
+    vi.mocked(usersService.getById).mockResolvedValue(user)
+
+    const req = mockRequest()
+    const res = mockResponse()
+    res.locals.user = user
+
+    await getMeHandler(req, res)
+
+    expect(usersService.getById).toHaveBeenCalledWith(userId)
+    expect(res.body).toEqual(user)
+  })
+
+  it('getMeHandler returns 404 when user is missing', async () => {
+    vi.mocked(usersService.getById).mockResolvedValue(undefined)
+
+    const req = mockRequest()
+    const res = mockResponse()
+    res.locals.user = user
+
+    await expect(getMeHandler(req, res)).rejects.toEqual(new HttpError(404, 'User not found'))
   })
 
   it('updateMeHandler updates authenticated user profile', async () => {

@@ -66,6 +66,18 @@ pnpm --filter api run db:migrate
 pnpm run dev
 ```
 
+**Docker Desktop disk:** Postgres runs inside Docker’s virtual disk, not your Mac’s
+free space. A oversized profile avatar saved before compression limits can fill that
+volume and crash Postgres (`No space left on device`). If `/health` returns
+`503` or auth routes fail with `Database temporarily unavailable`, run
+`docker system prune -f`, restart the `postgres` service, and re-run migrations.
+To reset dev data entirely: `docker compose -f docker-compose.dev.yml down -v` then
+`up -d postgres` and migrate again.
+
+Profile avatars are capped at **256 KB** in the API, nginx, Express body parser,
+client compression worker, and a PostgreSQL `CHECK` constraint — production deploys
+apply migration `0005_avatar_url_length_guard` on API start.
+
 ### Testnet (Base Sepolia)
 
 For contract deploy and app wiring against chain `84532`:
@@ -106,6 +118,9 @@ docker compose up -d --build
 5. Leave `VITE_API_URL` empty — production builds call the API at `/api/*` (nginx
    proxy); SPA routes like `/auth/reset-password` stay on the web app.
 6. Postgres and API stay on the internal network; do not publish them publicly.
+7. **Profile avatars:** stored as base64 or HTTPS URLs in `users.avatar_url`, hard-capped
+   at **256 KB** per row (Zod + Express + nginx + PostgreSQL `CHECK`). Monitor Postgres
+   disk on your host; Coolify/managed Postgres should have alerts on volume usage.
 
 Production images:
 

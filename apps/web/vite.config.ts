@@ -33,6 +33,10 @@ export default defineConfig({
   build: {
     target: 'es2020',
     cssCodeSplit: true,
+    modulePreload: {
+      resolveDependencies: (_url, deps) =>
+        deps.filter((dep) => !dep.includes('/web3-') && !dep.includes('/metamask-sdk-')),
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {

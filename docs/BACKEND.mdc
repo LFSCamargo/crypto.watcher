@@ -222,7 +222,7 @@ apps/
 | x_account | text | nullable |
 | nickname | text unique | nullable |
 | display_name | text | |
-| avatar_url | text | |
+| avatar_url | text | HTTPS URL or `data:image/...;base64,...`; max **256 KB** (`users_avatar_url_length_chk`) |
 | bio | text | |
 | role | text not null default 'user' | `user` \| `team` \| `admin` `[Phase 2]` |
 | email_verified_at | timestamptz | nullable; set after OTP email verification |
@@ -359,9 +359,10 @@ Unique: `(tx_hash, log_index)` for idempotent indexing.
 - `POST /auth/verify-email-otp` → verify a 6-digit email OTP, set session cookie, and set `users.email_verified_at` when applicable.
 - `POST /auth/resend-email-otp` → resend the email verification OTP.
 - `POST /auth/logout` 🔒 → revoke session.
-- `GET  /auth/me` 🔒 → current user.
+- `GET  /auth/me` 🔒 → current user (session fields only; `avatarUrl` is always `null` — use `GET /users/me` for avatar).
 
 ### users `[MVP]`
+- `GET   /users/me` 🔒 → full profile for the signed-in user (includes avatar).
 - `GET   /users/:identifier` → public profile by wallet address or nickname.
 - `PATCH /users/me` 🔒 → update own profile.
 

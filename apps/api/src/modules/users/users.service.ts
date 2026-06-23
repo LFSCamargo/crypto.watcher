@@ -76,7 +76,7 @@ export const usersService = {
     id: string,
     input: Partial<{
       displayName: string
-      avatarUrl: string
+      avatarUrl: string | null
       bio: string
       xAccount: string
       nickname: string

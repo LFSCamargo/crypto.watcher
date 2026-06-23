@@ -18,16 +18,11 @@ export function findClosestPrice(
 ): number | null {
   if (prices.length === 0) return null
 
-  let closest = prices[0]!
-  let closestDistance = Math.abs(closest[0] - targetTimestamp)
-
-  for (const point of prices) {
-    const distance = Math.abs(point[0] - targetTimestamp)
-    if (distance < closestDistance) {
-      closest = point
-      closestDistance = distance
-    }
-  }
+  const closest = prices.reduce((best, point) => {
+    const currentDistance = Math.abs(point[0] - targetTimestamp)
+    const bestDistance = Math.abs(best[0] - targetTimestamp)
+    return currentDistance < bestDistance ? point : best
+  })
 
   return closest[1]
 }
@@ -123,6 +118,20 @@ export class MarketService {
     return buildMarketSnapshot(slug, coingeckoId, payload.prices)
   }
 
+  private async fetchFreshOrStale(slug: string, coingeckoId: string): Promise<MarketSnapshot> {
+    try {
+      const snapshot = await this.fetchFromCoinGecko(slug, coingeckoId)
+      await this.repository.upsert(slug, coingeckoId, snapshot)
+      return snapshot
+    } catch (error) {
+      const staleInDb = await this.repository.getAny(slug)
+      if (staleInDb) return { ...staleInDb, stale: true }
+
+      if (error instanceof HttpError) throw error
+      throw new HttpError(502, 'Unable to fetch market data right now')
+    }
+  }
+
   async getProjectMarket(slug: string): Promise<MarketSnapshot> {
     const coingeckoId = resolveCoingeckoId(slug)
     if (!coingeckoId) {
@@ -135,19 +144,8 @@ export class MarketService {
     const freshInDb = await this.repository.getFresh(slug)
     if (freshInDb) return this.remember(slug, freshInDb)
 
-    try {
-      const snapshot = await this.fetchFromCoinGecko(slug, coingeckoId)
-      await this.repository.upsert(slug, coingeckoId, snapshot)
-      return this.remember(slug, snapshot)
-    } catch (error) {
-      const staleInDb = await this.repository.getAny(slug)
-      if (staleInDb) {
-        return this.remember(slug, { ...staleInDb, stale: true })
-      }
-
-      if (error instanceof HttpError) throw error
-      throw new HttpError(502, 'Unable to fetch market data right now')
-    }
+    const snapshot = await this.fetchFreshOrStale(slug, coingeckoId)
+    return this.remember(slug, snapshot)
   }
 }
 

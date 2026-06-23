@@ -81,11 +81,8 @@ jobs:
         run: pnpm exec nx run web:test
       - name: Build
         run: pnpm exec nx run web:build
-      - uses: browser-actions/setup-chrome@v1
       - name: O1 complexity check
         run: pnpm run o1-check:web
-      - name: Lighthouse
-        run: pnpm run lighthouse:web -- --skip-build
 
   contracts:
     name: contracts

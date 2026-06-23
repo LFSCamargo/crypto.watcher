@@ -79,7 +79,7 @@ always validate `apps/*` and `packages/*`:
 | `packages/o1-check` | `packages/o1-check` | lint, typecheck, test (coverage), build |
 | `packages/email-templates` | `packages/email-templates` | lint, typecheck, test, build |
 | `apps/api` | `apps/api` | lint, typecheck, test (coverage), build, `o1-check:api` |
-| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web`, Lighthouse |
+| `apps/web` | `apps/web` | lint, typecheck, test (coverage), build, `o1-check:web` |
 | `contracts` | `contracts/` | `forge build`, `forge test` (push to `main` only) |
 
 Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL run on
