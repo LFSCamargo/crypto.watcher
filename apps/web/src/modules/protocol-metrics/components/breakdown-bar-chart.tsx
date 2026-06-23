@@ -1,52 +1,74 @@
 import { useState } from 'react'
 import { cn } from '../../../lib/utils'
-import type { ChainTvlBreakdown } from '../lib/protocol-metrics.types'
 import { chainIconUrl } from '../lib/chain-icon-url'
 
 const CHART_HEIGHT_WIDE = 200
 const CHART_HEIGHT_COMPACT = 128
 const ICON_ROW_HEIGHT = 28
 
-interface ChainTvlBarChartProps {
+export interface BreakdownBarItem {
+  key: string
+  label: string
+  value: number
+  share: number
+}
+
+interface BreakdownBarChartProps {
   title: string
-  items: ChainTvlBreakdown[]
+  items: BreakdownBarItem[]
   formatValue: (value: number) => string
+  /** Chain logos vs token symbol initials under each bar. */
+  iconVariant?: 'chain' | 'token'
   /** Expand chart to full panel width with a side legend when no sibling breakdown. */
   wide?: boolean
 }
 
-function ChainBarIcon({ chain, size = 'md' }: { chain: string; size?: 'sm' | 'md' }) {
+function BreakdownIcon({
+  label,
+  variant,
+  size = 'md',
+}: {
+  label: string
+  variant: 'chain' | 'token'
+  size?: 'sm' | 'md'
+}) {
   const [errored, setErrored] = useState(false)
-  const initials = chain.slice(0, 2).toUpperCase()
+  const initials = label.slice(0, variant === 'token' ? 4 : 2).toUpperCase()
   const sizeClass = size === 'sm' ? 'h-5 w-5 text-[8px]' : 'h-7 w-7 text-[9px]'
 
-  if (errored) {
+  if (variant === 'chain' && !errored) {
     return (
-      <span
-        className={cn(
-          'flex shrink-0 items-center justify-center rounded-full bg-muted font-semibold uppercase text-muted-foreground',
-          sizeClass,
-        )}
-        aria-hidden
-      >
-        {initials}
-      </span>
+      <img
+        src={chainIconUrl(label)}
+        alt=""
+        loading="lazy"
+        draggable={false}
+        onError={() => setErrored(true)}
+        className={cn('shrink-0 rounded-full object-cover', sizeClass)}
+      />
     )
   }
 
   return (
-    <img
-      src={chainIconUrl(chain)}
-      alt=""
-      loading="lazy"
-      draggable={false}
-      onError={() => setErrored(true)}
-      className={cn('shrink-0 rounded-full object-cover', sizeClass)}
-    />
+    <span
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-full bg-primary/15 font-semibold uppercase text-foreground',
+        sizeClass,
+      )}
+      aria-hidden
+    >
+      {initials}
+    </span>
   )
 }
 
-export function ChainTvlBarChart({ title, items, formatValue, wide = false }: ChainTvlBarChartProps) {
+export function BreakdownBarChart({
+  title,
+  items,
+  formatValue,
+  iconVariant = 'chain',
+  wide = false,
+}: BreakdownBarChartProps) {
   if (items.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-muted/20 p-4">
@@ -56,7 +78,7 @@ export function ChainTvlBarChart({ title, items, formatValue, wide = false }: Ch
     )
   }
 
-  const maxTvl = Math.max(...items.map((item) => item.tvl), 1)
+  const maxValue = Math.max(...items.map((item) => item.value), 1)
   const chartHeight = wide ? CHART_HEIGHT_WIDE : CHART_HEIGHT_COMPACT
   const barAreaHeight = chartHeight - ICON_ROW_HEIGHT
 
@@ -71,23 +93,23 @@ export function ChainTvlBarChart({ title, items, formatValue, wide = false }: Ch
             style={{ height: chartHeight }}
           >
             {items.map((item) => {
-              const barHeight = Math.max(Math.round((item.tvl / maxTvl) * barAreaHeight), 4)
+              const barHeight = Math.max(Math.round((item.value / maxValue) * barAreaHeight), 4)
 
               return (
                 <div
-                  key={item.chain}
+                  key={item.key}
                   className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
-                  title={`${item.chain}: ${formatValue(item.tvl)} (${item.share.toFixed(1)}%)`}
+                  title={`${item.label}: ${formatValue(item.value)} (${item.share.toFixed(1)}%)`}
                 >
                   <div
-                    data-testid="chain-bar"
+                    data-testid="breakdown-bar"
                     className={cn(
                       'w-full rounded-t-md bg-primary transition-opacity group-hover:opacity-90',
                       wide ? 'max-w-14' : 'max-w-10',
                     )}
                     style={{ height: barHeight }}
                   />
-                  <ChainBarIcon chain={item.chain} />
+                  <BreakdownIcon label={item.label} variant={iconVariant} />
                 </div>
               )
             })}
@@ -103,13 +125,13 @@ export function ChainTvlBarChart({ title, items, formatValue, wide = false }: Ch
           )}
         >
           {items.map((item) => (
-            <li key={item.chain} className="flex items-center justify-between gap-2">
+            <li key={item.key} className="flex items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-2">
-                <ChainBarIcon chain={item.chain} size="sm" />
-                <span className="truncate text-muted-foreground">{item.chain}</span>
+                <BreakdownIcon label={item.label} variant={iconVariant} size="sm" />
+                <span className="truncate text-muted-foreground">{item.label}</span>
               </span>
               <span className="shrink-0 tabular-nums text-foreground">
-                {item.share.toFixed(1)}% · {formatValue(item.tvl)}
+                {item.share.toFixed(1)}% · {formatValue(item.value)}
               </span>
             </li>
           ))}

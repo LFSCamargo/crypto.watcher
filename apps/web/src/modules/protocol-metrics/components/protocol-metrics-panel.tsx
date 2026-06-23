@@ -22,8 +22,7 @@ import {
   formatShortDate,
 } from '../lib/format-metrics'
 import type { ProtocolMetricsSnapshot } from '../lib/protocol-metrics.types'
-import { DistributionDonut } from './distribution-donut'
-import { ChainTvlBarChart } from './chain-tvl-bar-chart'
+import { BreakdownBarChart } from './breakdown-bar-chart'
 import { TVL_CHART_RANGE_OPTIONS } from '../lib/metric-chart-range'
 import { MetricHistoryChart } from './metric-history-chart'
 
@@ -111,22 +110,31 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
           )}
         >
           {showChainBreakdown ? (
-            <ChainTvlBarChart
+            <BreakdownBarChart
               title="TVL by chain"
-              items={data.chainBreakdown}
+              items={data.chainBreakdown.map((item) => ({
+                key: item.chain,
+                label: item.chain,
+                value: item.tvl,
+                share: item.share,
+              }))}
               formatValue={formatCompactUsd}
+              iconVariant="chain"
               wide={!showTokenComposition}
             />
           ) : null}
           {showTokenComposition ? (
-            <DistributionDonut
+            <BreakdownBarChart
               title="TVL token composition"
-              slices={data.tokenComposition.map((item) => ({
+              items={data.tokenComposition.map((item) => ({
+                key: item.symbol,
                 label: item.symbol,
                 value: item.usd,
                 share: item.share,
               }))}
               formatValue={formatCompactUsd}
+              iconVariant="token"
+              wide={!showChainBreakdown}
             />
           ) : null}
         </div>

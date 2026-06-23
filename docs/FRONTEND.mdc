@@ -119,7 +119,7 @@ apps/
 
 ### protocol-metrics `[MVP]`
 - `ProtocolMetricsPanel` on reference and live project detail pages below the price panel.
-- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts, chain bar breakdown with chain icons, token composition, security incidents).
+- **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts, chain + token bar breakdowns, security incidents).
 - **Chain** projects (L1/L2): TVL plus network-wide DEX volume and fees paid — DeFi activity locked on the network, not a single protocol entity.
 - Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
 
