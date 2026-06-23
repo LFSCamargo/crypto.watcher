@@ -14,7 +14,7 @@ ENV VITE_API_URL=$VITE_API_URL \
     VITE_SITE_URL=$VITE_SITE_URL \
     VITE_WALLETCONNECT_PROJECT_ID=$VITE_WALLETCONNECT_PROJECT_ID \
     VITE_DEFAULT_CHAIN_ID=$VITE_DEFAULT_CHAIN_ID
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/web/package.json apps/web/package.json
 RUN pnpm install --frozen-lockfile --filter web...
 COPY apps/web ./apps/web

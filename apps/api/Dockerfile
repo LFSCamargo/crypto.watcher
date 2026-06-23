@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 make g++ \
 ENV HUSKY=0
 
 FROM base AS build
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY packages/email-templates/package.json packages/email-templates/package.json
 RUN pnpm install --frozen-lockfile --filter api...
