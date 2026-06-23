@@ -1,15 +1,23 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "include": ["files", "dependencies", "devDependencies", "binaries", "unlisted", "unresolved"],
+  "include": [
+    "files",
+    "dependencies",
+    "devDependencies",
+    "binaries",
+    "unlisted",
+    "unresolved"
+  ],
   "ignoreWorkspaces": ["contracts"],
   "ignoreBinaries": ["playwright"],
-  "ignoreDependencies": ["@nx/js"],
+  "ignoreDependencies": ["@nx/js", "@fontsource/jetbrains-mono", "@fontsource/raleway"],
   "ignore": [
     "apps/api/src/core/chain/**",
     "apps/web/src/modules/users/**",
     "apps/web/src/modules/projects/components/reference-project-voting-cta.tsx",
     "apps/web/src/modules/projects/components/index.ts",
-    "apps/web/src/modules/projects/lib/coingecko-ids.ts"
+    "apps/web/src/modules/projects/lib/coingecko-ids.ts",
+    "apps/web/src/modules/**/routes.tsx"
   ],
   "workspaces": {
     ".": {

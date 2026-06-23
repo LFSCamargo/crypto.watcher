@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { useAccount, useSignMessage } from 'wagmi'
 import { authApi } from '../api/auth.api'
 import { usersApi } from '../../users/api/users.api'
 import type { LoginBody, RegisterBody } from '../../../lib/api/types'
@@ -73,24 +72,6 @@ export function useVerifyEmailOtp() {
 export function useResendEmailOtp() {
   return useMutation({
     mutationFn: (email: string) => authApi.resendEmailOtp(email),
-  })
-}
-
-export function useWalletLogin() {
-  const { address } = useAccount()
-  const { signMessageAsync } = useSignMessage()
-  const setUser = useSession((state) => state.setUser)
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: () => {
-      if (!address) throw new Error('Connect a wallet first')
-      return authApi.walletLogin(address, (message) => signMessageAsync({ message }))
-    },
-    onSuccess: (user) => {
-      setUser(user)
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-    },
   })
 }
 

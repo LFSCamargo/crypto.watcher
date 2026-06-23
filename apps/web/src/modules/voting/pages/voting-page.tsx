@@ -7,6 +7,7 @@ import { ThumbsUp, ThumbsDown, CheckCircle, XCircle, Wallet } from '@phosphor-ic
 import { projectVotingAbi } from '../../../lib/web3/contracts'
 import { useProject } from '../../projects/hooks/use-projects'
 import { useVoteEligibility, useVoteTally } from '../hooks/use-voting'
+import { Web3Providers } from '../../../lib/web3/web3-providers'
 import {
   Button,
   Card,
@@ -18,7 +19,7 @@ import {
 } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
 
-export function VotingPage() {
+function VotingPageContent() {
   const { slug } = useParams()
   const { address } = useAccount()
   const { writeContractAsync, isPending } = useWriteContract()
@@ -227,5 +228,13 @@ export function VotingPage() {
         </Card>
       </aside>
     </motion.div>
+  )
+}
+
+export function VotingPage() {
+  return (
+    <Web3Providers>
+      <VotingPageContent />
+    </Web3Providers>
   )
 }

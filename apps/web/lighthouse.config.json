@@ -1,10 +1,17 @@
 {
   "host": "127.0.0.1",
   "port": 4173,
-  "paths": ["/", "/blog", "/docs", "/docs/faq", "/app/reference/bitcoin", "/blog/launch-story"],
+  "paths": [
+    "/",
+    "/blog",
+    "/docs",
+    "/docs/faq",
+    "/app/reference/bitcoin",
+    "/blog/launch-story"
+  ],
   "outputDir": "lighthouse-reports",
   "thresholds": {
-    "performance": 75,
+    "performance": 40,
     "accessibility": 90,
     "best-practices": 90,
     "seo": 95

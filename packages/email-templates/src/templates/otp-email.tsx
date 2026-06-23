@@ -10,11 +10,11 @@ export type OtpEmailProps = EmailBrandProps & {
   expiresMinutes: number
 }
 
-export function OtpEmail({ code, purpose, expiresMinutes }: OtpEmailProps) {
+export function OtpEmail({ code, purpose, expiresMinutes, logoUrl }: OtpEmailProps) {
   const copy = getOtpEmailCopy(purpose)
 
   return (
-    <EmailShell preview={copy.preview}>
+    <EmailShell preview={copy.preview} logoUrl={logoUrl}>
       <Heading className="m-0 mb-4 text-2xl font-bold tracking-tight text-foreground">
         {copy.heading}
       </Heading>
