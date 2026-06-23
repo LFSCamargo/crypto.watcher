@@ -1,0 +1,37 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "include": ["files", "dependencies", "devDependencies", "binaries", "unlisted", "unresolved"],
+  "ignoreWorkspaces": ["contracts"],
+  "ignoreBinaries": ["playwright"],
+  "ignoreDependencies": ["@nx/js"],
+  "ignore": [
+    "apps/api/src/core/chain/**",
+    "apps/web/src/modules/users/**",
+    "apps/web/src/modules/projects/components/reference-project-voting-cta.tsx",
+    "apps/web/src/modules/projects/components/index.ts",
+    "apps/web/src/modules/projects/lib/coingecko-ids.ts"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.{mjs,sh}", "o1-check.config.json", "o1-check.web.config.json"],
+      "project": ["scripts/**/*.{mjs,js}"]
+    },
+    "apps/api": {
+      "entry": ["src/core/db/migrations/*.ts"],
+      "project": ["src/**/*.ts"],
+      "ignoreDependencies": ["pino-pretty"]
+    },
+    "apps/web": {
+      "entry": ["scripts/**/*.{ts,mjs}"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/email-templates": {
+      "entry": ["src/index.ts", "src/emails/**/*.tsx"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/o1-check": {
+      "entry": ["src/__tests__/fixtures/**/*.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  }
+}

@@ -123,8 +123,8 @@ export function HeroSection() {
             </Button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 pb-10">
-            {topRated.map((project) => (
-              <TopRatedProjectCard key={project.slug} project={project} />
+            {topRated.map((project, index) => (
+              <TopRatedProjectCard key={project.slug} project={project} index={index} />
             ))}
           </div>
         </motion.div>

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { Test } from "forge-std/Test.sol";
+import { ProtocolSettings } from "../../src/governance/ProtocolSettings.sol";
 import { ReputationRegistry } from "../../src/reputation/ReputationRegistry.sol";
-import { ProjectVoting } from "../../src/voting/ProjectVoting.sol";
-import { ProjectWatcherFactory } from "../../src/voting/ProjectWatcherFactory.sol";
+import { ProjectReview } from "../../src/review/ProjectReview.sol";
+import { ProjectWatcherFactory } from "../../src/review/ProjectWatcherFactory.sol";
 
 contract ProjectWatcherFactoryTest is Test {
     address internal team = makeAddr("team");
@@ -15,27 +16,30 @@ contract ProjectWatcherFactoryTest is Test {
     address internal user = makeAddr("user");
 
     ReputationRegistry internal reputation;
+    ProtocolSettings internal settings;
     ProjectWatcherFactory internal factory;
 
     bytes32 internal projectId = keccak256("project:aave");
 
     function setUp() public {
         reputation = new ReputationRegistry(team, 1);
-        factory = new ProjectWatcherFactory(team, reputation, 3 days, owner, backend);
+        settings = new ProtocolSettings(team, 1);
+        factory = new ProjectWatcherFactory(team, reputation, settings, owner, backend);
     }
 
     function test_backendSubmitsOnBehalfOfPayingUser() public {
         vm.prank(backend);
-        address votingAddress = factory.submitProject(projectId, user);
-        ProjectVoting voting = ProjectVoting(votingAddress);
+        address reviewAddress = factory.submitProject(projectId, user);
+        ProjectReview review = ProjectReview(reviewAddress);
 
-        assertEq(voting.projectId(), projectId);
-        assertEq(voting.submitter(), user);
-        assertEq(voting.team(), team);
-        assertEq(address(voting.reputation()), address(reputation));
-        assertEq(voting.votingDuration(), 3 days);
+        assertEq(review.projectId(), projectId);
+        assertEq(review.submitter(), user);
+        assertEq(review.team(), team);
+        assertEq(address(review.reputation()), address(reputation));
+        assertEq(address(review.settings()), address(settings));
+        assertEq(uint8(review.status()), uint8(ProjectReview.Status.Requested));
 
-        assertEq(factory.votingOf(projectId), votingAddress);
+        assertEq(factory.reviewOf(projectId), reviewAddress);
         assertEq(factory.submitterOf(projectId), user);
         assertTrue(factory.isRegistered(projectId));
         assertEq(factory.projectCount(), 1);
@@ -85,8 +89,8 @@ contract ProjectWatcherFactoryTest is Test {
         assertEq(factory.backend(), newBackend);
 
         vm.prank(newBackend);
-        address votingAddress = factory.submitProject(projectId, user);
-        assertTrue(votingAddress != address(0));
+        address reviewAddress = factory.submitProject(projectId, user);
+        assertTrue(reviewAddress != address(0));
     }
 
     function test_onlyOwnerCanRotateBackend() public {
@@ -95,6 +99,12 @@ contract ProjectWatcherFactoryTest is Test {
             abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, backend)
         );
         factory.setBackend(makeAddr("newBackend"));
+    }
+
+    function test_setZeroBackendReverts() public {
+        vm.prank(owner);
+        vm.expectRevert(ProjectWatcherFactory.ZeroAddress.selector);
+        factory.setBackend(address(0));
     }
 
     function test_pauseBlocksSubmission() public {
@@ -113,8 +123,8 @@ contract ProjectWatcherFactoryTest is Test {
         vm.stopPrank();
 
         vm.prank(backend);
-        address votingAddress = factory.submitProject(projectId, user);
-        assertTrue(votingAddress != address(0));
+        address reviewAddress = factory.submitProject(projectId, user);
+        assertTrue(reviewAddress != address(0));
     }
 
     function test_onlyOwnerCanPause() public {

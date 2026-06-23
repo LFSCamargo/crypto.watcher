@@ -42,7 +42,7 @@ pnpm run docker:dev   # = docker compose up --build
 ### Deploy contracts to testnet (Base Sepolia)
 
 ```bash
-cp contracts/.env.example contracts/.env   # set BASE_SEPOLIA_RPC_URL + DEPLOYER_PRIVATE_KEY
+cp .env.example .env   # set BASE_SEPOLIA_RPC_URL + DEPLOYER_PRIVATE_KEY
 pnpm run deploy:testnet
 ```
 
@@ -106,7 +106,7 @@ pnpm run format
 
 ### Deployment
 
-- Hetzner
+- Hostinger + Coolify
 - Docker
 - Nginx
 - SSL

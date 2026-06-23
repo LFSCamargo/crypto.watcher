@@ -11,7 +11,7 @@ export type GovernanceProposalState =
   | 'executed'
 export type RewardType = 'reward' | 'slash'
 export type SessionType = 'wallet' | 'email' | 'reset' | 'otp'
-export type OtpPurpose = 'verify_email' | 'password_reset'
+export type OtpPurpose = 'verify_email' | 'sign_in' | 'password_reset'
 export type AnalysisRequestStatus =
   | 'pending'
   | 'paid'

@@ -121,6 +121,22 @@ describe('CuratedProjectCard', () => {
     expect(screen.getByText('-2.40%')).toBeInTheDocument()
   })
 
+  it('shows loading skeletons while market data is fetching', () => {
+    mockedUseMarketPrice.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    } as never)
+
+    const project = getCuratedProject('bitcoin')
+    renderWithProviders(<CuratedProjectCard index={0} project={project!} fetchImmediately />)
+
+    expect(screen.getByLabelText('Loading market data')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Bitcoin/i })).toHaveAttribute('aria-busy', 'true')
+    expect(screen.queryByText(/Live price data unavailable/i)).not.toBeInTheDocument()
+  })
+
   it('renders a rich chart when requested', () => {
     Element.prototype.getBoundingClientRect = vi.fn(() => ({
       width: 320,

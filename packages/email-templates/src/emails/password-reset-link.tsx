@@ -1,3 +1,4 @@
+import { DEFAULT_EMAIL_LOGO_URL } from '../lib/brand'
 import { PasswordResetEmail, type PasswordResetEmailProps } from '../templates/password-reset-email'
 
 export default function PasswordResetLink(props: PasswordResetEmailProps) {
@@ -7,4 +8,5 @@ export default function PasswordResetLink(props: PasswordResetEmailProps) {
 PasswordResetLink.PreviewProps = {
   resetUrl: 'https://crypto-watcher.local/reset-password?token=preview-token',
   expiresMinutes: 60,
+  logoUrl: DEFAULT_EMAIL_LOGO_URL,
 } satisfies PasswordResetEmailProps

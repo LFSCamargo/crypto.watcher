@@ -1,40 +1,35 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IProtocolSettings } from "./interfaces/IProtocolSettings.sol";
 
 /// @title ProtocolSettings
-/// @notice Minimal governance-controlled parameters for MVP voting. [MVP]
-contract ProtocolSettings is Ownable {
-    uint256 public votingDuration;
-    uint256 public reputationThreshold;
+/// @notice Governance-controlled protocol parameters for the review process. [MVP]
+/// @dev Owned by the Timelock. The `methodologyVersion` is read by every
+///      `ProjectReview` when a governor publishes a report, so changing it via
+///      governance directly affects on-chain behavior (no orphaned settings).
+contract ProtocolSettings is Ownable, IProtocolSettings {
+    /// @inheritdoc IProtocolSettings
+    uint32 public methodologyVersion;
 
-    event VotingDurationSet(uint256 votingDuration);
-    event ReputationThresholdSet(uint256 reputationThreshold);
+    event MethodologyVersionSet(uint32 previousVersion, uint32 newVersion);
 
-    constructor(address owner_, uint256 votingDuration_, uint256 reputationThreshold_)
-        Ownable(owner_)
-    {
-        _setVotingDuration(votingDuration_);
-        _setReputationThreshold(reputationThreshold_);
+    error InvalidMethodologyVersion();
+
+    constructor(address owner_, uint32 methodologyVersion_) Ownable(owner_) {
+        _setMethodologyVersion(methodologyVersion_);
     }
 
-    function setVotingDuration(uint256 votingDuration_) external onlyOwner {
-        _setVotingDuration(votingDuration_);
+    /// @notice Bump the active review methodology version (governance only).
+    /// @dev Must be strictly increasing to keep an auditable, monotonic history.
+    function setMethodologyVersion(uint32 methodologyVersion_) external onlyOwner {
+        _setMethodologyVersion(methodologyVersion_);
     }
 
-    function setReputationThreshold(uint256 reputationThreshold_) external onlyOwner {
-        _setReputationThreshold(reputationThreshold_);
-    }
-
-    function _setVotingDuration(uint256 votingDuration_) private {
-        require(votingDuration_ > 0, "voting duration is zero");
-        votingDuration = votingDuration_;
-        emit VotingDurationSet(votingDuration_);
-    }
-
-    function _setReputationThreshold(uint256 reputationThreshold_) private {
-        reputationThreshold = reputationThreshold_;
-        emit ReputationThresholdSet(reputationThreshold_);
+    function _setMethodologyVersion(uint32 methodologyVersion_) private {
+        if (methodologyVersion_ <= methodologyVersion) revert InvalidMethodologyVersion();
+        emit MethodologyVersionSet(methodologyVersion, methodologyVersion_);
+        methodologyVersion = methodologyVersion_;
     }
 }

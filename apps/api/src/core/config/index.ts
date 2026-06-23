@@ -1,3 +1,7 @@
+import { loadEnv } from './load-env'
+
+loadEnv()
+
 const required = (key: string, fallback?: string): string => {
   const value = process.env[key] ?? fallback
   if (value === undefined) throw new Error(`Missing env var: ${key}`)

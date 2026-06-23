@@ -14,9 +14,14 @@ export function SignInPage() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     try {
-      const user = await login.mutateAsync({ email, password })
-      toast.success('Welcome back!')
-      navigate(user.publicKey ? '/app/profile' : '/auth/onboarding')
+      const result = await login.mutateAsync({ email, password })
+      toast.success('Check your email for a sign-in code')
+      navigate('/auth/verify-otp', {
+        state: {
+          email: result.email,
+          nextPath: '/app/profile',
+        },
+      })
     } catch {
       toast.error('Invalid email or password')
     }

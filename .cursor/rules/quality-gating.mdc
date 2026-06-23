@@ -12,13 +12,15 @@ task complete and before committing.
 
 1. **Spaghetti layout** — `pnpm run check:spaghetti`. Module files follow
    `.cursor/rules/spaghetti-checker.mdc` (handlers/, schemas/, pages/, `__tests__/`).
-2. **Lint** — `pnpm run lint` (ESLint + Prettier). No errors; fix warnings you introduced.
-3. **Typecheck** — `pnpm run typecheck` (`tsc --noEmit`). Zero type errors.
-4. **Tests** — `pnpm run test`. All unit/integration tests pass; API and web enforce
+2. **Knip** — `pnpm run knip`. No unused files, dependencies, or unlisted binaries
+   (see `knip.json`; run `pnpm run knip:exports` for unused export analysis).
+3. **Lint** — `pnpm run lint` (ESLint + Prettier). No errors; fix warnings you introduced.
+4. **Typecheck** — `pnpm run typecheck` (`tsc --noEmit`). Zero type errors.
+5. **Tests** — `pnpm run test`. All unit/integration tests pass; API and web enforce
    ≥ 80% statement coverage via Vitest thresholds (see `.cursor/rules/test-driven.mdc`).
-5. **Build** — `pnpm run build`. Apps build successfully.
-6. **Contracts** (when `contracts/` changed) — `forge build` and `forge test` pass.
-7. **Docs sync** — `docs/` updated per `.cursor/rules/docs-sync.mdc` with correct
+6. **Build** — `pnpm run build`. Apps build successfully.
+7. **Contracts** (when `contracts/` changed) — `forge build` and `forge test` pass.
+8. **Docs sync** — `docs/` updated per `.cursor/rules/docs-sync.mdc` with correct
    phase citations.
 
 ## Rules
@@ -32,5 +34,5 @@ task complete and before committing.
 
 ## Definition of done
 
-Code + tests + docs updated, all seven gates above pass locally, and the change
+Code + tests + docs updated, all eight gates above pass locally, and the change
 follows the modular structure described in `docs/`.

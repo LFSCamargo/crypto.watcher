@@ -1,9 +1,13 @@
 /// <reference types="vitest/config" />
+import { fileURLToPath } from 'node:url'
 import type { ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 const API_TARGET = 'http://localhost:3000'
+
+// Load VITE_* vars from the central env file at the monorepo root.
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 
 /** Proxy API calls but serve the SPA for browser navigations on overlapping paths. */
 function apiProxy(): ProxyOptions {
@@ -22,6 +26,28 @@ function apiProxy(): ProxyOptions {
 export default defineConfig({
   plugins: [react()],
   publicDir: 'src/public',
+  envDir: repoRoot,
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (
+            id.includes('@rainbow-me/rainbowkit') ||
+            id.includes('/wagmi/') ||
+            id.includes('/viem/')
+          ) {
+            return 'web3'
+          }
+          if (id.includes('framer-motion')) return 'motion'
+          if (id.includes('@tanstack/react-query')) return 'query'
+          if (id.includes('react-dom') || id.includes('react-router')) return 'vendor-react'
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     host: true,
@@ -41,7 +67,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/__tests__/**/*.test.tsx'],
+    include: ['src/**/__tests__/**/*.test.tsx', 'src/__tests__/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
       include: [

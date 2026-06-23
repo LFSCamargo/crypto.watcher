@@ -4,6 +4,8 @@ import { config } from '../config'
 
 let transporter: nodemailer.Transporter | undefined
 
+const emailLogoUrl = () => `${config.webUrl}/logo.png`
+
 const getTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
@@ -32,6 +34,7 @@ export const mailService = {
       code: input.code,
       purpose: input.purpose,
       expiresMinutes: input.expiresMinutes,
+      logoUrl: emailLogoUrl(),
     })
 
     await getTransporter().sendMail({
@@ -51,6 +54,7 @@ export const mailService = {
     const message = await renderPasswordResetEmail({
       resetUrl: input.resetUrl,
       expiresMinutes: input.expiresMinutes,
+      logoUrl: emailLogoUrl(),
     })
 
     await getTransporter().sendMail({

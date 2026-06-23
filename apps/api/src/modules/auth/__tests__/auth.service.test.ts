@@ -34,6 +34,7 @@ vi.mock('../auth.repository', () => ({
     revokeUserResetTokens: vi.fn(),
     revokeUserOtpTokens: vi.fn(),
     getActiveOtpForEmail: vi.fn(),
+    getActiveAuthOtpForEmail: vi.fn(),
     revokeSession: vi.fn(),
   },
 }))
@@ -157,7 +158,13 @@ describe('authService email/password', () => {
       nickname: 'alice',
     })
 
-    expect(result.sessionId).toBe('session-1')
+    expect(result).toEqual({ ok: true, email: 'user@example.com' })
+    expect(authRepository.createSession).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionType: 'otp', otpPurpose: 'verify_email' }),
+    )
+    expect(authRepository.createSession).not.toHaveBeenCalledWith(
+      expect.objectContaining({ sessionType: 'email' }),
+    )
     expect(usersService.createWithEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'user@example.com',
@@ -194,14 +201,14 @@ describe('authService email/password', () => {
       role: 'user',
       created_at: new Date(),
       updated_at: null,
-      email_verified_at: null,
+      email_verified_at: new Date(),
     })
     vi.mocked(authRepository.createSession).mockResolvedValue({
-      id: 'session-2',
+      id: 'otp-1',
       user_id: 'user-1',
-      session_type: 'email',
-      nonce: null,
-      otp_purpose: null,
+      session_type: 'otp',
+      nonce: '123456',
+      otp_purpose: 'sign_in',
       expires_at: new Date(),
       revoked_at: null,
       created_at: new Date(),
@@ -212,8 +219,19 @@ describe('authService email/password', () => {
       password: 'secret-password',
     })
 
-    expect(result?.sessionId).toBe('session-2')
-    expect(result?.user.email).toBe('user@example.com')
+    expect(result).toEqual({ ok: true, email: 'user@example.com' })
+    expect(authRepository.createSession).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionType: 'otp', otpPurpose: 'sign_in' }),
+    )
+    expect(authRepository.createSession).not.toHaveBeenCalledWith(
+      expect.objectContaining({ sessionType: 'email' }),
+    )
+    expect(mailService.sendOtpEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'user@example.com',
+        purpose: 'sign_in',
+      }),
+    )
   })
 
   it('returns undefined when login password is wrong', async () => {
@@ -552,11 +570,12 @@ describe('authService OTP emails', () => {
     expect(generateOtpCode()).toMatch(/^\d{6}$/)
   })
 
-  it('verifies email OTP and marks the user verified', async () => {
-    vi.mocked(authRepository.getActiveOtpForEmail).mockResolvedValue({
+  it('verifies email OTP, creates a session, and marks the user verified', async () => {
+    vi.mocked(authRepository.getActiveAuthOtpForEmail).mockResolvedValue({
       id: 'otp-1',
       user_id: 'user-1',
       expires_at: new Date(Date.now() + 60_000),
+      otp_purpose: 'verify_email',
     })
     vi.mocked(usersService.markEmailVerified).mockResolvedValue({
       id: 'user-1',
@@ -572,6 +591,16 @@ describe('authService OTP emails', () => {
       createdAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),
     })
+    vi.mocked(authRepository.createSession).mockResolvedValue({
+      id: 'session-1',
+      user_id: 'user-1',
+      session_type: 'email',
+      nonce: null,
+      otp_purpose: null,
+      expires_at: new Date(),
+      revoked_at: null,
+      created_at: new Date(),
+    })
 
     const result = await authService.verifyEmailOtp({
       email: 'user@example.com',
@@ -579,6 +608,7 @@ describe('authService OTP emails', () => {
     })
 
     expect(result?.ok).toBe(true)
+    expect(result?.sessionId).toBe('session-1')
     expect(usersService.markEmailVerified).toHaveBeenCalledWith('user-1')
     expect(authRepository.revokeUserOtpTokens).toHaveBeenCalledWith('user-1', 'verify_email')
   })

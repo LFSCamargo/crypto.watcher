@@ -35,7 +35,7 @@ docs/         # Design docs (source of truth)
    `[Phase 2]`, `[Phase 3]`, `[Final]`) accurate.
 2. **Test-driven.** Write/extend tests before or alongside code; no feature lands
    without tests (see `.cursor/rules/test-driven.mdc`).
-3. **Quality gates must pass.** Lint, typecheck, tests, build, and spaghetti layout
+3. **Quality gates must pass.** Lint, typecheck, tests, build, knip, and spaghetti layout
    check must be green before a change is considered done (see
    `.cursor/rules/quality-gating.mdc` and `.cursor/rules/spaghetti-checker.mdc`).
 4. **Modular by feature.** One feature = one folder, owning its routes/components,
@@ -46,16 +46,19 @@ docs/         # Design docs (source of truth)
 ## Common commands
 
 ```bash
+cp .env.example .env        # single central env (api + web VITE_* + contracts)
 pnpm install                # install all workspaces (Node 22.13 — run `nvm use` first)
 pnpm run dev                # run web + api in parallel (nx)
 pnpm run lint               # eslint across the monorepo
 pnpm run check:spaghetti    # module layout (handlers, schemas, pages, __tests__)
+pnpm run knip               # unused files, dependencies, binaries (see knip.json)
+pnpm run knip:exports       # optional: unused exports and types
 pnpm run o1-check -- apps/api/src --config o1-check.config.json  # complexity/performance risk scan
 pnpm run typecheck          # tsc --noEmit across packages
 pnpm run test               # unit/integration tests
 pnpm run build              # build all apps
-pnpm run lighthouse:web
-pnpm run email:dev          # React Email preview at http://localhost:3030     # Lighthouse audits on production preview (apps/web)
+pnpm run lighthouse:web     # Lighthouse audits on production preview (apps/web)
+pnpm run email:dev          # React Email preview at http://localhost:3030
 
 # contracts (run inside contracts/)
 forge build
@@ -70,6 +73,7 @@ always validate `apps/*` and `packages/*`:
 | Job | Scope | Gates |
 |-----|-------|-------|
 | `Spaghetti detector` | `apps/api`, `apps/web` modules | `check:spaghetti` |
+| `Knip (dead code)` | monorepo (TS/JS workspaces) | `knip` |
 | `packages/o1-check` | `packages/o1-check` | lint, typecheck, test (coverage), build |
 | `packages/email-templates` | `packages/email-templates` | lint, typecheck, test, build |
 | `apps/api` | `apps/api` | lint, typecheck, test (coverage), build, `o1-check:api` |
@@ -86,3 +90,8 @@ Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL 
 - Validate all API I/O with Zod; surface OpenAPI via `@asteasolutions/zod-to-openapi`.
 - DB access only via Kysely repositories; on-chain reads via Viem (`core/chain`).
 - Frontend network calls via `lib/api/`; on-chain via `lib/web3/`.
+- **Single central env.** One git-ignored `.env` at the repo root feeds the API
+  (`apps/api` reads it via `core/config/load-env.ts`), the web app (Vite `envDir`
+  is the repo root; browser vars must be `VITE_`-prefixed) and the contracts deploy
+  script. Use `.env.local` for machine-local secret overrides. Real process env
+  (Docker/CI) always wins over the files.

@@ -1,3 +1,4 @@
+import './styles/fonts.css'
 import './styles/index.css'
 import '@rainbow-me/rainbowkit/styles.css'
 import { StrictMode } from 'react'

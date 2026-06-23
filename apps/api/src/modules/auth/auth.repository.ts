@@ -89,11 +89,35 @@ export const authRepository = {
     return db
       .selectFrom('sessions')
       .innerJoin('users', 'users.id', 'sessions.user_id')
-      .select(['sessions.id', 'sessions.user_id', 'sessions.expires_at'])
+      .select([
+        'sessions.id',
+        'sessions.user_id',
+        'sessions.expires_at',
+        'sessions.otp_purpose',
+      ])
       .where('users.email', '=', email.toLowerCase())
       .where('sessions.nonce', '=', code)
       .where('sessions.session_type', '=', 'otp')
       .where('sessions.otp_purpose', '=', purpose)
+      .where('sessions.revoked_at', 'is', null)
+      .where('sessions.expires_at', '>', new Date())
+      .executeTakeFirst()
+  },
+
+  async getActiveAuthOtpForEmail(email: string, code: string) {
+    return db
+      .selectFrom('sessions')
+      .innerJoin('users', 'users.id', 'sessions.user_id')
+      .select([
+        'sessions.id',
+        'sessions.user_id',
+        'sessions.expires_at',
+        'sessions.otp_purpose',
+      ])
+      .where('users.email', '=', email.toLowerCase())
+      .where('sessions.nonce', '=', code)
+      .where('sessions.session_type', '=', 'otp')
+      .where('sessions.otp_purpose', 'in', ['verify_email', 'sign_in'])
       .where('sessions.revoked_at', 'is', null)
       .where('sessions.expires_at', '>', new Date())
       .executeTakeFirst()
