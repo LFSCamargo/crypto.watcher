@@ -27,6 +27,9 @@ export default defineConfig({
   plugins: [react()],
   publicDir: 'src/public',
   envDir: repoRoot,
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   build: {
     target: 'es2020',
     cssCodeSplit: true,
@@ -34,6 +37,18 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return
+
+          if (
+            /node_modules\/react-router-dom\//.test(id) ||
+            /node_modules\/react-router\//.test(id) ||
+            /node_modules\/react-dom\//.test(id) ||
+            /node_modules\/react-helmet-async\//.test(id) ||
+            /node_modules\/scheduler\//.test(id) ||
+            /node_modules\/react\//.test(id)
+          ) {
+            return 'vendor-react'
+          }
+
           if (
             id.includes('@rainbow-me/rainbowkit') ||
             id.includes('/wagmi/') ||
@@ -41,9 +56,9 @@ export default defineConfig({
           ) {
             return 'web3'
           }
+
           if (id.includes('framer-motion')) return 'motion'
           if (id.includes('@tanstack/react-query')) return 'query'
-          if (id.includes('react-dom') || id.includes('react-router')) return 'vendor-react'
         },
       },
     },
