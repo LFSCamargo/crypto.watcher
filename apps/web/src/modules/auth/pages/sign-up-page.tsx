@@ -22,9 +22,9 @@ export function SignUpPage() {
       return
     }
     try {
-      await register.mutateAsync({ email, password, nickname: nickname || undefined })
-      toast.success('Account created!')
-      navigate('/auth/onboarding')
+      const result = await register.mutateAsync({ email, password, nickname: nickname || undefined })
+      toast.success('Check your email for a verification code')
+      navigate('/auth/verify-otp', { state: { email: result.email, nextPath: '/auth/onboarding' } })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not create account')
     }

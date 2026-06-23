@@ -50,8 +50,8 @@ describe('auth handlers', () => {
     vi.clearAllMocks()
   })
 
-  it('loginHandler sets session cookie and returns user', async () => {
-    vi.mocked(authService.login).mockResolvedValue({ sessionId, user })
+  it('loginHandler sends OTP challenge without setting session cookie', async () => {
+    vi.mocked(authService.login).mockResolvedValue({ ok: true, email: 'test@example.com' })
 
     const req = mockRequest({ body: { email: 'test@example.com', password: 'secret123' } })
     const res = mockResponse()
@@ -62,8 +62,8 @@ describe('auth handlers', () => {
       email: 'test@example.com',
       password: 'secret123',
     })
-    expect(res.cookie).toHaveBeenCalled()
-    expect(res.body).toEqual({ user })
+    expect(res.cookie).not.toHaveBeenCalled()
+    expect(res.body).toEqual({ ok: true, email: 'test@example.com' })
   })
 
   it('loginHandler returns 401 for invalid credentials', async () => {
@@ -77,8 +77,8 @@ describe('auth handlers', () => {
     )
   })
 
-  it('registerHandler creates account and sets session cookie', async () => {
-    vi.mocked(authService.register).mockResolvedValue({ sessionId, user })
+  it('registerHandler creates account and returns OTP challenge', async () => {
+    vi.mocked(authService.register).mockResolvedValue({ ok: true, email: 'new@example.com' })
 
     const req = mockRequest({
       body: { email: 'new@example.com', password: 'password123', nickname: 'newbie' },
@@ -88,8 +88,8 @@ describe('auth handlers', () => {
     await registerHandler(req, res)
 
     expect(res.statusCode).toBe(201)
-    expect(res.cookie).toHaveBeenCalled()
-    expect(res.body).toEqual({ user })
+    expect(res.cookie).not.toHaveBeenCalled()
+    expect(res.body).toEqual({ ok: true, email: 'new@example.com' })
   })
 
   it('registerHandler returns 409 when email is taken', async () => {

@@ -42,6 +42,7 @@ apps/
     │   │   └── ui/                  # Shadcn/UI primitives (shared)
     │   ├── lib/                     # api client, wagmi/viem config, utils
     │   │   ├── api/                 # typed API client (maps to BACKEND)
+    │   │   ├── seo/                 # PageMeta, route resolver, JSON-LD [MVP]
     │   │   ├── web3/                # wagmi config, contract ABIs/hooks
     │   │   └── utils/
     │   ├── store/                   # Zustand root store + shared slices
@@ -76,11 +77,12 @@ apps/
     │   │   ├── rewards/            # Reviewer compensation UI           [Phase 1]
     │   │   └── notifications/      # In-app notification center        [Phase 1]
     │   ├── styles/                  # Tailwind base + theme
-    │   └── public/                  # Static assets (logos, `/icons/{slug}.png` coin logos)
+    │   └── public/                  # Static assets, robots.txt, sitemap.xml (generated)
     ├── e2e/                         # Playwright tests
     ├── lighthouse.config.json       # Lighthouse URLs + score thresholds [MVP]
     ├── lighthouse-reports/          # Generated audit JSON (gitignored)
     ├── scripts/
+    │   ├── generate-seo-files.ts    # Build-time robots.txt + sitemap.xml [MVP]
     │   ├── run-lighthouse.ts        # Production preview + Lighthouse CLI [MVP]
     │   └── sync-crypto-icons.mjs
     └── package.json
@@ -117,7 +119,7 @@ apps/
 - Small per-comment fee explained in UI (anti-spam); on-chain fee settlement `[MVP]` (UI + backend flag).
 
 ### auth `[MVP]`
-- Email/password registration and login with session cookies, on a split-panel branded auth shell.
+- Email/password registration and login with session cookies after OTP verification, on a split-panel branded auth shell.
 - Forgot-password and reset-password flow (token-based; dev surfaces the link until email infra ships).
 - Guided multi-step onboarding teaching search, expert safety scores, comments/evidence, and optional wallet linking for **protocol** governance.
 - Public-key (wallet) linking for CWT protocol governance votes (not project score voting).
@@ -197,8 +199,8 @@ apps/
 | path | feature | access | phase |
 | --- | --- | --- | --- |
 | `/` | marketing (hero search + top rated) | public | `MVP` |
-| `/auth/signin`, `/auth/signup`, `/auth/onboarding` | auth | public / 🔒 | `MVP` |
-| `/auth/forgot-password`, `/auth/reset-password` | auth (password recovery) | public | `MVP` |
+| `/auth/signin`, `/auth/signup`, `/auth/verify-otp`, `/auth/forgot-password`, `/auth/reset-password` | auth (guest-only; redirects when signed in) | public | `MVP` |
+| `/auth/onboarding` | auth (post-signup; requires session) | 🔒 | `MVP` |
 | `/app` | projects (Safe Projects App Store) | public | `MVP` |
 | `/app/reference/:slug` | projects (curated safe project detail) | public | `MVP` |
 | `/app/projects/:slug` | projects (on-chain detail) | public | `MVP` |
@@ -227,7 +229,7 @@ apps/
 
 | feature | endpoints / on-chain | phase |
 | --- | --- | --- |
-| auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/link-public-key`, `POST /auth/nonce`, `POST /auth/verify`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/logout`, `GET /auth/me` | `MVP` |
+| auth | `POST /auth/register`, `POST /auth/login`, `POST /auth/verify-email-otp`, `POST /auth/resend-email-otp`, `POST /auth/link-public-key`, `POST /auth/nonce`, `POST /auth/verify`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `POST /auth/logout`, `GET /auth/me` | `MVP` |
 | analysis | `GET /analysis-requests`, `POST /analysis-requests`, `GET /analysis-requests/me`, `PATCH /analysis-requests/:id` 👑 | `MVP` |
 | users | `GET /users/:address`, `PATCH /users/me` | `MVP` |
 | projects | `GET /projects`, `GET /projects/:slug`, `POST /projects` 👑, `PATCH /projects/:id` 👑, `POST /projects/:id/transition` 👑 | `MVP` |
@@ -326,6 +328,18 @@ interface VotingState {
 > Frontend persistence note: the frontend has no SQL store of its own; persistent
 > data is modeled in PostgreSQL on the backend (see the SQL Data Modeling section
 > of [BACKEND](./BACKEND.mdc)). The client only keeps cached server data + UI state.
+
+## SEO & performance `[MVP]`
+
+- **`lib/seo/`** — `PageMeta` (react-helmet-async), `RouteSeo` in the app shell,
+  `resolveRouteMeta()` for every public route (static + blog + reference projects),
+  JSON-LD (WebSite, Organization, Article, Product/Review, BreadcrumbList).
+- **Build artifacts** — `pnpm --filter web seo:generate` (also runs before `build`)
+  writes `src/public/robots.txt` and `sitemap.xml` from `VITE_SITE_URL` +
+  `getIndexablePaths()`. Auth/admin/profile routes are `noindex`.
+- **Fonts** — self-hosted via `@fontsource` (no render-blocking Google Fonts).
+- **Code splitting** — lazy-loaded route chunks + manual Rollup vendor splits
+  (`web3`, `motion`, `query`, `vendor-react`) for Lighthouse performance.
 
 ## Conventions
 

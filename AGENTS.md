@@ -46,6 +46,7 @@ docs/         # Design docs (source of truth)
 ## Common commands
 
 ```bash
+cp .env.example .env        # single central env (api + web VITE_* + contracts)
 pnpm install                # install all workspaces (Node 22.13 — run `nvm use` first)
 pnpm run dev                # run web + api in parallel (nx)
 pnpm run lint               # eslint across the monorepo
@@ -89,3 +90,8 @@ Shared setup lives in `.github/actions/setup-pnpm`. Dependency audit and CodeQL 
 - Validate all API I/O with Zod; surface OpenAPI via `@asteasolutions/zod-to-openapi`.
 - DB access only via Kysely repositories; on-chain reads via Viem (`core/chain`).
 - Frontend network calls via `lib/api/`; on-chain via `lib/web3/`.
+- **Single central env.** One git-ignored `.env` at the repo root feeds the API
+  (`apps/api` reads it via `core/config/load-env.ts`), the web app (Vite `envDir`
+  is the repo root; browser vars must be `VITE_`-prefixed) and the contracts deploy
+  script. Use `.env.local` for machine-local secret overrides. Real process env
+  (Docker/CI) always wins over the files.

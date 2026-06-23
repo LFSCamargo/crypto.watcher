@@ -72,18 +72,23 @@ export function CuratedProjectCard({
   index,
   project,
   richChart = false,
+  /** Start fetching market data immediately (above-the-fold cards on the landing page). */
+  fetchImmediately = false,
 }: {
   index: number
   project: CuratedProject
   /** Use the full interactive PriceChart (good for landing hero with few cards). Default is cheap mini sparkline for dense grids. */
   richChart?: boolean
+  fetchImmediately?: boolean
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(fetchImmediately)
 
   // Only fetch market data (and thus render any chart) when the card is near the viewport.
   // This prevents firing 50-100 simultaneous CoinGecko calls when loading /app.
   useEffect(() => {
+    if (fetchImmediately) return
+
     const el = cardRef.current
     if (!el) return
 
@@ -92,18 +97,18 @@ export function CuratedProjectCard({
         const entry = entries[0]
         if (entry?.isIntersecting) {
           setIsVisible(true)
-          // Once visible, we can stop observing to save work
           observer.disconnect()
         }
       },
-      { rootMargin: '200px' }, // prefetch a bit before it scrolls into view
+      { rootMargin: '200px' },
     )
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [fetchImmediately])
 
   const { data, isLoading } = useMarketPrice(isVisible ? project.slug : undefined)
+  const marketPending = !isVisible || isLoading
   const tone = scoreTone(project.score)
 
   return (
@@ -116,6 +121,7 @@ export function CuratedProjectCard({
       <Link
         to={`/app/reference/${project.slug}`}
         className="group card-hover flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card"
+        aria-busy={marketPending}
       >
         <div className="flex flex-1 flex-col gap-3 p-4 pb-3">
           <div className="flex items-start gap-3">
@@ -161,9 +167,10 @@ export function CuratedProjectCard({
           </p>
 
           <div className="rounded-xl border border-border/60 bg-muted/10 p-3">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-24 rounded-md" />
+            {marketPending ? (
+              <div className="space-y-2" aria-label="Loading market data">
+                <Skeleton className="h-3 w-10 rounded" />
+                <Skeleton className="h-7 w-28 rounded-md" />
                 <div className="grid grid-cols-4 gap-2">
                   <Skeleton className="h-12 rounded-lg" />
                   <Skeleton className="h-12 rounded-lg" />
@@ -188,7 +195,7 @@ export function CuratedProjectCard({
               </>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Live price data unavailable{isLoading ? '…' : ' (may be rate limited or not indexed)'}
+                Live price data unavailable (may be rate limited or not indexed)
               </p>
             )}
           </div>
@@ -205,7 +212,12 @@ export function CuratedProjectCard({
           </div>
         </div>
 
-        {data ? (
+        {marketPending ? (
+          <Skeleton
+            className={`w-full rounded-none ${richChart ? 'h-20' : 'h-10'}`}
+            aria-hidden
+          />
+        ) : data ? (
           richChart ? (
             <PriceChart
               history={data.history}
@@ -219,8 +231,6 @@ export function CuratedProjectCard({
               <MiniSparkline history={data.history} maxPoints={40} />
             </div>
           )
-        ) : isLoading ? (
-          <Skeleton className="h-10 w-full rounded-none" />
         ) : null}
       </Link>
     </motion.div>

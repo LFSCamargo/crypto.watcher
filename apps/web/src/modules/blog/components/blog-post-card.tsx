@@ -22,8 +22,8 @@ export function BlogPostCard({ post, featured = false }: BlogPostCardProps) {
     >
       <div
         className={cn(
-          'relative flex shrink-0 items-center justify-center bg-foreground text-background',
-          featured ? 'lg:w-2/5' : 'h-40',
+          'relative flex h-40 shrink-0 items-center justify-center bg-foreground text-background',
+          featured && 'lg:h-auto lg:min-h-full lg:w-2/5',
         )}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,214,0,0.25),transparent_55%)]" />

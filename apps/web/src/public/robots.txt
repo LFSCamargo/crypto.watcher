@@ -1,0 +1,11 @@
+# Crypto Watcher — generated at build time
+User-agent: *
+Allow: /
+
+Disallow: /auth/
+Disallow: /app/admin
+Disallow: /app/me
+Disallow: /app/profile
+Disallow: /app/u/
+
+Sitemap: https://cryptowatcher.io/sitemap.xml

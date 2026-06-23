@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import { Governor } from "@openzeppelin/contracts/governance/Governor.sol";
 import {
@@ -28,11 +28,25 @@ contract CryptoWatcherGovernor is
     GovernorVotesQuorumFraction,
     GovernorTimelockControl
 {
-    constructor(IVotes token, TimelockController timelock)
+    /// @param token Governance token (ERC20Votes).
+    /// @param timelock Timelock that executes passed proposals.
+    /// @param votingDelay_ Blocks between proposal creation and voting start.
+    /// @param votingPeriod_ Blocks the vote stays open.
+    /// @param proposalThreshold_ Minimum votes required to submit a proposal
+    ///        (must be non-zero in production to prevent proposal spam).
+    /// @param quorumFraction_ Quorum as a percentage of total voting supply.
+    constructor(
+        IVotes token,
+        TimelockController timelock,
+        uint48 votingDelay_,
+        uint32 votingPeriod_,
+        uint256 proposalThreshold_,
+        uint256 quorumFraction_
+    )
         Governor("CryptoWatcherGovernor")
-        GovernorSettings(1, 50_400, 0)
+        GovernorSettings(votingDelay_, votingPeriod_, proposalThreshold_)
         GovernorVotes(token)
-        GovernorVotesQuorumFraction(4)
+        GovernorVotesQuorumFraction(quorumFraction_)
         GovernorTimelockControl(timelock)
     { }
 

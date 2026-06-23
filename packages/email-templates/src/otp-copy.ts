@@ -1,4 +1,4 @@
-export type OtpPurpose = 'verify_email' | 'password_reset'
+export type OtpPurpose = 'verify_email' | 'sign_in' | 'password_reset'
 
 export type OtpEmailCopy = {
   subject: string
@@ -14,6 +14,15 @@ export function getOtpEmailCopy(purpose: OtpPurpose): OtpEmailCopy {
       preview: 'Use this code to reset your password.',
       heading: 'Reset your password',
       body: 'Enter this one-time code to reset your Crypto Watcher password.',
+    }
+  }
+
+  if (purpose === 'sign_in') {
+    return {
+      subject: 'Your Crypto Watcher sign-in code',
+      preview: 'Use this code to finish signing in.',
+      heading: 'Sign in to Crypto Watcher',
+      body: 'Enter this one-time code to complete your sign-in.',
     }
   }
 

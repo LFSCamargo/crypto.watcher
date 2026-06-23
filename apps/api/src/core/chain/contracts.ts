@@ -1,13 +1,13 @@
 import { parseAbi } from 'viem'
 
-export const projectVotingFactoryAbi = parseAbi([
-  'event ProjectVotingDeployed(bytes32 indexed projectId, address indexed voting)',
+export const projectWatcherFactoryAbi = parseAbi([
+  'event ProjectSubmitted(bytes32 indexed projectId, address indexed review, address indexed submitter)',
+  'event BackendUpdated(address indexed previousBackend, address indexed newBackend)',
 ])
 
-export const projectVotingAbi = parseAbi([
-  'event VotingOpened(bytes32 indexed projectId, uint64 openedAt, uint64 closesAt)',
-  'event Voted(bytes32 indexed projectId, address indexed voter, uint8 choice, uint256 weight)',
-  'event VotingClosed(bytes32 indexed projectId, uint64 closedAt, uint256 weightFor, uint256 weightAgainst)',
+export const projectReviewAbi = parseAbi([
+  'event AnalysisStarted(bytes32 indexed projectId, uint64 startedAt)',
+  'event ReportPublished(bytes32 indexed projectId, address indexed governor, uint256 indexed round, uint8 riskScore, bytes32 reportHash, uint32 methodologyVersion)',
 ])
 
 export const governorAbi = parseAbi([

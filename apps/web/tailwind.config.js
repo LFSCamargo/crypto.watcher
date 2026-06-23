@@ -61,6 +61,7 @@ export default {
       },
       fontFamily: {
         sans: ['Raleway', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       keyframes: {
         'accordion-down': {

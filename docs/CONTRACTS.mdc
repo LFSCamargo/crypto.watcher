@@ -10,9 +10,10 @@ alwaysApply: true
 
 > **Product model:** Official project risk scores are published by a vetted governor
 > council only. CWT governs **protocol** decisions (reviewer roster, methodology,
-> accountability) — not vote-to-rate on individual projects. Legacy `ProjectVoting` /
-> reputation-weighted public score contracts remain in the repo from an earlier design
-> and are being refactored toward governor-only review authority.
+> accountability) — not vote-to-rate on individual projects. The on-chain review
+> record (`ProjectReview`) enforces this: only vetted council governors (gated by
+> `ReputationRegistry`) may publish reports — there is no public, token- or
+> reputation-weighted vote-to-rate.
 
 ## Tech Stack
 
@@ -37,14 +38,14 @@ contracts/
 │   │   ├── GovernanceToken.sol   # ERC20Votes governance token  [MVP]
 │   │   ├── CryptoWatcherGovernor.sol  # Governor (proposals/voting)  [MVP→Final]
 │   │   ├── Timelock.sol          # TimelockController             [MVP]
-│   │   ├── ProtocolSettings.sol  # Governed protocol params       [MVP]
+│   │   ├── ProtocolSettings.sol  # Governed methodology version (consumed by reviews) [MVP]
 │   │   └── interfaces/
-│   ├── voting/                   # Per-project registry module (legacy name)
-│   │   ├── ProjectVoting.sol     # On-chain review record / anchor [MVP] (legacy vote-to-rate being removed)
-│   │   ├── ProjectWatcherFactory.sol # Backend-gated submit + registry [MVP]
-│   │   └── interfaces/
-│   ├── reputation/               # Reviewer credentials module
-│   │   ├── ReputationRegistry.sol # Governor eligibility + reviewer weight [MVP→Phase 1]
+│   │       └── IProtocolSettings.sol
+│   ├── review/                   # Per-project review registry module
+│   │   ├── ProjectReview.sol     # Governor-only on-chain report record + audit trail [MVP]
+│   │   └── ProjectWatcherFactory.sol # Backend-gated submit + registry [MVP]
+│   ├── reputation/               # Council governor credentials module
+│   │   ├── ReputationRegistry.sol # Governor allow-list + accountability weight [MVP→Phase 1]
 │   │   └── interfaces/
 │   ├── rewards/                  # Reviewer compensation module
 │   │   ├── RewardDistributor.sol # Governor compensation + misconduct penalties [Phase 1]
@@ -69,30 +70,40 @@ contracts/
 - Seed distribution to early protocol participants / treasury. `[MVP]`
 - `Timelock` (`TimelockController`) owned by team multisig at launch. `[MVP]`
 - `CryptoWatcherGovernor`: proposals for protocol params (reviewer roster changes,
-  methodology version, review fees, backend submitter rotation). `[MVP]`
-- `ProtocolSettings`: Timelock-owned review methodology and council policy params. `[MVP]`
+  methodology version, review fees, backend submitter rotation). Voting delay/period,
+  quorum fraction and a **non-zero proposal threshold** (anti-spam) are constructor
+  parameters and remain governance-tunable via the OZ setters. `[MVP]`
+- `ProtocolSettings`: Timelock-owned `methodologyVersion`. This value is **read by
+  every `ProjectReview` at publish time** and stamped onto each report, so governance
+  changes have direct on-chain effect (no orphaned settings). `[MVP]`
 - Community token-weighted **protocol** proposals, quorum + voting delay. `[Phase 1]`
 - Vote delegation UX support for protocol votes. `[Phase 2]`
 - Full DAO: treasury + upgrade control governed on-chain. `[Final]`
 
-### Review registry module (folder: `voting/`)
+### Review registry module (folder: `review/`)
 - `ProjectWatcherFactory`: backend-controlled `submitProject(projectId, submitter)`
   callable only by the platform `backend` (users pay for their review off-chain;
-  the backend then emits the on-chain record on their behalf). Deploys one registry
-  contract per project, records the paying user as submitter, prevents duplicate ids
-  and exposes a registry (`votingOf`, `submitterOf`, enumeration).
+  the backend then emits the on-chain record on their behalf). Deploys one
+  `ProjectReview` per project, records the paying user as submitter, prevents
+  duplicate ids and exposes a registry (`reviewOf`, `submitterOf`, enumeration).
   `Ownable2Step` + `Pausable`; governance owns it, can rotate the `backend`
   address (`setBackend`) and pause submissions. `[MVP]`
-- `ProjectVoting` (legacy): currently implements public vote-to-rate; target state is
-  governor-only score publication with on-chain audit trail. Refactor in progress. `[MVP]`
-- Indexer-friendly events for published scores, reviewer attestations, methodology
-  version and timestamps. `[MVP]`
-- Governor-gated score publication (only `GOVERNOR_ROLE` / council members). `[MVP]`
+- `ProjectReview`: governor-only score publication with an immutable on-chain audit
+  trail. Lifecycle `Requested → InAnalysis → Published`; the team/operator advances
+  analysis, then vetted council governors call `publishReport(riskScore, reportHash)`.
+  Each report is stamped with the current `methodologyVersion`; re-reviews append a
+  new immutable round. A governor cannot review a project they submitted
+  (conflict-of-interest guard). No public vote-to-rate. `[MVP]`
+- Indexer-friendly events (`ProjectSubmitted`, `AnalysisStarted`, `ReportPublished`)
+  carrying score, governor, round, report hash and methodology version. `[MVP]`
+- Governor-gated score publication (only council members eligible in
+  `ReputationRegistry`, also granted `GOVERNOR_ROLE`). `[MVP]`
 - Multi-chain deployment of project registry contracts. `[Phase 2]`
 
-### Reputation module (reviewer credentials)
-- `ReputationRegistry`: governor/reviewer allow-list + accountability weight for
-  **council members only** — not public score voting eligibility. `[MVP→Phase 1]`
+### Reputation module (council governor credentials)
+- `ReputationRegistry`: governor allow-list + accountability weight for **council
+  members only** — not public score voting eligibility. Eligible governors are also
+  granted `GOVERNOR_ROLE`. `[MVP→Phase 1]`
 - Multi-factor reviewer reputation (report quality, timeliness, appeal overturn rate,
   conflict disclosures). `[Phase 1]`
 - On-chain reviewer credential references. `[Phase 2]`
@@ -110,6 +121,24 @@ contracts/
   on-chain. `[MVP]`
 - Score factors enriched with external risk signals to **assist** governors (human-in-the-loop). `[Phase 3]`
 - Appeals and re-review workflow (governor council, not token vote). `[Phase 1]`
+
+## Security posture
+
+- **Access control.** Report publication is gated to vetted council governors
+  (`ReputationRegistry.isEligible` + `GOVERNOR_ROLE`); lifecycle transitions are
+  `team`-only; the factory is `Ownable2Step` + `Pausable` and backend-gated.
+- **Governance wiring.** `ProtocolSettings.methodologyVersion` is consumed by every
+  `ProjectReview`, so governed parameters have real on-chain effect. The governor
+  ships with a non-zero `proposalThreshold` to prevent proposal spam.
+- **Deploy hardening.** `Deploy.s.sol` hands timelock control to the governor and
+  renounces the deployer's `DEFAULT_ADMIN_ROLE`, and delegates the deployer's votes
+  so governance is immediately usable. Pinned compiler pragma (`0.8.26`).
+- **Conflict of interest.** A governor cannot publish a report for a project they
+  submitted; risk scores are bounded `[0, 100]` and report hashes must be non-zero.
+- **Known trust assumptions.** The `backend` submitter and the governor council are
+  trusted, governance-rotatable roles; the full token supply is minted to the
+  deployer at genesis and **must be distributed to the treasury/council before
+  mainnet** so a single key cannot dominate governance.
 
 ## Security & Testing
 

@@ -65,7 +65,7 @@ const sessionUserFromRow = (session: {
 const issueOtpForUser = async (
   userId: string,
   email: string,
-  purpose: 'verify_email' | 'password_reset',
+  purpose: 'verify_email' | 'sign_in' | 'password_reset',
 ) => {
   await authRepository.revokeUserOtpTokens(userId, purpose)
   const code = generateOtpCode()
@@ -139,32 +139,21 @@ export const authService = {
       nickname: input.nickname ?? null,
     })
 
-    const session = await authRepository.createSession({
-      userId: user.id,
-      sessionType: 'email',
-      expiresAt: new Date(Date.now() + EMAIL_SESSION_TTL_MS),
-    })
-
     await issueOtpForUser(user.id, user.email!, 'verify_email').catch(() => undefined)
 
-    return { sessionId: session.id, user }
+    return { ok: true as const, email: user.email! }
   },
 
   async login(input: { email: string; password: string }) {
     const userRow = await usersService.getRowByEmail(input.email.toLowerCase())
-    if (!userRow?.password_hash) return undefined
+    if (!userRow?.password_hash || !userRow.email) return undefined
 
     const valid = await bcrypt.compare(input.password, userRow.password_hash)
     if (!valid) return undefined
 
-    const user = mapUser(userRow)
-    const session = await authRepository.createSession({
-      userId: user.id,
-      sessionType: 'email',
-      expiresAt: new Date(Date.now() + EMAIL_SESSION_TTL_MS),
-    })
+    await issueOtpForUser(userRow.id, userRow.email, 'sign_in')
 
-    return { sessionId: session.id, user }
+    return { ok: true as const, email: userRow.email }
   },
 
   async linkPublicKey(userId: string, publicKey: string) {
@@ -229,24 +218,34 @@ export const authService = {
     const userRow = await usersService.getRowByEmail(email.toLowerCase())
     if (!userRow?.email) return { ok: true as const }
 
-    const code = await issueOtpForUser(userRow.id, userRow.email, 'verify_email')
+    const purpose = userRow.email_verified_at ? 'sign_in' : 'verify_email'
+    const code = await issueOtpForUser(userRow.id, userRow.email, purpose)
     const code_ = config.env === 'production' ? undefined : code
     return { ok: true as const, code: code_ }
   },
 
   async verifyEmailOtp(input: { email: string; code: string }) {
-    const otp = await authRepository.getActiveOtpForEmail(
+    const otp = await authRepository.getActiveAuthOtpForEmail(
       input.email.toLowerCase(),
       input.code,
-      'verify_email',
     )
-    if (!otp) return undefined
+    if (!otp?.otp_purpose) return undefined
 
-    const user = await usersService.markEmailVerified(otp.user_id)
+    const user =
+      otp.otp_purpose === 'verify_email'
+        ? await usersService.markEmailVerified(otp.user_id)
+        : await usersService.getById(otp.user_id)
     if (!user) return undefined
 
-    await authRepository.revokeUserOtpTokens(otp.user_id, 'verify_email')
-    return { ok: true as const, user }
+    await authRepository.revokeUserOtpTokens(otp.user_id, otp.otp_purpose)
+
+    const session = await authRepository.createSession({
+      userId: otp.user_id,
+      sessionType: 'email',
+      expiresAt: new Date(Date.now() + EMAIL_SESSION_TTL_MS),
+    })
+
+    return { ok: true as const, sessionId: session.id, user }
   },
 
   async sendPasswordResetOtp(email: string) {

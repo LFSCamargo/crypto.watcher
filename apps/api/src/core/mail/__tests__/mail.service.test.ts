@@ -10,6 +10,21 @@ vi.mock('nodemailer', () => ({
   default: { createTransport },
 }))
 
+vi.mock('../../config', () => ({
+  config: {
+    env: 'test',
+    webUrl: 'http://localhost:5173',
+    smtp: {
+      host: 'localhost',
+      port: 1025,
+      secure: false,
+      from: 'Crypto Watcher <noreply@localhost>',
+      user: undefined,
+      pass: undefined,
+    },
+  },
+}))
+
 vi.mock('email-templates', () => ({
   renderOtpEmail: vi.fn().mockResolvedValue({
     subject: 'OTP subject',
@@ -43,6 +58,7 @@ describe('mailService', () => {
       code: '123456',
       purpose: 'verify_email',
       expiresMinutes: 10,
+      logoUrl: 'http://localhost:5173/logo.png',
     })
     expect(sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -64,6 +80,7 @@ describe('mailService', () => {
     expect(renderPasswordResetEmail).toHaveBeenCalledWith({
       resetUrl: 'http://localhost:5173/auth/reset-password?token=abc',
       expiresMinutes: 30,
+      logoUrl: 'http://localhost:5173/logo.png',
     })
     expect(sendMail).toHaveBeenCalledWith(
       expect.objectContaining({

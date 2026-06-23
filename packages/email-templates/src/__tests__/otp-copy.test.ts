@@ -11,6 +11,15 @@ describe('getOtpEmailCopy', () => {
     })
   })
 
+  it('returns sign-in copy', () => {
+    expect(getOtpEmailCopy('sign_in')).toEqual({
+      subject: 'Your Crypto Watcher sign-in code',
+      preview: 'Use this code to finish signing in.',
+      heading: 'Sign in to Crypto Watcher',
+      body: 'Enter this one-time code to complete your sign-in.',
+    })
+  })
+
   it('returns password-reset copy', () => {
     expect(getOtpEmailCopy('password_reset')).toEqual({
       subject: 'Your Crypto Watcher password reset code',

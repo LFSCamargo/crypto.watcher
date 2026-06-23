@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import { Test } from "forge-std/Test.sol";
 import { CryptoWatcherGovernor } from "../../src/governance/CryptoWatcherGovernor.sol";
@@ -22,7 +22,7 @@ contract CryptoWatcherGovernorTest is Test {
         address[] memory executors = new address[](1);
         executors[0] = address(0);
         timelock = new Timelock(1, proposers, executors, admin);
-        governor = new CryptoWatcherGovernor(token, timelock);
+        governor = new CryptoWatcherGovernor(token, timelock, 1, 50_400, 0, 4);
 
         vm.startPrank(admin);
         token.delegate(admin);
@@ -31,7 +31,7 @@ contract CryptoWatcherGovernorTest is Test {
         timelock.revokeRole(timelock.DEFAULT_ADMIN_ROLE(), admin);
         vm.stopPrank();
 
-        settings = new ProtocolSettings(address(timelock), 3 days, 1);
+        settings = new ProtocolSettings(address(timelock), 1);
     }
 
     function test_tokenDelegationCreatesVotingUnits() public view {
@@ -46,9 +46,9 @@ contract CryptoWatcherGovernorTest is Test {
         values[0] = 0;
 
         bytes[] memory calldatas = new bytes[](1);
-        calldatas[0] = abi.encodeCall(ProtocolSettings.setVotingDuration, (7 days));
+        calldatas[0] = abi.encodeCall(ProtocolSettings.setMethodologyVersion, (2));
 
-        string memory description = "Set voting duration to seven days";
+        string memory description = "Bump methodology version to 2";
         bytes32 descriptionHash = keccak256(bytes(description));
 
         vm.prank(admin);
@@ -65,6 +65,6 @@ contract CryptoWatcherGovernorTest is Test {
         vm.warp(block.timestamp + timelock.getMinDelay() + 1);
         governor.execute(targets, values, calldatas, descriptionHash);
 
-        assertEq(settings.votingDuration(), 7 days);
+        assertEq(settings.methodologyVersion(), 2);
     }
 }

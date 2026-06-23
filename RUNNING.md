@@ -31,8 +31,7 @@ git submodule update --init --recursive   # fetch Foundry libs (forge-std, openz
 ### Option A — apps on host, infra in Docker
 
 ```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+cp .env.example .env   # single central env shared by api, web and contracts
 
 docker compose up -d postgres mailhog   # Postgres (5432) + MailHog (1025/8025)
 pnpm --filter api run db:migrate         # run DB migrations
@@ -110,10 +109,11 @@ Fund the address with Base Sepolia ETH from a faucet
 ### 2. Configure env
 
 ```bash
-cp contracts/.env.example contracts/.env
+cp .env.example .env   # central env at the repo root
 ```
 
-Fill in `contracts/.env`:
+Fill in the contracts section of the root `.env` (the deploy script also reads
+`.env.local` for machine-local secret overrides):
 
 | Variable | Required | Description |
 | --- | --- | --- |
@@ -121,7 +121,8 @@ Fill in `contracts/.env`:
 | `DEPLOYER_PRIVATE_KEY` | yes | Funded deployer key (`0x`-prefixed). |
 | `BASESCAN_API_KEY` | no | Set to verify contracts on Basescan. |
 | `BACKEND_SUBMITTER` | no | Backend allowed to emit projects (defaults to deployer). |
-| `INITIAL_SUPPLY` / `VOTING_DURATION` / `TIMELOCK_MIN_DELAY` / `MIN_REPUTATION_WEIGHT` | no | Deploy params (sane defaults in `Deploy.s.sol`). |
+| `INITIAL_SUPPLY` / `TIMELOCK_MIN_DELAY` / `MIN_REPUTATION_WEIGHT` / `METHODOLOGY_VERSION` | no | Deploy params (sane defaults in `Deploy.s.sol`). |
+| `GOV_VOTING_DELAY` / `GOV_VOTING_PERIOD` / `GOV_PROPOSAL_THRESHOLD` / `GOV_QUORUM_FRACTION` | no | Governor tuning (sane defaults in `Deploy.s.sol`). |
 
 ### 3. Deploy
 
@@ -141,16 +142,16 @@ GovernanceToken:      0x...
 Timelock:             0x...
 CryptoWatcherGovernor:0x...
 ReputationRegistry:   0x...
+ProtocolSettings:     0x...
 ProjectWatcherFactory:0x...
 Factory backend:      0x...
-ProtocolSettings:     0x...
 ```
 
 ### 4. Point the apps at the deployment
 
 - Addresses are recorded in `contracts/deployments/base-sepolia.json` — read from
   there instead of re-deploying.
-- Set `RPC_URL=https://sepolia.base.org` in `apps/api/.env` (already the default).
+- Set `RPC_URL=https://sepolia.base.org` in the root `.env` (already the default).
 - The web app already includes Base Sepolia (`VITE_DEFAULT_CHAIN_ID=84532`).
 - Wire the deployed `ProjectWatcherFactory` / token addresses into the app config
   as needed.

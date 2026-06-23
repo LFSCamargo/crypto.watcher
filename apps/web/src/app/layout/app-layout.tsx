@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { RouteSeo } from '../../lib/seo'
 import { RiCompass3Line, RiSearchLine, RiStackLine } from '@remixicon/react'
 import { motion } from 'framer-motion'
 import { AuthControls } from '../../modules/auth/components/auth-controls'
@@ -34,6 +35,7 @@ export function AppLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background">
+      <RouteSeo />
       <PageGridBackground />
       <CommandPalette open={open} onOpenChange={setOpen} />
 

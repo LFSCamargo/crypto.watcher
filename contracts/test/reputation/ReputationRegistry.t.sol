@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.26;
 
 import { Test } from "forge-std/Test.sol";
 import { Roles } from "../../src/access/Roles.sol";
@@ -50,5 +50,22 @@ contract ReputationRegistryTest is Test {
 
     function test_roleConstantIsAvailable() public pure {
         assertEq(Roles.REPUTATION_MANAGER_ROLE, keccak256("REPUTATION_MANAGER_ROLE"));
+        assertEq(Roles.GOVERNOR_ROLE, keccak256("GOVERNOR_ROLE"));
+    }
+
+    function test_eligibilityGrantsAndRevokesGovernorRole() public {
+        vm.startPrank(admin);
+        reputation.setEligibility(alice, true, 10);
+        assertTrue(reputation.hasRole(Roles.GOVERNOR_ROLE, alice));
+
+        reputation.setEligibility(alice, false, 0);
+        assertFalse(reputation.hasRole(Roles.GOVERNOR_ROLE, alice));
+        vm.stopPrank();
+    }
+
+    function test_zeroAccountReverts() public {
+        vm.prank(admin);
+        vm.expectRevert(ReputationRegistry.ZeroAccount.selector);
+        reputation.setEligibility(address(0), true, 10);
     }
 }
