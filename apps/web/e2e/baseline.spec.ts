@@ -6,6 +6,7 @@ test.describe('compatibility redirects', () => {
     ['/projects/bitcoin', /\/app\/reference\/bitcoin$/],
     ['/profile', /\/app\/profile$/],
     ['/analysis', /\/app\/in-analysis$/],
+    ['/app/projects/aave/vote', /\/app\/projects\/aave$/],
   ]
 
   for (const [from, to] of redirects) {
@@ -39,7 +40,8 @@ test.describe('browsing without an account', () => {
 
   test('missing API project shows a recoverable not-found state', async ({ page }) => {
     await page.goto('/app/projects/does-not-exist')
-    await expect(page.getByText('Project not found.')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: 'Project not found' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Back to projects' })).toBeVisible()
   })
 
   test('governance proposals are reachable without a wallet', async ({ page }) => {

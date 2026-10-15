@@ -22,10 +22,10 @@ export function ProjectSafetyVerdict({ profile }: { profile: ProjectReviewProfil
     <Card
       className={cn(
         'rounded-2xl border',
-        profile.verdict === 'low_risk' && 'border-emerald-500/20 bg-emerald-500/5',
+        profile.verdict === 'low_risk' && 'border-success/25 bg-success/5',
         profile.verdict === 'moderate_risk' && 'border-primary/20 bg-primary/5',
-        profile.verdict === 'elevated_risk' && 'border-amber-500/20 bg-amber-500/5',
-        profile.verdict === 'caution' && 'border-red-500/20 bg-red-500/5',
+        profile.verdict === 'elevated_risk' && 'border-warning/25 bg-warning/5',
+        profile.verdict === 'caution' && 'border-destructive/25 bg-destructive/5',
       )}
     >
       <CardContent className="space-y-3 p-6">

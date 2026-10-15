@@ -359,10 +359,6 @@ export class MockApi {
       return [200, this.comments.filter((comment) => comment.projectId === idOrSlug)]
     }
 
-    if (resource === 'votes') {
-      return [200, { projectId: idOrSlug, round: 1, weightFor: '0', weightAgainst: '0' }]
-    }
-
     const project = this.projects.find(
       (item) => item.slug === idOrSlug || item.id === idOrSlug,
     )

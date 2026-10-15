@@ -64,7 +64,10 @@ describe('CuratedProjectCard', () => {
       }
 
       observe = vi.fn(() => {
-        this.callback([{ isIntersecting: true } as IntersectionObserverEntry], this as never)
+        this.callback(
+          [{ isIntersecting: true } as IntersectionObserverEntry],
+          this as never,
+        )
       })
 
       disconnect = vi.fn()
@@ -81,7 +84,11 @@ describe('CuratedProjectCard', () => {
     renderWithProviders(<CuratedProjectCard index={0} project={project!} />)
 
     expect(screen.getByRole('link', { name: /Bitcoin/i })).toBeInTheDocument()
-    expect(screen.getByText('Reviewed safe')).toBeInTheDocument()
+    expect(screen.getByText('Lower risk')).toBeInTheDocument()
+    expect(screen.getByText('Reference assessment')).toBeInTheDocument()
+    expect(
+      screen.queryByText(/Reviewed safe|Expert safety review/),
+    ).not.toBeInTheDocument()
     expect(screen.getByText('$50,000.00')).toBeInTheDocument()
   })
 
@@ -130,10 +137,15 @@ describe('CuratedProjectCard', () => {
     } as never)
 
     const project = getCuratedProject('bitcoin')
-    renderWithProviders(<CuratedProjectCard index={0} project={project!} fetchImmediately />)
+    renderWithProviders(
+      <CuratedProjectCard index={0} project={project!} fetchImmediately />,
+    )
 
     expect(screen.getByLabelText('Loading market data')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Bitcoin/i })).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByRole('link', { name: /Bitcoin/i })).toHaveAttribute(
+      'aria-busy',
+      'true',
+    )
     expect(screen.queryByText(/Live price data unavailable/i)).not.toBeInTheDocument()
   })
 

@@ -48,7 +48,8 @@ export function AnalysisRequestPage() {
         <RiShieldCheckLine className="mx-auto mb-4 h-12 w-12 text-primary" />
         <h1 className="heading-3 mb-2">Request a project review</h1>
         <p className="mb-6 text-muted-foreground">
-          Sign in to pay the review fee and submit your project to the governor council queue.
+          Sign in to pay the review fee and submit your project to the governor council
+          queue.
         </p>
         <Button asChild className="rounded-full">
           <Link to={signInHref}>Sign in to continue</Link>
@@ -83,7 +84,7 @@ export function AnalysisRequestPage() {
               <li>Submit your project details below</li>
               <li>Pay the review fee (funds the protocol treasury and expert work)</li>
               <li>Governors investigate and publish a structured report</li>
-              <li>Official safety score appears in the Safe Projects catalog</li>
+              <li>Official safety score appears in the project catalog</li>
             </ol>
           </div>
         </CardContent>

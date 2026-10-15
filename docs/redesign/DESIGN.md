@@ -121,9 +121,9 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | Landing | Hero (claim, sub-claim, search, Browse projects / Get started — Request a review when signed in) → illustrative report preview (figcaption "Illustrative example") → methodology pillars → 5-step review lifecycle → 4 reference assessments (labeled, linked to `/app/reference/:slug`, no charts) → CWT governance vs score separation → resources → final CTA. Implemented in R2. | Hero report-preview card, final CTA card |
 | Auth | Single centered glass panel over the grid; title, one-line purpose, form, inline errors (`role="alert"`), secondary links. Desktop adds a short value column. | Auth panel |
 | Onboarding | 3 steps (how scores work, how to participate, optional wallet) with progress, Back, Skip. | Step panel |
-| Catalog | Title + count, search + category chips (URL-backed), source legend (Reference vs Council report), card grid, empty state with reset, API projects section with its own loading/error. | Filter bar (flat) |
-| API project | Identity + lifecycle status → official score card (meaning, round, provenance) → findings / reference link → market + protocol data (labeled "Market context") → discussion. | Score summary card |
-| Reference asset | Identity + "Reference assessment" banner → reference index with disclaimer → audit coverage → market context → request-review CTA. | Reference index card |
+| Catalog | Title + request CTA → search (URL `?search=`, debounced, history replace) → **Council projects** first (own loading / retry / empty states) → **Reference assessments** (source note, category chips with `aria-pressed`, count, 24-per-page "Show more", empty state with Clear filters). Implemented in R4. | None blurred; cards use `.glass-card-flat` |
+| API project | Identity + lifecycle status → official score card (meaning, round, provenance) → council findings (lifecycle text; separate reference link) → "Market context" (not part of the score) → discussion. Side column: review progress steps, on-chain record, request CTA. Implemented in R4. | Score summary card (`.glass-card`) |
+| Reference asset | Identity + "Reference assessment" badge and note → analyst review sections → market context; side column: reference index (meaning, disclaimer), audit coverage, "Request a council review". Partner trade links removed. Implemented in R4. | None blurred (flat cards) |
 | Queue / request | Queue: lifecycle legend, request cards with status chip and next step, on-chain projects in analysis. Request: what happens next (free today), grouped form with inline validation, persistent success panel with link to profile history. | Success panel |
 | Docs / blog | Sticky glass sidebar on desktop, glass sheet on mobile; opaque reading column (max 70ch), on-page heading anchors. | Sidebar, mobile sheet |
 | Profile / reviewer / governance / admin | Profile: identity header, settings form, wallet status, request history. Reviewer: council status, weight, credential explanation. Governance: state legend, proposal list, detail with lifecycle and participation guidance. Admin: role-gated forms with explicit forbidden state. | Header summary cards |
@@ -142,3 +142,8 @@ Each row is the content hierarchy implementers follow (top to bottom).
   client cooldown and maps HTTP 429 if the API adds limits later.
 - Transaction states (pending / confirmed / failed) — there is no in-app contract
   write after the R4 voting removal; wallet sign-in is a message signature only.
+- Score in the project list payload — `GET /projects` omits the score, so council
+  cards say "Score on the report" for published projects instead of a number.
+- Rating labels — scores map to "S&P"/"Moody's"-style letter grades
+  (`lib/ratings/credit-rating.ts`). These are Crypto Watcher's own scale, not ratings
+  issued by those agencies; product/legal should confirm the naming before launch.

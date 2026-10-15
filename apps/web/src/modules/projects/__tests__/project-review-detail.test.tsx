@@ -6,7 +6,7 @@ import { getCuratedProject } from '../lib/curated-projects'
 import { getProjectReviewProfile } from '../lib/curated-project-reviews'
 
 describe('ProjectReviewDetail', () => {
-  it('composes the full governor review sections', () => {
+  it('composes the reference assessment sections', () => {
     const profile = getProjectReviewProfile(getCuratedProject('bitcoin')!)
 
     renderWithProviders(<ProjectReviewDetail profile={profile} />)
@@ -14,6 +14,6 @@ describe('ProjectReviewDetail', () => {
     expect(screen.getByText(profile.headline)).toBeInTheDocument()
     expect(screen.getByText("Why it's rated well")).toBeInTheDocument()
     expect(screen.getByText('External security reviews')).toBeInTheDocument()
-    expect(screen.getByText('Governor council notes')).toBeInTheDocument()
+    expect(screen.getByText('Analyst notes')).toBeInTheDocument()
   })
 })

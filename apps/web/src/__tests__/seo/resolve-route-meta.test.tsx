@@ -18,10 +18,17 @@ describe('resolveRouteMeta', () => {
     expect(meta.path).toBe('/blog/launch-story')
   })
 
-  it('returns reference project metadata with score in title', () => {
+  it('labels catalog metadata with council and reference terminology', () => {
+    const meta = resolveRouteMeta('/app')
+    expect(meta.title).toBe('Browse Projects — Council Scores & Reference Assessments')
+    expect(JSON.stringify(meta.jsonLd)).not.toContain('Safe Projects')
+  })
+
+  it('returns reference project metadata labelled as a reference assessment', () => {
     const meta = resolveRouteMeta('/app/reference/bitcoin')
-    expect(meta.title).toContain('Bitcoin')
-    expect(meta.title).toContain('96')
+    expect(meta.title).toBe('Bitcoin Reference Assessment — Index 96/100')
+    expect(meta.description).toContain('not a governor council report')
+    expect(JSON.stringify(meta.jsonLd)).not.toContain('Governor Council')
     expect(meta.image).toBe('/icons/bitcoin.png')
     expect(meta.path).toBe('/app/reference/bitcoin')
   })

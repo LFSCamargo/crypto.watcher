@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { RiArrowRightUpLine, RiShieldCheckLine } from '@remixicon/react'
+import { RiArrowRightUpLine, RiBookOpenLine } from '@remixicon/react'
 import { motion } from 'framer-motion'
 import type { CuratedProject } from '../lib/curated-projects'
 import { projectCategories } from '../lib/curated-projects'
@@ -21,7 +21,7 @@ function scoreTone(score: number) {
 function statusLabel(status: CuratedProject['status']) {
   switch (status) {
     case 'safe':
-      return 'Reviewed safe'
+      return 'Lower risk'
     case 'reference':
       return 'Reference'
     case 'watch':
@@ -57,9 +57,9 @@ function MarketChangeChip({
       <p
         className={`mt-0.5 text-xs font-bold tabular-nums ${
           tone === 'positive'
-            ? 'text-success'
+            ? 'text-success-strong'
             : tone === 'negative'
-              ? 'text-destructive'
+              ? 'text-destructive-strong'
               : 'text-muted-foreground'
         }`}
       >
@@ -124,7 +124,7 @@ export function CuratedProjectCard({
     >
       <Link
         to={`/app/reference/${project.slug}`}
-        className="group card-hover flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card"
+        className="glass-card-flat group card-hover flex h-full flex-col overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         aria-busy={marketPending}
       >
         <div className="flex flex-1 flex-col gap-3 p-4 pb-3">
@@ -145,7 +145,13 @@ export function CuratedProjectCard({
                   </p>
                 </div>
                 <Badge
-                  variant={tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'destructive'}
+                  variant={
+                    tone === 'success'
+                      ? 'success'
+                      : tone === 'warning'
+                        ? 'warning'
+                        : 'destructive'
+                  }
                   className="shrink-0 rounded-full font-semibold tabular-nums"
                   title={`Moody's ${creditRating.moodys}`}
                 >
@@ -162,7 +168,10 @@ export function CuratedProjectCard({
             <Badge variant="outline" className="rounded-full text-[10px]">
               {project.network}
             </Badge>
-            <Badge variant={statusVariant(project.status)} className="rounded-full text-[10px]">
+            <Badge
+              variant={statusVariant(project.status)}
+              className="rounded-full text-[10px]"
+            >
               {statusLabel(project.status)}
             </Badge>
           </div>
@@ -189,7 +198,9 @@ export function CuratedProjectCard({
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Price
                   </p>
-                  <p className="text-lg font-bold tabular-nums">{formatUsd(data.price)}</p>
+                  <p className="text-lg font-bold tabular-nums">
+                    {formatUsd(data.price)}
+                  </p>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <MarketChangeChip label="24h" value={data.change24h} />
@@ -207,11 +218,11 @@ export function CuratedProjectCard({
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <RiShieldCheckLine className="h-3.5 w-3.5 text-primary" />
-              Expert safety review
+              <RiBookOpenLine aria-hidden className="h-3.5 w-3.5" />
+              Reference assessment
             </span>
             <span className="flex items-center gap-1 font-semibold text-foreground/70 transition-colors group-hover:text-foreground">
-              View review
+              View assessment
               <RiArrowRightUpLine className="h-3.5 w-3.5" />
             </span>
           </div>

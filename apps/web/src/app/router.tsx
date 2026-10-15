@@ -31,12 +31,16 @@ import {
   SignInPage,
   SignUpPage,
   VerifyOtpPage,
-  VotingPage,
 } from './lazy-routes'
 
 function LegacyProjectRedirect() {
   const { slug } = useParams()
   return <Navigate to={`/app/reference/${slug ?? ''}`} replace />
+}
+
+function RetiredVoteRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={`/app/projects/${slug ?? ''}`} replace />
 }
 
 function withLazy(element: ReactNode) {
@@ -89,7 +93,7 @@ export const router = createBrowserRouter([
           { index: true, element: withLazy(<ProjectsPage />) },
           { path: 'projects/:slug', element: withLazy(<ProjectDetailPage />) },
           { path: 'reference/:slug', element: withLazy(<ReferenceProjectDetailPage />) },
-          { path: 'projects/:slug/vote', element: withLazy(<VotingPage />) },
+          { path: 'projects/:slug/vote', element: <RetiredVoteRedirect /> },
           { path: 'in-analysis', element: withLazy(<InAnalysisPage />) },
           { path: 'analysis-request', element: withLazy(<AnalysisRequestPage />) },
           { path: 'profile', element: withLazy(<ProfilePage />) },

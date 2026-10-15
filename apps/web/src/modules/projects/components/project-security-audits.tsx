@@ -39,7 +39,9 @@ function SecurityAuditCard({ review }: { review: ExternalSecurityReview }) {
         <Badge variant="outline" className="font-semibold">
           {review.provider}
         </Badge>
-        <Badge variant={reviewStatusVariant(review.status)}>{reviewStatusLabel(review.status)}</Badge>
+        <Badge variant={reviewStatusVariant(review.status)}>
+          {reviewStatusLabel(review.status)}
+        </Badge>
         <span className="text-xs text-muted-foreground">{review.completedAt}</span>
       </div>
       <p className="font-medium">{review.title}</p>
@@ -50,7 +52,7 @@ function SecurityAuditCard({ review }: { review: ExternalSecurityReview }) {
         href={review.url}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary-strong hover:underline"
       >
         View report
         <RiExternalLinkLine className="h-4 w-4" />
@@ -66,28 +68,31 @@ export function ProjectSecurityAudits({ profile }: { profile: ProjectReviewProfi
     <Card className="rounded-2xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <RiShieldCheckLine className="h-4 w-4 text-primary" />
+          <RiShieldCheckLine className="h-4 w-4 text-primary-strong" />
           External security reviews
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {!hasReviews ? (
           <p className="text-sm text-muted-foreground">
-            No specific public smart contract audit report from a recognized security firm is
-            currently indexed for this project. The council score reflects category risk
-            factors, operational history, liquidity depth, and the absence of major known
-            incidents. Request a formal review for detailed coverage.
+            No specific public smart contract audit report from a recognized security firm
+            is currently indexed for this project. The council score reflects category
+            risk factors, operational history, liquidity depth, and the absence of major
+            known incidents. Request a formal review for detailed coverage.
           </p>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Specific security reviews and finance attestations from recognized firms. These
-              reports are the primary source for understanding why the protocol is considered
-              safe (or not).
+              Specific security reviews and finance attestations from recognized firms.
+              These reports are the primary source for understanding why the protocol is
+              considered safe (or not).
             </p>
             <div className="space-y-3">
               {profile.externalReviews.map((review) => (
-                <SecurityAuditCard key={`${review.provider}-${review.title}`} review={review} />
+                <SecurityAuditCard
+                  key={`${review.provider}-${review.title}`}
+                  review={review}
+                />
               ))}
             </div>
           </>

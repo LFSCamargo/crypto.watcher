@@ -24,7 +24,8 @@ Tests: Vitest + Testing Library (unit/integration) and Playwright (e2e). Monorep
 
 > **Product model:** Official scores come from a vetted governor council. Regular users
 > browse reports, comment, submit evidence and participate in protocol governance — but
-> do not vote on project risk scores. Legacy project voting UI remains during migration.
+> do not vote on project risk scores. The legacy project voting UI was removed in R4;
+> `/app/projects/:slug/vote` now redirects to the project report.
 
 ## Modular Folder Structure
 
@@ -61,7 +62,7 @@ apps/
     │   │   └── utils/
     │   ├── store/                   # Zustand root store + shared slices
     │   ├── modules/                 # Feature modules
-    │   │   ├── projects/            # Safety index + project detail   [MVP]
+    │   │   ├── projects/            # Catalog, council reports, reference assessments [MVP]
     │   │   │   ├── components/
     │   │   │   ├── hooks/
     │   │   │   ├── api/
@@ -89,7 +90,6 @@ apps/
     │   │   │   ├── workers/         # compress-avatar.worker.ts
     │   │   │   ├── pages/
     │   │   │   └── __tests__/
-    │   │   ├── voting/              # Legacy project vote UI (deprecated) [MVP]
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
     │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
@@ -122,11 +122,12 @@ apps/
 ## Features by Phase
 
 ### projects `[MVP]`
-- Public safety index with top-nav/landing search and project detail page.
+- Catalog at `/app` with two clearly labelled groups: **Council projects** (from `GET /projects`, the only projects with an official score) listed first, then **Reference assessments** (curated, compiled from public sources; never presented as council reports). Search and category live in the URL (`?search=`, `?category=`) via `hooks/use-catalog-filters.ts`: search writes are debounced and use history `replace`, category chips are `aria-pressed` toggles. References page 24 at a time with "Show more"; empty filter results offer "Clear filters"; a council list failure shows an inline retry without hiding references.
+- Council project report (`/app/projects/:slug`) order: status badge → official score with meaning ("higher is safer") and provenance ("Published by the governor council · Round N") → council findings (lifecycle explanation until a report is published; a separate link when a reference assessment exists) → market context (explicitly not part of the score) → discussion; side column shows review progress (`ProjectLifecycleSteps`, `aria-current="step"`) and the on-chain record. No simulated governor controls. Unknown slugs stop retrying on 4xx and show "Project not found".
+- Reference assessment (`/app/reference/:slug`): "Reference assessment" notice, "Reference index" with meaning and disclaimer, analyst notes (not "governor council notes"), and a "Request a council review" link. No trading-venue promotion.
 - Curated market-reference assets inspired by widely tracked CoinMarketCap listings.
 - Local coin logos in `public/icons/{slug}.png` (synced from CoinGecko via `pnpm --filter web icons:sync`); `ProjectIcon` loads by slug with initials fallback.
-- Lifecycle status badges (`In analysis → Under review → Report published`).
-- Expert score and structured report on the detail page.
+- Lifecycle status badges (`lib/format.ts`): `in_analysis` → "In analysis", `ready` → "Awaiting governor review", `voting` → "Governor review", `closed` → "Report pending", `analyzed` → "Report published". Legacy API state names stay internal.
 - Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
 - Protocol fundamentals panel on project detail (TVL trend, fees/revenue, exploit history; hidden when unavailable e.g. pure L1 networks).
 - Community submission form. `[Phase 2]`
@@ -171,11 +172,8 @@ apps/
 ### profile `[MVP]`
 - Unified profile page (`/app/profile`): PFP upload (Web Worker compresses to base64 data URI before save), nickname, X account, bio, public key, governor badge for council members.
 
-### voting `[MVP]` (legacy — deprecated)
-- Legacy project vote UI; being removed in favor of governor-only score publication.
-
 ### scoring `[MVP]`
-- Expert score breakdown + charts from governor-published reports.
+- `ScorePanel` ("Official safety score") shows the governor-published score, its meaning and round provenance, or "No official score yet".
 - **Credit-style ratings:** each safety score maps to paired **S&P** and **Moody's** letter grades (`AAA`/`Aaa` … `D`) and a top-level group — **Investment grade** (`AAA`–`BBB`) or **Speculative grade** (`BB`–`D`). See `lib/ratings/credit-rating.ts`.
 - Enriched external-signal display. `[Phase 3]`
 
@@ -199,7 +197,7 @@ apps/
 - Uber-inspired light theme (cream/yellow/black), Raleway font, fully rounded Shadcn components; blueprint grid background on all pages. `[MVP]`
 - Global shell: skip link → glass header (Projects, In Analysis, Governance, Resources menu | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a fixed glass bottom bar keeps Projects, In Analysis and Governance one tap away and opens a "Menu" sheet with resources, account actions and theme. All links come from `components/layout/navigation.ts`. `[MVP]`
 - Liquid-glass design language (see `docs/redesign/DESIGN.md`): `--glass-*` tokens with `.glass-nav`, `.glass-card`, `.glass-card-flat` and `.glass-panel` surfaces; alpha tuned for WCAG AA text contrast; opaque fallback under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; at most three blurred layers on screen. Semantic `info`, `chart-1..5` and `*-strong` status text tokens. Framer Motion honors `prefers-reduced-motion` via `MotionConfig`. `[MVP]`
-- Command palette search (debounced, race-conditioned) over 100 curated + live projects. `[MVP]`
+- Command palette search (debounced, race-conditioned) over council projects (listed first, tagged "Council") and reference assessments (tagged "Reference"). `[MVP]`
 - Toasts via Sonner, icons via Remix Icon, forms via React Hook Form. `[MVP]`
 - Error reporting via Sentry. `[MVP]`
 - Embeddable score widgets/badges. `[Phase 3]`
@@ -208,8 +206,8 @@ apps/
 ## Functional Requirements (by feature & phase)
 
 ### projects `[MVP]`
-- R1: Browse and search a public safety index without connecting a wallet.
-- R2: View a project detail page with lifecycle status and score.
+- R1: Browse and search council projects and reference assessments without connecting a wallet; filters are shareable URLs.
+- R2: View a council project report with lifecycle status, official score provenance and market context; view reference assessments labelled as such.
 - R3: Team UI to create/update/transition projects. `[MVP]` (role-gated `[Phase 2]`)
 - R4: Community submission form. `[Phase 2]`
 
@@ -218,9 +216,6 @@ apps/
 
 ### auth `[MVP]`
 - R1: Connect wallet (RainbowKit), SIWE login, session-aware UI, logout.
-
-### voting `[MVP]` (legacy)
-- R1: Legacy project vote routes retained during migration; not available to regular users in target model.
 
 ### scoring `[MVP]`
 - R1: Visualize governor-published score and report breakdown; show per-round history.
@@ -242,13 +237,13 @@ apps/
 | `/` | marketing (hero search, illustrative report preview, review lifecycle, reference assessments, governance, resources) | public | `MVP` |
 | `/auth/signin`, `/auth/signup`, `/auth/verify-otp`, `/auth/forgot-password`, `/auth/reset-password` | auth (guest-only; redirects when signed in) | public | `MVP` |
 | `/auth/onboarding` | auth (post-signup; requires session) | 🔒 | `MVP` |
-| `/app` | projects (Safe Projects App Store) | public | `MVP` |
-| `/app/reference/:slug` | projects (curated safe project detail) | public | `MVP` |
-| `/app/projects/:slug` | projects (on-chain detail) | public | `MVP` |
+| `/app` | projects (catalog: council projects + reference assessments) | public | `MVP` |
+| `/app/reference/:slug` | projects (reference assessment) | public | `MVP` |
+| `/app/projects/:slug` | projects (council project report) | public | `MVP` |
 | `/app/in-analysis` | analysis (POA review queue) | public | `MVP` |
 | `/app/analysis-request` | analysis (paid review request) | 🔒 | `MVP` |
 | `/app/profile` | profile (own profile) | 🔒 | `MVP` |
-| `/app/projects/:slug/vote` | voting (legacy) | 🔒 deprecated | `MVP` |
+| `/app/projects/:slug/vote` | redirect → `/app/projects/:slug` (legacy vote UI removed) | public | `MVP` |
 | `/projects/submit` | projects | 🔒 | `Phase 2` |
 | `/app/governance` | governance (list) | public | `MVP` |
 | `/app/governance/:onchainId` | governance (detail) | public | `MVP` |
@@ -276,7 +271,6 @@ apps/
 | projects | `GET /projects`, `GET /projects/:slug`, `POST /projects` 👑, `PATCH /projects/:id` 👑, `POST /projects/:id/transition` 👑 | `MVP` |
 | projects | `POST /projects/submit` | `Phase 2` |
 | comments | `GET /projects/:id/comments`, `POST /projects/:id/comments`, `DELETE /comments/:id` | `MVP` |
-| voting | legacy `GET /projects/:id/votes`; on-chain registry reads | `MVP` |
 | scoring | `GET /projects/:id/score`, `GET /projects/:id/score/history` | `MVP` |
 | governance | `GET /governance/proposals`, `GET /governance/proposals/:onchainId`; on-chain `propose`/`castVote` via Governor | `MVP` |
 | reputation | `GET /reputation/:address` | `MVP → Phase 1` |
@@ -356,13 +350,6 @@ export const createProposalSchema = z.object({
 interface SessionState {
   user?: { id: string; walletAddress: string; role: 'user'|'team'|'admin' }
   setUser: (u?: SessionState['user']) => void
-}
-
-// modules/voting/store.ts
-interface VotingState {
-  pendingTxHash?: string
-  selectedChoice?: number
-  setChoice: (c: number) => void
 }
 ```
 
