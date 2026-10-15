@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
+  RiAddLine,
   RiCompass3Line,
   RiLogoutBoxRLine,
   RiShieldCheckLine,
@@ -43,7 +44,8 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-1.5 transition-colors hover:bg-secondary sm:pr-3"
+          aria-label={`Account menu for ${displayName}`}
+          className="flex items-center gap-2 rounded-full border border-foreground/10 bg-background/60 py-1 pl-1 pr-1.5 transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
         >
           <Avatar className="h-8 w-8">
             {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={displayName} /> : null}
@@ -77,6 +79,10 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
           <RiUserLine className="h-4 w-4" />
           Profile
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate('/app/analysis-request')}>
+          <RiAddLine className="h-4 w-4" />
+          Request analysis
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate('/app/in-analysis')}>
           <RiCompass3Line className="h-4 w-4" />
           In Analysis
@@ -102,7 +108,7 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
             event.preventDefault()
             void handleLogout()
           }}
-          className="text-destructive focus:bg-destructive/10"
+          className="text-destructive-strong focus:bg-destructive/10"
         >
           <RiLogoutBoxRLine className="h-4 w-4" />
           Sign out

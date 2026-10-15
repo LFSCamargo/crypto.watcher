@@ -15,3 +15,4 @@ class IntersectionObserverMock {
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
+window.scrollTo = vi.fn() as unknown as typeof window.scrollTo

@@ -39,7 +39,7 @@ const NavigationMenuTrigger = React.forwardRef<
   <NavigationMenuPrimitive.Trigger
     ref={ref}
     className={cn(
-      'group inline-flex h-9 items-center justify-center gap-1 rounded-full px-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-secondary hover:text-foreground data-[state=open]:bg-secondary data-[state=open]:text-foreground',
+      'group inline-flex h-9 items-center justify-center gap-1 rounded-full px-4 text-sm font-semibold text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-secondary hover:text-foreground data-[state=open]:bg-secondary data-[state=open]:text-foreground',
       className,
     )}
     {...props}
@@ -76,7 +76,7 @@ const NavigationMenuViewport = React.forwardRef<
     <NavigationMenuPrimitive.Viewport
       ref={ref}
       className={cn(
-        'origin-top-center relative mt-2 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]',
+        'origin-top-center relative mt-2 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-3xl glass-panel text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]',
         className,
       )}
       {...props}

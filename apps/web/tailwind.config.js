@@ -28,6 +28,7 @@ export default {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+          strong: 'hsl(var(--destructive-strong))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -48,11 +49,27 @@ export default {
         success: {
           DEFAULT: 'hsl(var(--success))',
           foreground: 'hsl(var(--success-foreground))',
+          strong: 'hsl(var(--success-strong))',
         },
         warning: {
           DEFAULT: 'hsl(var(--warning))',
           foreground: 'hsl(var(--warning-foreground))',
+          strong: 'hsl(var(--warning-strong))',
         },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+        },
+        chart: {
+          1: 'hsl(var(--chart-1))',
+          2: 'hsl(var(--chart-2))',
+          3: 'hsl(var(--chart-3))',
+          4: 'hsl(var(--chart-4))',
+          5: 'hsl(var(--chart-5))',
+        },
+      },
+      transitionTimingFunction: {
+        glass: 'var(--ease-glass)',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -9,6 +9,7 @@ export { Label } from './label'
 export { Separator } from './separator'
 export { Skeleton } from './skeleton'
 export { Textarea } from './textarea'
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetTitle, SheetDescription } from './sheet'
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'
 export {
   Dialog,

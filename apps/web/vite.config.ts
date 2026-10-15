@@ -92,12 +92,15 @@ export default defineConfig({
       provider: 'v8',
       include: [
         'src/components/brand/project-icon.tsx',
+        'src/components/layout/**/*.{ts,tsx}',
+        'src/components/ui/card.tsx',
         'src/modules/auth/components/password-strength-field.tsx',
         'src/modules/projects/components/**/*.tsx',
         'src/modules/market/components/**/*.tsx',
       ],
       exclude: [
         '**/__tests__/**',
+        'src/components/layout/page-grid-background.tsx',
         'src/modules/projects/components/project-search.tsx',
         'src/modules/projects/components/reference-project-voting-cta.tsx',
       ],

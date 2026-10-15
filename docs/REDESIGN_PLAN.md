@@ -376,8 +376,8 @@ with its PRs, screenshots, checks and unresolved dependencies linked here.
 | Milestone | Status | Notes |
 | --- | --- | --- |
 | R0 — Audit, design decisions and baseline | verified | [DESIGN.md](./redesign/DESIGN.md), `baseline-metrics.json`, `r0-*` screenshots, `e2e/baseline.spec.ts` |
-| R1 — Foundations and shared shell | implementing | |
-| R2 — Landing page | planned | |
+| R1 — Foundations and shared shell | verified | Glass tokens + fallbacks in `styles/index.css`, Card/Dialog/Sheet/Menu variants, `components/layout/*` shell with unit tests, `e2e/shell.spec.ts`, `r1-*` screenshots |
+| R2 — Landing page | implementing | |
 | R3 — Sign-in, Get started and account entry | planned | |
 | R4 — Projects, reports and research data | planned | |
 | R5 — Analysis queue and request journey | planned | |
