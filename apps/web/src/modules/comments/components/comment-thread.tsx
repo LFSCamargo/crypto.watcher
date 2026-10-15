@@ -1,33 +1,35 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RiCoinLine, RiInformationLine, RiSendPlaneLine, RiUserLine } from '@remixicon/react'
+import { RiSendPlaneLine, RiUserLine } from '@remixicon/react'
 import { useSession } from '../../../store/session'
+import { useAuthLinks } from '../../auth/hooks/use-auth-links'
 import { useComments, useCreateComment } from '../hooks/use-comments'
 import {
+  Avatar,
+  AvatarFallback,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Textarea,
-  Avatar,
-  AvatarFallback,
+  FormAlert,
+  Label,
   Skeleton,
+  Textarea,
 } from '../../../components/ui'
-
-const COMMENT_FEE_USD = 0.05
 
 export function CommentThread({ projectId }: { projectId: string }) {
   const user = useSession((state) => state.user)
+  const { signInHref } = useAuthLinks()
   const { data, isLoading } = useComments(projectId)
   const createComment = useCreateComment(projectId)
   const [body, setBody] = useState('')
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (!body.trim()) return
-    await createComment.mutateAsync(body)
-    setBody('')
+    if (!body.trim() || createComment.isPending) return
+    createComment.mutate(body.trim(), { onSuccess: () => setBody('') })
   }
 
   return (
@@ -41,48 +43,52 @@ export function CommentThread({ projectId }: { projectId: string }) {
             </span>
           )}
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Public discussion. Share evidence, sources or concerns — comments inform the
+          council but do not change the score.
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
-          <RiInformationLine className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-          <div className="text-muted-foreground">
-            <p className="font-semibold text-foreground">Small fee per comment</p>
-            <p className="mt-1">
-              We charge ~${COMMENT_FEE_USD.toFixed(2)} in protocol tokens per comment to
-              reduce spam and bot attacks. Each comment requires a small on-chain
-              transaction — this helps keep discussions trustworthy.
-            </p>
-          </div>
-        </div>
-
-        {user && (
+        {user ? (
           <form onSubmit={handleSubmit} className="space-y-3">
+            <Label htmlFor={`comment-${projectId}`}>Add a comment</Label>
             <Textarea
+              id={`comment-${projectId}`}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="Share your analysis..."
+              placeholder="What should others know?"
               value={body}
               className="min-h-[80px] resize-none rounded-xl"
             />
+            {createComment.isError ? (
+              <FormAlert>
+                <p>
+                  Your comment wasn&apos;t posted. Your text is still here — try again.
+                </p>
+              </FormAlert>
+            ) : null}
             <Button
               type="submit"
               disabled={!body.trim() || createComment.isPending}
               className="gap-2 rounded-full"
               size="sm"
             >
-              <RiSendPlaneLine className="h-4 w-4" />
-              {createComment.isPending ? 'Posting...' : `Post comment (~$${COMMENT_FEE_USD.toFixed(2)} fee)`}
+              <RiSendPlaneLine aria-hidden className="h-4 w-4" />
+              {createComment.isPending ? 'Posting…' : 'Post comment'}
             </Button>
           </form>
-        )}
-
-        {!user && (
+        ) : (
           <div className="rounded-xl bg-muted/50 p-4 text-center text-sm text-muted-foreground">
-            Sign in to post a comment
+            <Link
+              to={signInHref}
+              className="font-semibold text-primary-strong underline-offset-4 hover:underline"
+            >
+              Sign in to comment
+            </Link>
           </div>
         )}
 
         {isLoading && (
-          <div className="space-y-4 pt-4">
+          <div className="space-y-4 pt-4" aria-label="Loading comments">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex gap-3">
                 <Skeleton className="h-8 w-8 rounded-full" />
@@ -96,10 +102,10 @@ export function CommentThread({ projectId }: { projectId: string }) {
         )}
 
         {data && data.length > 0 && (
-          <div className="space-y-4 border-t border-border pt-4">
+          <ul className="space-y-4 border-t border-border pt-4">
             <AnimatePresence mode="popLayout">
               {data.map((comment, index) => (
-                <motion.div
+                <motion.li
                   key={comment.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -109,31 +115,33 @@ export function CommentThread({ projectId }: { projectId: string }) {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-secondary text-xs">
-                      <RiUserLine className="h-4 w-4" />
+                      <RiUserLine aria-hidden className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
-                        {comment.authorId.slice(0, 8)}...
+                        {comment.authorId.slice(0, 8)}…
                       </span>
-                      <RiCoinLine className="h-3 w-3 text-primary" aria-hidden />
-                      <span className="text-xs text-muted-foreground">
+                      <time
+                        dateTime={comment.createdAt}
+                        className="text-xs text-muted-foreground"
+                      >
                         {new Date(comment.createdAt).toLocaleDateString()}
-                      </span>
+                      </time>
                     </div>
                     <p className="text-sm text-muted-foreground">{comment.body}</p>
                   </div>
-                </motion.div>
+                </motion.li>
               ))}
             </AnimatePresence>
-          </div>
+          </ul>
         )}
 
         {data && data.length === 0 && !isLoading && (
-          <div className="py-6 text-center text-sm text-muted-foreground">
-            No comments yet. Be the first to share your analysis!
-          </div>
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No comments yet. Share what you know about this project.
+          </p>
         )}
       </CardContent>
     </Card>

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { RiCheckboxCircleLine, RiErrorWarningLine } from '@remixicon/react'
-import { cn } from '../../../lib/utils'
+import { cn } from '../../lib/utils'
 
 interface FormAlertProps {
   tone?: 'error' | 'success'

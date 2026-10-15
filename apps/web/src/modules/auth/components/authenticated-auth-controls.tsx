@@ -83,7 +83,7 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate('/app/analysis-request')}>
           <RiAddLine className="h-4 w-4" />
-          Request analysis
+          Request a review
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate('/app/in-analysis')}>
           <RiCompass3Line className="h-4 w-4" />

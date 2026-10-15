@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthShell } from '../components/auth-shell'
-import { FormAlert } from '../components/form-alert'
+import { FormAlert } from '../../../components/ui/form-alert'
 import { useLogin } from '../hooks/use-session'
 import { useReturnTo } from '../hooks/use-auth-links'
 import { authErrorMessage } from '../lib/auth-error-message'

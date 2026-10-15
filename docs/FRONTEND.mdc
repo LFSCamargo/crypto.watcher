@@ -153,8 +153,8 @@ apps/
 - Featured post on index, sidebar navigation, launch CTAs on article pages.
 
 ### comments `[MVP]`
-- Public comment thread (read by all, post when authenticated).
-- Small per-comment fee explained in UI (anti-spam); on-chain fee settlement `[MVP]` (UI + backend flag).
+- Public comment thread (read by all, post when authenticated). Guests get a "Sign in to comment" link that returns to the project; a failed post keeps the draft and shows an inline alert. Comments inform the council but never change the score.
+- No per-comment fee: the API stores `comment_fee_paid` but charges nothing, so the UI makes no fee or transaction claims. TODO(docs): reinstate fee copy only if an anti-spam fee flow ships.
 
 ### auth `[MVP]`
 - Email/password registration and login with session cookies after OTP verification, inside a glass auth panel (`AuthShell`) with a value column on desktop. Errors are inline (`FormAlert`, `role="alert"`) and distinguish incorrect credentials, invalid/expired codes or links, rate limiting, server errors and network failures (`lib/auth-error-message.ts`).
@@ -166,8 +166,8 @@ apps/
 - Wallet connect via RainbowKit lives inside the logged-in profile dropdown (not the top nav).
 
 ### analysis `[MVP]`
-- **In Analysis** page: review requests + projects awaiting governor investigation.
-- **Analysis Request** page: authenticated users submit projects for paid expert review.
+- **In Analysis** page (`/app/in-analysis`): status legend that separates request status from published reviews ("A request is not a review"); request cards (`article`) with readable status (`lib/request-status.ts`: `pending`/`paid` → Received, `in_review` → Under review, `approved` → Accepted, `rejected` → Declined), next step, submitted date and council notes; load error with retry; council projects in analysis. Team/admin see triage buttons (Start review, Accept, Decline) that PATCH only the status — no generated verdict notes.
+- **Analysis Request** page (`/app/analysis-request`): free during launch (API `feeAmount` is always `0`; no payment flow). Guests get sign-in / sign-up links that return to the form. Grouped form with inline validation mirroring the API schema (name 1–200, http(s) URL, description 10–5000), focus on the first invalid field, single submission while pending, data kept on failure with error-specific messages (session expired → sign in again, 429, 5xx, network). Success shows a persistent, focused "Request received" panel with a queue link; "Your requests" lists `GET /analysis-requests/me`.
 
 ### profile `[MVP]`
 - Unified profile page (`/app/profile`): PFP upload (Web Worker compresses to base64 data URI before save), nickname, X account, bio, public key, governor badge for council members.
@@ -241,7 +241,7 @@ apps/
 | `/app/reference/:slug` | projects (reference assessment) | public | `MVP` |
 | `/app/projects/:slug` | projects (council project report) | public | `MVP` |
 | `/app/in-analysis` | analysis (POA review queue) | public | `MVP` |
-| `/app/analysis-request` | analysis (paid review request) | 🔒 | `MVP` |
+| `/app/analysis-request` | analysis (free review request + your requests) | public (form requires sign-in) | `MVP` |
 | `/app/profile` | profile (own profile) | 🔒 | `MVP` |
 | `/app/projects/:slug/vote` | redirect → `/app/projects/:slug` (legacy vote UI removed) | public | `MVP` |
 | `/projects/submit` | projects | 🔒 | `Phase 2` |

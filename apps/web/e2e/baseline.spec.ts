@@ -86,11 +86,11 @@ test.describe('analysis requests', () => {
     api.signIn()
     await page.goto('/app/analysis-request')
     await page.getByLabel('Project name').fill('Test Protocol')
-    await page.getByLabel('Project URL').fill('https://test.example')
+    await page.getByLabel('Project website').fill('https://test.example')
     await page
-      .getByLabel(/What should we review/)
+      .getByLabel('What should the council look at?')
       .fill('Please review the staking contracts.')
-    await page.getByRole('button', { name: /Submit/ }).click()
+    await page.getByRole('button', { name: 'Submit request' }).click()
     await expect
       .poll(() =>
         api.analysisRequests.some((item) => item.projectName === 'Test Protocol'),
@@ -100,6 +100,6 @@ test.describe('analysis requests', () => {
 
   test('the queue lists existing requests', async ({ page }) => {
     await page.goto('/app/in-analysis')
-    await expect(page.getByText('Orbit Bridge')).toBeVisible()
+    await expect(page.getByRole('article', { name: 'Orbit Bridge' })).toBeVisible()
   })
 })

@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthShell } from '../components/auth-shell'
-import { FormAlert } from '../components/form-alert'
+import { FormAlert } from '../../../components/ui/form-alert'
 import { PasswordStrengthField } from '../components/password-strength-field'
 import { passwordsMatch } from '../lib/password-strength'
 import { useRegister } from '../hooks/use-session'

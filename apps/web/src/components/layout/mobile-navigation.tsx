@@ -128,7 +128,7 @@ export function MobileNavigation() {
                   <Button asChild variant="outline" className="justify-start">
                     <Link to="/app/analysis-request" onClick={close}>
                       <RiAddLine aria-hidden />
-                      Request analysis
+                      Request a review
                     </Link>
                   </Button>
                   <Button

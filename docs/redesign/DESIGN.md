@@ -124,7 +124,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | Catalog | Title + request CTA → search (URL `?search=`, debounced, history replace) → **Council projects** first (own loading / retry / empty states) → **Reference assessments** (source note, category chips with `aria-pressed`, count, 24-per-page "Show more", empty state with Clear filters). Implemented in R4. | None blurred; cards use `.glass-card-flat` |
 | API project | Identity + lifecycle status → official score card (meaning, round, provenance) → council findings (lifecycle text; separate reference link) → "Market context" (not part of the score) → discussion. Side column: review progress steps, on-chain record, request CTA. Implemented in R4. | Score summary card (`.glass-card`) |
 | Reference asset | Identity + "Reference assessment" badge and note → analyst review sections → market context; side column: reference index (meaning, disclaimer), audit coverage, "Request a council review". Partner trade links removed. Implemented in R4. | None blurred (flat cards) |
-| Queue / request | Queue: lifecycle legend, request cards with status chip and next step, on-chain projects in analysis. Request: what happens next (free today), grouped form with inline validation, persistent success panel with link to profile history. | Success panel |
+| Queue / request | Queue: request-status legend ("a request is not a review"), request cards with status chip, next step and council notes, team triage actions, council projects in analysis. Request: grouped form with inline validation, what happens next (free during launch), your requests list, persistent focused success panel linking to the queue. Implemented in R5. | Request form panel (`.glass-panel`) |
 | Docs / blog | Sticky glass sidebar on desktop, glass sheet on mobile; opaque reading column (max 70ch), on-page heading anchors. | Sidebar, mobile sheet |
 | Profile / reviewer / governance / admin | Profile: identity header, settings form, wallet status, request history. Reviewer: council status, weight, credential explanation. Governance: state legend, proposal list, detail with lifecycle and participation guidance. Admin: role-gated forms with explicit forbidden state. | Header summary cards |
 
@@ -132,7 +132,11 @@ Each row is the content hierarchy implementers follow (top to bottom).
 
 - Evidence and incident submission API — listed under `[MVP]` in the roadmap but not
   implemented; the UI links to "Request a review" until it exists.
-- Analysis fee payment and verification — UI states requests are free.
+- Analysis fee payment and verification — UI states requests are free. The legacy
+  `paid` request status reads as "Received".
+- Request idempotency — the API has no idempotency key; the UI blocks repeat
+  submissions while one is pending but cannot dedupe across reloads.
+- Comment anti-spam fee — not implemented server-side; UI copy removed in R5.
 - In-app protocol governance voting (`CryptoWatcherGovernor.castVote`) — UI explains
   participation and links to the docs; no simulated transaction states.
 - Published report body (findings, methodology version, reviewer list, on-chain

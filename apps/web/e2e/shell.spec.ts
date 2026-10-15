@@ -88,7 +88,7 @@ test.describe('application shell', () => {
       ).toBeVisible()
     } else {
       await page.getByRole('button', { name: /Account menu/ }).click()
-      await expect(page.getByRole('menuitem', { name: 'Request analysis' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Request a review' })).toBeVisible()
     }
   })
 })

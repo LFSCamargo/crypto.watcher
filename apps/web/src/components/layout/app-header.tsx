@@ -82,7 +82,7 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
             >
               <Link to="/app/analysis-request">
                 <RiAddLine aria-hidden />
-                Request analysis
+                Request a review
               </Link>
             </Button>
           ) : null}

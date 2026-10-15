@@ -82,7 +82,7 @@ describe('MobileNavigation', () => {
       'href',
       '/app/profile',
     )
-    expect(within(sheet).getByRole('link', { name: 'Request analysis' })).toHaveAttribute(
+    expect(within(sheet).getByRole('link', { name: 'Request a review' })).toHaveAttribute(
       'href',
       '/app/analysis-request',
     )

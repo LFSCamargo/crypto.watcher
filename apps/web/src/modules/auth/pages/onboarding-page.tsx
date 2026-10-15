@@ -8,7 +8,7 @@ import {
   RiShieldCheckLine,
   RiWallet3Line,
 } from '@remixicon/react'
-import { FormAlert } from '../components/form-alert'
+import { FormAlert } from '../../../components/ui/form-alert'
 import { useAuthStatus, useLinkPublicKey } from '../hooks/use-session'
 import { useReturnTo } from '../hooks/use-auth-links'
 import { authErrorMessage } from '../lib/auth-error-message'

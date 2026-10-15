@@ -1,144 +1,77 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { toast } from 'sonner'
-import { RiAddLine, RiShieldCheckLine } from '@remixicon/react'
-import { useMutation } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
 import { useSession } from '../../../store/session'
 import { useAuthLinks } from '../../auth/hooks/use-auth-links'
-import { analysisRequestsApi } from '../api/analysis-requests.api'
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Label,
-  Textarea,
-} from '../../../components/ui'
+import { Button } from '../../../components/ui'
+import type { AnalysisRequest } from '../api/analysis-requests.api'
+import { MyRequestsSection } from '../components/my-requests-section'
+import { RequestForm } from '../components/request-form'
+import { RequestSuccessPanel } from '../components/request-success-panel'
+import { WhatHappensNext } from '../components/what-happens-next'
 
 export function AnalysisRequestPage() {
   const user = useSession((state) => state.user)
-  const { signInHref } = useAuthLinks()
-  const [projectName, setProjectName] = useState('')
-  const [projectUrl, setProjectUrl] = useState('')
-  const [description, setDescription] = useState('')
-
-  const createRequest = useMutation({
-    mutationFn: analysisRequestsApi.create,
-    onSuccess: () => {
-      toast.success('Review request submitted!')
-      setProjectName('')
-      setProjectUrl('')
-      setDescription('')
-    },
-    onError: () => toast.error('Could not submit request'),
-  })
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault()
-    createRequest.mutate({ projectName, projectUrl, description })
-  }
+  const { signInHref, signUpHref } = useAuthLinks()
+  const [created, setCreated] = useState<AnalysisRequest>()
+  const [formKey, setFormKey] = useState(0)
 
   if (!user) {
     return (
-      <Card className="mx-auto max-w-lg rounded-2xl p-8 text-center">
-        <RiShieldCheckLine className="mx-auto mb-4 h-12 w-12 text-primary" />
-        <h1 className="heading-3 mb-2">Request a project review</h1>
-        <p className="mb-6 text-muted-foreground">
-          Sign in to pay the review fee and submit your project to the governor council
-          queue.
+      <section className="glass-panel mx-auto max-w-lg space-y-4 rounded-3xl p-8 text-center">
+        <h1 className="heading-3">Request a review</h1>
+        <p className="text-muted-foreground">
+          Ask the governor council to review a crypto project. Requests are free during
+          launch — sign in so you can follow your request.
         </p>
-        <Button asChild className="rounded-full">
-          <Link to={signInHref}>Sign in to continue</Link>
-        </Button>
-      </Card>
+        <div className="flex flex-col justify-center gap-2 sm:flex-row">
+          <Button asChild className="rounded-full">
+            <Link to={signInHref}>Sign in to continue</Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link to={signUpHref}>Create an account</Link>
+          </Button>
+        </div>
+      </section>
     )
   }
 
   return (
-    <motion.section
-      className="mx-auto max-w-2xl space-y-8"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div>
-        <Badge variant="secondary" className="mb-3">
-          Paid review
-        </Badge>
-        <h1 className="heading-2 mb-2">Request Analysis</h1>
-        <p className="body-large">
-          Ask our expert governor council to review a DApp or crypto project. After
-          submission, pay the review fee to enter the investigation queue.
+    <div className="mx-auto max-w-5xl space-y-8">
+      <header className="max-w-2xl space-y-3">
+        <p className="text-sm font-semibold uppercase tracking-wide text-primary-strong">
+          Review request
         </p>
+        <h1 className="heading-2">Request a review</h1>
+        <p className="body-large">
+          Point the governor council at a project you want assessed. Tell us where to look
+          and why.
+        </p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section aria-label="Request form" className="glass-panel rounded-3xl p-6 sm:p-8">
+          {created ? (
+            <RequestSuccessPanel
+              request={created}
+              onRequestAnother={() => {
+                setCreated(undefined)
+                setFormKey((key) => key + 1)
+              }}
+            />
+          ) : (
+            <RequestForm
+              key={formKey}
+              signInHref={signInHref}
+              focusOnMount={formKey > 0}
+              onCreated={setCreated}
+            />
+          )}
+        </section>
+        <aside className="space-y-4">
+          <WhatHappensNext />
+          <MyRequestsSection />
+        </aside>
       </div>
-
-      <Card className="rounded-2xl border-primary/20 bg-primary/5">
-        <CardContent className="flex items-start gap-3 p-6">
-          <RiAddLine className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-          <div className="text-sm">
-            <p className="font-semibold">How it works</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-muted-foreground">
-              <li>Submit your project details below</li>
-              <li>Pay the review fee (funds the protocol treasury and expert work)</li>
-              <li>Governors investigate and publish a structured report</li>
-              <li>Official safety score appears in the project catalog</li>
-            </ol>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-2xl">
-        <CardHeader>
-          <CardTitle>Project details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="projectName">Project name</Label>
-              <Input
-                id="projectName"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                required
-                className="rounded-xl"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="projectUrl">Project URL</Label>
-              <Input
-                id="projectUrl"
-                type="url"
-                value={projectUrl}
-                onChange={(e) => setProjectUrl(e.target.value)}
-                placeholder="https://..."
-                required
-                className="rounded-xl"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">What should we review?</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                minLength={10}
-                required
-                className="min-h-[120px] rounded-xl"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full rounded-full"
-              disabled={createRequest.isPending}
-            >
-              {createRequest.isPending ? 'Submitting...' : 'Submit review request'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </motion.section>
+    </div>
   )
 }

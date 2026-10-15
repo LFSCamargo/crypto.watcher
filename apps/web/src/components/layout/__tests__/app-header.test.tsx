@@ -61,7 +61,7 @@ describe('AppHeader', () => {
       '/auth/signin?next=%2Fapp',
     )
     expect(
-      screen.queryByRole('link', { name: 'Request analysis' }),
+      screen.queryByRole('link', { name: 'Request a review' }),
     ).not.toBeInTheDocument()
   })
 
@@ -71,7 +71,7 @@ describe('AppHeader', () => {
     expect(
       await screen.findByRole('button', { name: 'Account menu for ada' }),
     ).toBeVisible()
-    expect(screen.getByRole('link', { name: 'Request analysis' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Request a review' })).toHaveAttribute(
       'href',
       '/app/analysis-request',
     )
