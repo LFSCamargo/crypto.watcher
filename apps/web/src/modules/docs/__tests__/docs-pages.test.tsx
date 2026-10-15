@@ -61,13 +61,14 @@ describe('Documentation', () => {
     ).toBeGreaterThan(0)
   })
 
-  it('explains that governance votes and delegation happen in a wallet for now', () => {
+  it('explains where votes and delegation happen', () => {
     renderPage(<DocsGovernance />)
 
     expect(screen.queryByText(/Click "Delegate"/)).not.toBeInTheDocument()
     expect(
-      screen.getAllByText(/in-app voting and delegation are not available yet/i).length,
-    ).toBeGreaterThan(0)
+      screen.getByText(/connect the wallet that holds your voting power/),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/In-app delegation isn't available yet/)).toBeInTheDocument()
   })
 
   it('keeps the introduction aligned with the review lifecycle', () => {

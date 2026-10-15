@@ -75,7 +75,7 @@ export function DocsGovernance() {
             {
               title: 'Voting',
               description:
-                'CWT holders vote For, Against or Abstain on protocol proposals only. The app shows proposals and results; in-app voting and delegation are not available yet, so votes are cast with your wallet on the Governor contract.',
+                'CWT holders vote For, Against or Abstain on protocol proposals only. Open a proposal in the app and connect the wallet that holds your voting power, or call castVote on the Governor contract directly.',
             },
             {
               title: 'Execution',
@@ -138,7 +138,7 @@ export function DocsGovernance() {
             {
               title: 'Call delegate on the CWT token',
               description:
-                'In-app voting and delegation are not available yet. Use your wallet to call delegate on the CWT token contract.',
+                "In-app delegation isn't available yet. Use your wallet to call delegate on the CWT token contract before a proposal opens — voting power is fixed at that moment.",
             },
             {
               title: 'Confirm',

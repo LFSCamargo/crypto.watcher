@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, FormAlert } from '../../../components/ui'
+import { Button, FormAlert, FormField } from '../../../components/ui'
 import type { AnalysisRequest } from '../api/analysis-requests.api'
 import { useCreateAnalysisRequest } from '../hooks/use-create-analysis-request'
 import { isSessionExpired, requestErrorMessage } from '../lib/request-error-message'
@@ -10,7 +10,6 @@ import {
   type RequestFormErrors,
   type RequestFormValues,
 } from '../lib/validate-request-form'
-import { RequestField } from './request-field'
 
 const EMPTY: RequestFormValues = { projectName: '', projectUrl: '', description: '' }
 const FIELD_ORDER: (keyof RequestFormValues)[] = [
@@ -97,7 +96,7 @@ export function RequestForm({
 
       <fieldset className="space-y-4">
         <legend className="mb-2 text-sm font-semibold">About the project</legend>
-        <RequestField
+        <FormField
           id="projectName"
           label="Project name"
           value={values.projectName}
@@ -105,7 +104,7 @@ export function RequestForm({
           error={errors.projectName}
           inputRef={nameRef}
         />
-        <RequestField
+        <FormField
           id="projectUrl"
           label="Project website"
           type="url"
@@ -120,7 +119,7 @@ export function RequestForm({
 
       <fieldset className="space-y-4">
         <legend className="mb-2 text-sm font-semibold">What to review</legend>
-        <RequestField
+        <FormField
           id="description"
           label="What should the council look at?"
           multiline

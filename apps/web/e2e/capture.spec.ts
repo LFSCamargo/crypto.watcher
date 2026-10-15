@@ -10,7 +10,12 @@ const outDir = fileURLToPath(
   new URL('../../../docs/redesign/screenshots/', import.meta.url),
 )
 
-const routes: { name: string; path: string; signedIn?: boolean }[] = [
+const routes: {
+  name: string
+  path: string
+  signedIn?: boolean
+  role?: 'user' | 'team' | 'admin'
+}[] = [
   { name: 'landing', path: '/' },
   { name: 'catalog', path: '/app' },
   { name: 'reference', path: '/app/reference/bitcoin' },
@@ -23,7 +28,10 @@ const routes: { name: string; path: string; signedIn?: boolean }[] = [
   { name: 'docs', path: '/docs' },
   { name: 'blog', path: '/blog' },
   { name: 'governance', path: '/app/governance' },
+  { name: 'proposal', path: '/app/governance/1' },
+  { name: 'reviewer', path: '/app/u/0x00000000000000000000000000000000000000c1' },
   { name: 'profile', path: '/app/profile', signedIn: true },
+  { name: 'admin', path: '/app/admin', signedIn: true, role: 'team' },
 ]
 
 test.describe('redesign capture', () => {
@@ -35,7 +43,7 @@ test.describe('redesign capture', () => {
 
       for (const route of routes) {
         test(route.name, async ({ page, api }, testInfo) => {
-          if (route.signedIn) api.signIn()
+          if (route.signedIn) api.signIn({ role: route.role ?? 'user' })
           await page.goto(route.path)
           await expect(page.locator('main')).not.toBeEmpty()
           await page.waitForLoadState('networkidle')

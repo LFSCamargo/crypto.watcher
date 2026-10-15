@@ -62,7 +62,7 @@ apps/
     │   ├── lib/                     # api client, wagmi/viem config, utils
     │   │   ├── api/                 # typed API client (maps to BACKEND)
     │   │   ├── seo/                 # PageMeta, route resolver, JSON-LD [MVP]
-    │   │   ├── web3/                # wagmi config, contract ABIs/hooks
+    │   │   ├── web3/                # wagmi config, providers, governor.ts (Governor ABI + VITE_GOVERNOR_ADDRESS)
     │   │   └── utils/
     │   ├── store/                   # Zustand root store + shared slices
     │   ├── modules/                 # Feature modules
@@ -88,9 +88,9 @@ apps/
     │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
     │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
     │   │   ├── profile/             # Unified user profile page           [MVP]
-    │   │   │   ├── components/      # profile-avatar-upload.tsx
-    │   │   │   ├── hooks/           # use-compress-avatar.ts
-    │   │   │   ├── lib/             # compress-avatar-image.ts
+    │   │   │   ├── components/      # header, settings form, wallet status, council tools, avatar upload
+    │   │   │   ├── hooks/           # use-compress-avatar.ts, use-update-profile.ts
+    │   │   │   ├── lib/             # compress-avatar-image.ts, validate-profile-form.ts, profile-error-message.ts
     │   │   │   ├── workers/         # compress-avatar.worker.ts
     │   │   │   ├── pages/
     │   │   │   └── __tests__/
@@ -98,6 +98,11 @@ apps/
     │   │   ├── market/              # Price chart + change badges      [MVP]
     │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
+    │   │   │   ├── components/     # proposal card/badge/legend/lifecycle, vote section + lazy vote controls
+    │   │   │   ├── hooks/          # use-governance.ts, use-proposal-vote.ts (wagmi castVote)
+    │   │   │   ├── lib/            # proposal-state.ts, vote-error.ts, proposal-id.ts
+    │   │   │   ├── pages/
+    │   │   │   └── __tests__/
     │   │   ├── reputation/         # Reviewer credentials profile       [MVP→Phase 1]
     │   │   ├── rewards/            # Reviewer compensation UI           [Phase 1]
     │   │   └── notifications/      # In-app notification center        [Phase 1]
@@ -181,7 +186,7 @@ apps/
 - **Analysis Request** page (`/app/analysis-request`): free during launch (API `feeAmount` is always `0`; no payment flow). Guests get sign-in / sign-up links that return to the form. Grouped form with inline validation mirroring the API schema (name 1–200, http(s) URL, description 10–5000), focus on the first invalid field, single submission while pending, data kept on failure with error-specific messages (session expired → sign in again, 429, 5xx, network). Success shows a persistent, focused "Request received" panel with a queue link; "Your requests" lists `GET /analysis-requests/me`.
 
 ### profile `[MVP]`
-- Unified profile page (`/app/profile`): PFP upload (Web Worker compresses to base64 data URI before save), nickname, X account, bio, public key, governor badge for council members.
+- Unified profile page (`/app/profile`, also `/app/me`): identity header (role badge "Governor council" for admin, "Platform team" for team), settings form with inline validation matching `PATCH /users/me` limits (nickname 2–32, display name ≤120, X ≤64, bio ≤1000, public wallet address format), PFP upload (Web Worker compresses to a base64 data URI before save), in-place "Profile saved." confirmation and a failure alert that keeps edits (session-expired link on 401). Side column: wallet status, council tools (team/admin only: review queue, manage projects) and the "Your requests" history. Guests get a sign-in prompt that returns to the profile. `[MVP]`
 
 ### scoring `[MVP]`
 - `ScorePanel` ("Official safety score") shows the governor-published score, its meaning and round provenance, or "No official score yet".
@@ -190,12 +195,14 @@ apps/
 
 ### governance — launch requirement
 - View **protocol** proposals, cast CWT governance votes, see results (Governor + token). `[MVP]`
+  - List: readable states (Not open yet, Voting open, Passed, Not passed, Executed) with a state legend, retry on error and an honest empty state.
+  - Detail: lifecycle steps, description, proposer, voting window and a "Your vote" panel. Voting calls `castVote(proposalId, support)` on the Governor via wagmi when `VITE_GOVERNOR_ADDRESS` is set; otherwise the panel explains that in-app voting isn't enabled. Panel states: disconnected (connect wallet), wrong network (switch chain), checking, read failure, ineligible (no voting power at `proposalSnapshot`), already voted, ready, awaiting wallet confirmation, pending, confirmed (explorer link), cancelled by the user and failed (with the contract's reason). Wallet code is lazy-loaded with the panel.
 - Community proposal creation UI. `[Phase 1]`
 - Vote delegation UX (`ERC20Votes`). `[Phase 2]`
 - Full DAO/treasury dashboards. `[Final]`
 
 ### reputation `[MVP → Phase 1]`
-- Show reviewer credentials for governor council members. `[MVP]`
+- Show reviewer credentials for governor council members. `[MVP]` `/app/u/:address` validates the address client-side, shows council status neutrally for non-members ("Not on the governor council"), shows reviewer weight only for members and states that only council members publish official scores.
 - Detailed multi-factor reviewer accountability profile. `[Phase 1]`
 
 ### rewards `[Phase 1]`
@@ -263,7 +270,7 @@ apps/
 | `/app/me` | users (own profile) | 🔒 | `MVP` |
 | `/rewards` | rewards | 🔒 | `Phase 1` |
 | `/notifications` | notifications | 🔒 | `Phase 1` |
-| `/app/admin` | team/admin project actions | 👑 | `MVP` |
+| `/app/admin` | team/admin project actions (create project; move one lifecycle step via a project picker; guest sign-in and forbidden states; server 403 shown inline) | 👑 | `MVP` |
 | `/docs` | docs (introduction) | public | `MVP` |
 | `/docs/whitepaper` | docs (whitepaper) | public | `MVP` |
 | `/blog` | blog (index) | public | `MVP` |

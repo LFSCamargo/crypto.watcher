@@ -12,7 +12,6 @@
   "ignoreDependencies": ["@nx/js", "@fontsource/jetbrains-mono", "@fontsource/raleway"],
   "ignore": [
     "apps/api/src/core/chain/**",
-    "apps/web/src/modules/users/**",
     "apps/web/src/modules/projects/components/index.ts",
     "apps/web/src/modules/**/routes.tsx"
   ],

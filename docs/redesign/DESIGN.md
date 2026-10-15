@@ -126,7 +126,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | Reference asset | Identity + "Reference assessment" badge and note → analyst review sections → market context; side column: reference index (meaning, disclaimer), audit coverage, "Request a council review". Partner trade links removed. Implemented in R4. | None blurred (flat cards) |
 | Queue / request | Queue: request-status legend ("a request is not a review"), request cards with status chip, next step and council notes, team triage actions, council projects in analysis. Request: grouped form with inline validation, what happens next (free during launch), your requests list, persistent focused success panel linking to the queue. Implemented in R5. | Request form panel (`.glass-panel`) |
 | Docs / blog | Sticky glass sidebar on desktop, glass sheet on mobile (current page as trigger label); opaque reading column (max 72ch), section anchors, "On this page" on `xl`, previous/next pager (docs), "More from the blog" (articles); wide tables scroll in a focusable region. Single `main` (layouts render a `div`). Implemented in R6. | Sidebar, mobile sheet |
-| Profile / reviewer / governance / admin | Profile: identity header, settings form, wallet status, request history. Reviewer: council status, weight, credential explanation. Governance: state legend, proposal list, detail with lifecycle and participation guidance. Admin: role-gated forms with explicit forbidden state. | Header summary cards |
+| Profile / reviewer / governance / admin | Profile: identity header, settings form with inline validation, wallet status, council tools (team/admin), request history. Reviewer: address, neutral council status, weight for members, credential explanation. Governance: state legend, proposal list, detail with lifecycle and a "Your vote" panel covering wallet/network/eligibility/transaction states. Admin: guest and forbidden states, create form, one-step lifecycle move via project picker. Implemented in R7. | Profile header, reviewer header, vote panel (`.glass-card`); forms flat |
 
 ## 5. Data gaps (require separate product/API work)
 
@@ -137,15 +137,17 @@ Each row is the content hierarchy implementers follow (top to bottom).
 - Request idempotency — the API has no idempotency key; the UI blocks repeat
   submissions while one is pending but cannot dedupe across reloads.
 - Comment anti-spam fee — not implemented server-side; UI copy removed in R5.
-- In-app protocol governance voting (`CryptoWatcherGovernor.castVote`) — UI explains
-  participation and links to the docs; no simulated transaction states.
+- Governor deployment address — in-app voting (`castVote`, R7) needs
+  `VITE_GOVERNOR_ADDRESS`; no deployed address is recorded in the repo, so local and
+  preview builds show "In-app voting isn't enabled". In-app delegation remains `[Phase 2]`.
+- Invalid project transitions — the API throws a plain `Error` (HTTP 500) instead of a
+  400; the admin UI only offers the allowed next state so this path is not reachable
+  from the page.
 - Published report body (findings, methodology version, reviewer list, on-chain
   anchor) per API project — UI shows only fields the API returns.
 - Seed script for local deterministic data — browser tests use network fixtures.
 - Server-side OTP resend cooldown / rate limiting — the UI applies a 30-second
   client cooldown and maps HTTP 429 if the API adds limits later.
-- Transaction states (pending / confirmed / failed) — there is no in-app contract
-  write after the R4 voting removal; wallet sign-in is a message signature only.
 - Score in the project list payload — `GET /projects` omits the score, so council
   cards say "Score on the report" for published projects instead of a number.
 - Token symbol — docs and the UI call the governance token CWT, but

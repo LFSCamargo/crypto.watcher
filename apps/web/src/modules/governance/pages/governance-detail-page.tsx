@@ -1,77 +1,116 @@
 import { Link, useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { User, Hash } from '@phosphor-icons/react'
+import { ArrowLeft } from '@phosphor-icons/react'
+import { Button, FormAlert, Skeleton } from '../../../components/ui'
+import { ApiError } from '../../../lib/api/client'
+import { ProposalLifecycle } from '../components/proposal-lifecycle'
+import { ProposalStateBadge } from '../components/proposal-state-badge'
+import { ProposalVoteSection } from '../components/proposal-vote-section'
 import { useGovernanceProposal } from '../hooks/use-governance'
-import { getProposalStateBadge } from '../lib/proposal-state-badge'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Badge,
-  Skeleton,
-  Button,
-} from '../../../components/ui'
+import { proposalStateMeta } from '../lib/proposal-state'
 
 export function GovernanceDetailPage() {
   const { onchainId } = useParams()
-  const { data, isLoading, isError } = useGovernanceProposal(onchainId)
+  const { data, isLoading, isError, error, refetch, isRefetching } =
+    useGovernanceProposal(onchainId)
 
   if (isLoading) {
     return (
-      <Card className="max-w-3xl">
-        <CardContent className="space-y-4 p-6">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-32 w-full" />
-        </CardContent>
-      </Card>
+      <div className="mx-auto max-w-4xl space-y-4" aria-busy="true">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-40 w-full rounded-3xl" />
+      </div>
+    )
+  }
+
+  if ((error instanceof ApiError && error.status === 404) || (!isError && !data)) {
+    return (
+      <section className="glass-card mx-auto max-w-xl space-y-3 rounded-3xl p-8 text-center">
+        <h1 className="text-xl font-semibold">Proposal not found</h1>
+        <p className="text-sm text-muted-foreground">
+          It may not be indexed yet, or the link is wrong.
+        </p>
+        <Button asChild variant="outline" className="rounded-full">
+          <Link to="/app/governance">Back to governance</Link>
+        </Button>
+      </section>
     )
   }
 
   if (isError || !data) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">Proposal not found.</p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link to="/app/governance">Back to governance</Link>
+      <div className="mx-auto max-w-xl space-y-3">
+        <FormAlert>
+          This proposal couldn&apos;t be loaded. Check your connection and try again.
+        </FormAlert>
+        <Button
+          variant="outline"
+          className="rounded-full"
+          onClick={() => void refetch()}
+          disabled={isRefetching}
+        >
+          Try again
         </Button>
-      </Card>
+      </div>
     )
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Card className="max-w-3xl">
-        <CardHeader>
-          <Badge variant={getProposalStateBadge(data.state)} className="mb-3 w-fit">
-            {data.state}
-          </Badge>
-          <CardTitle className="text-2xl">{data.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="whitespace-pre-wrap text-muted-foreground">
-            {data.description ?? 'No description provided.'}
-          </p>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <Link
+        to="/app/governance"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft size={16} aria-hidden />
+        All proposals
+      </Link>
 
-          <div className="space-y-4 rounded-lg bg-muted/50 p-4">
-            <div className="flex items-start gap-3">
-              <Hash size={18} className="mt-0.5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">On-chain ID</p>
-                <p className="break-all text-sm text-muted-foreground">{data.onchainId}</p>
-              </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <article className="glass-card-flat space-y-6 rounded-3xl p-6">
+          <header className="space-y-3">
+            <ProposalStateBadge state={data.state} />
+            <h1 className="heading-3 text-balance">{data.title}</h1>
+            <p className="text-sm text-muted-foreground">
+              {proposalStateMeta(data.state).description}
+            </p>
+          </header>
+          <ProposalLifecycle state={data.state} />
+          <section aria-labelledby="proposal-description-title" className="space-y-2">
+            <h2 id="proposal-description-title" className="text-base font-semibold">
+              Description
+            </h2>
+            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+              {data.description ?? 'The proposer did not add a description.'}
+            </p>
+          </section>
+          <dl className="grid gap-4 rounded-2xl bg-muted/40 p-4 text-sm sm:grid-cols-2">
+            <div className="min-w-0">
+              <dt className="font-medium">Proposal ID</dt>
+              <dd className="break-all font-mono text-xs text-muted-foreground">
+                {data.onchainId}
+              </dd>
             </div>
-            <div className="flex items-start gap-3">
-              <User size={18} className="mt-0.5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Proposer</p>
-                <p className="break-all text-sm text-muted-foreground">{data.proposerAddress}</p>
-              </div>
+            <div className="min-w-0">
+              <dt className="font-medium">Proposer</dt>
+              <dd className="break-all font-mono text-xs text-muted-foreground">
+                {data.proposerAddress}
+              </dd>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+            {data.startBlock && data.endBlock ? (
+              <div className="sm:col-span-2">
+                <dt className="font-medium">Voting window</dt>
+                <dd className="text-muted-foreground">
+                  Blocks {data.startBlock} to {data.endBlock}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </article>
+
+        <aside>
+          <ProposalVoteSection proposal={data} />
+        </aside>
+      </div>
+    </div>
   )
 }

@@ -179,6 +179,14 @@ function marketSnapshot(slug: string) {
 
 const API_BASE = '/api'
 
+const NEXT_STATE: Record<MockProject['state'], MockProject['state'] | undefined> = {
+  in_analysis: 'ready',
+  ready: 'voting',
+  voting: 'closed',
+  closed: 'analyzed',
+  analyzed: undefined,
+}
+
 type Json = object | null
 
 export class MockApi {
@@ -335,7 +343,40 @@ export class MockApi {
     subResource: string | undefined,
     body: Record<string, unknown>,
   ): [number, Json] {
+    const isStaff = this.user?.role === 'team' || this.user?.role === 'admin'
+
+    if (!idOrSlug && method === 'POST') {
+      if (!this.user) return [401, { message: 'Unauthorized' }]
+      if (!isStaff) return [403, { message: 'Team or admin role required' }]
+      const name = String(body.name ?? '')
+      const created: MockProject = {
+        id: `project-${++this.requestCounter}`,
+        slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        name,
+        description: typeof body.description === 'string' ? body.description : null,
+        chainId: Number(body.chainId),
+        tokenAddress: null,
+        state: 'in_analysis',
+        votingContractAddress: null,
+        createdAt: FIXED_DATE,
+      }
+      this.projects.push(created)
+      return [201, created]
+    }
+
     if (!idOrSlug) return [200, this.projects]
+
+    if (resource === 'transition' && method === 'POST') {
+      if (!this.user) return [401, { message: 'Unauthorized' }]
+      if (!isStaff) return [403, { message: 'Team or admin role required' }]
+      const index = this.projects.findIndex((item) => item.id === idOrSlug)
+      if (index < 0) return [404, { message: 'Project not found' }]
+      const current = this.projects[index]!
+      if (NEXT_STATE[current.state] !== body.state)
+        return [500, { message: 'Invalid project transition' }]
+      this.projects[index] = { ...current, state: body.state as MockProject['state'] }
+      return [200, this.projects[index]!]
+    }
 
     if (resource === 'score') {
       const score = this.scores[idOrSlug]
