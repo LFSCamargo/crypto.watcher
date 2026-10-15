@@ -50,15 +50,15 @@ describe('AppHeader', () => {
     )
   })
 
-  it('shows sign in and get started for guests', () => {
+  it('shows sign in and get started for guests, returning them to the current page', () => {
     renderHeader()
     expect(screen.getByRole('link', { name: 'Get started' })).toHaveAttribute(
       'href',
-      '/auth/signup',
+      '/auth/signup?next=%2Fapp',
     )
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute(
       'href',
-      '/auth/signin',
+      '/auth/signin?next=%2Fapp',
     )
     expect(
       screen.queryByRole('link', { name: 'Request analysis' }),

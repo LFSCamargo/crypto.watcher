@@ -9,6 +9,7 @@ import {
   RiUserLine,
 } from '@remixicon/react'
 import { useSession } from '../../../store/session'
+import { useAuthLinks } from '../../auth/hooks/use-auth-links'
 import { usersApi } from '../../users/api/users.api'
 import {
   Avatar,
@@ -29,6 +30,7 @@ import { ProfileAvatarUpload } from '../components/profile-avatar-upload'
 export function ProfilePage() {
   const user = useSession((state) => state.user)
   const setUser = useSession((state) => state.setUser)
+  const { signInHref } = useAuthLinks()
   const [displayName, setDisplayName] = useState(user?.displayName ?? '')
   const [nickname, setNickname] = useState(user?.nickname ?? '')
   const [bio, setBio] = useState(user?.bio ?? '')
@@ -63,7 +65,7 @@ export function ProfilePage() {
         <RiUserLine className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
         <p className="mb-6 text-muted-foreground">Sign in to manage your profile.</p>
         <Button asChild className="rounded-full">
-          <Link to="/auth/signin">Sign in</Link>
+          <Link to={signInHref}>Sign in</Link>
         </Button>
       </Card>
     )

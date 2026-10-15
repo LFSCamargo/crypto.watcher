@@ -156,9 +156,11 @@ apps/
 - Small per-comment fee explained in UI (anti-spam); on-chain fee settlement `[MVP]` (UI + backend flag).
 
 ### auth `[MVP]`
-- Email/password registration and login with session cookies after OTP verification, on a split-panel branded auth shell.
-- Forgot-password and reset-password flow (token-based; dev surfaces the link until email infra ships).
-- Guided multi-step onboarding teaching search, expert safety scores, comments/evidence, and optional wallet linking for **protocol** governance.
+- Email/password registration and login with session cookies after OTP verification, inside a glass auth panel (`AuthShell`) with a value column on desktop. Errors are inline (`FormAlert`, `role="alert"`) and distinguish incorrect credentials, invalid/expired codes or links, rate limiting, server errors and network failures (`lib/auth-error-message.ts`).
+- Return destination: sign-in/sign-up links carry `?next=` (`hooks/use-auth-links.ts`); `lib/return-to.ts` accepts only in-app paths (rejects absolute, protocol-relative, backslash and `/auth/*` targets). The pending email, OTP purpose and destination live in `sessionStorage` (`lib/pending-verification.ts`) so the code page survives a reload. `GuestRoute` honours a safe `next` for signed-in visitors.
+- OTP page title mirrors the email heading for its purpose (verify email vs sign in) and states the 10-minute expiry; resend has a 30-second client cooldown and invalidates earlier codes.
+- Forgot-password and reset-password flow (token-based, single use, 30-minute expiry; enumeration-safe confirmation; dev surfaces the link until email infra ships). Successful reset returns to `/auth/signin?reset=1`.
+- Three-step onboarding (how scores work, how to take part, optional wallet address) with progress, Back and Skip; finishes at the preserved destination. Linking an address needs no signature; wallet sign-in from the account menu explains that signing sends no transaction and reports rejected signatures.
 - Public-key (wallet) linking for CWT protocol governance votes (not project score voting).
 - Wallet connect via RainbowKit lives inside the logged-in profile dropdown (not the top nav).
 

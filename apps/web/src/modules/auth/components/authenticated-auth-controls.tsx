@@ -48,7 +48,9 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
           className="flex items-center gap-2 rounded-full border border-foreground/10 bg-background/60 py-1 pl-1 pr-1.5 transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
         >
           <Avatar className="h-8 w-8">
-            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={displayName} /> : null}
+            {user.avatarUrl ? (
+              <AvatarImage src={user.avatarUrl} alt={displayName} />
+            ) : null}
             <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>

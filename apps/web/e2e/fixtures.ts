@@ -72,6 +72,7 @@ export const FIXED_DATE = '2026-09-01T12:00:00.000Z'
 export const VALID_OTP = '123456'
 export const VALID_PASSWORD = 'Correct-Horse-42!'
 export const VALID_RESET_TOKEN = 'valid-reset-token'
+export const TAKEN_WALLET = '0x000000000000000000000000000000000000dead'
 
 export function makeUser(overrides: Partial<MockUser> = {}): MockUser {
   return {
@@ -298,6 +299,14 @@ export class MockApi {
         if (body.token !== VALID_RESET_TOKEN)
           return [400, { message: 'Invalid or expired token' }]
         return [200, { ok: true }]
+      case 'link-public-key': {
+        if (!this.user) return [401, { message: 'Unauthorized' }]
+        const publicKey = typeof body.publicKey === 'string' ? body.publicKey : ''
+        if (publicKey.toLowerCase() === TAKEN_WALLET)
+          return [409, { message: 'Wallet already linked to another account' }]
+        this.user = { ...this.user, publicKey }
+        return [200, { user: this.user }]
+      }
       case 'logout':
         this.user = null
         return [204, null]

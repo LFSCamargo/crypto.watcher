@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { RiAddLine, RiLogoutBoxRLine, RiMenuLine, RiUserLine } from '@remixicon/react'
 import { useLogout } from '../../modules/auth/hooks/use-session'
+import { useAuthLinks } from '../../modules/auth/hooks/use-auth-links'
 import { useSession } from '../../store/session'
 import { cn } from '../../lib/utils'
 import { ThemeToggle } from '../theme/theme-toggle'
@@ -23,6 +24,7 @@ export function MobileNavigation() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const user = useSession((state) => state.user)
+  const { signInHref, signUpHref } = useAuthLinks()
   const logout = useLogout()
   const close = () => setOpen(false)
 
@@ -143,12 +145,12 @@ export function MobileNavigation() {
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <Button asChild variant="outline">
-                    <Link to="/auth/signin" onClick={close}>
+                    <Link to={signInHref} onClick={close}>
                       Sign in
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link to="/auth/signup" onClick={close}>
+                    <Link to={signUpHref} onClick={close}>
                       Get started
                     </Link>
                   </Button>

@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useAccount, useSignMessage } from 'wagmi'
 import { RiWallet3Line } from '@remixicon/react'
 import { authApi } from '../api/auth.api'
+import { walletErrorMessage } from '../lib/wallet-error-message'
 import { useSession } from '../../../store/session'
 import { Web3Providers } from '../../../lib/web3/web3-providers'
 import { DropdownMenuItem } from '../../../components/ui'
@@ -34,10 +35,12 @@ function WalletMenuItemInner({ walletLinked }: { walletLinked: boolean }) {
           if (walletLinked && connected) {
             openAccountModal()
           } else if (connected) {
+            const pending = toast.loading(
+              'Confirm the signature in your wallet. Signing is free and sends no transaction.',
+            )
             login.mutate(undefined, {
-              onSuccess: () => toast.success('Wallet linked'),
-              onError: (error) =>
-                toast.error(error instanceof Error ? error.message : 'Could not link wallet'),
+              onSuccess: () => toast.success('Wallet linked', { id: pending }),
+              onError: (error) => toast.error(walletErrorMessage(error), { id: pending }),
             })
           } else {
             openConnectModal()
@@ -47,8 +50,14 @@ function WalletMenuItemInner({ walletLinked }: { walletLinked: boolean }) {
         return (
           <DropdownMenuItem onSelect={onSelect}>
             <RiWallet3Line className="h-4 w-4" />
-            {walletLinked ? 'Wallet linked' : isConnected ? 'Link this wallet' : 'Connect wallet'}
-            {walletLinked ? <span className="ml-auto h-2 w-2 rounded-full bg-success" /> : null}
+            {walletLinked
+              ? 'Wallet linked'
+              : isConnected
+                ? 'Link this wallet'
+                : 'Connect wallet'}
+            {walletLinked ? (
+              <span className="ml-auto h-2 w-2 rounded-full bg-success" />
+            ) : null}
           </DropdownMenuItem>
         )
       }}

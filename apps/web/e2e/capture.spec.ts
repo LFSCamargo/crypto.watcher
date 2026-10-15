@@ -16,6 +16,8 @@ const routes: { name: string; path: string; signedIn?: boolean }[] = [
   { name: 'reference', path: '/app/reference/bitcoin' },
   { name: 'project', path: '/app/projects/aave' },
   { name: 'signin', path: '/auth/signin' },
+  { name: 'signup', path: '/auth/signup' },
+  { name: 'onboarding', path: '/auth/onboarding', signedIn: true },
   { name: 'request', path: '/app/analysis-request', signedIn: true },
   { name: 'queue', path: '/app/in-analysis' },
   { name: 'docs', path: '/docs' },

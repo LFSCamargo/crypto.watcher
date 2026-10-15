@@ -138,3 +138,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 - Published report body (findings, methodology version, reviewer list, on-chain
   anchor) per API project — UI shows only fields the API returns.
 - Seed script for local deterministic data — browser tests use network fixtures.
+- Server-side OTP resend cooldown / rate limiting — the UI applies a 30-second
+  client cooldown and maps HTTP 429 if the API adds limits later.
+- Transaction states (pending / confirmed / failed) — there is no in-app contract
+  write after the R4 voting removal; wallet sign-in is a message signature only.

@@ -5,6 +5,7 @@ import { RiAddLine, RiShieldCheckLine } from '@remixicon/react'
 import { useMutation } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { useSession } from '../../../store/session'
+import { useAuthLinks } from '../../auth/hooks/use-auth-links'
 import { analysisRequestsApi } from '../api/analysis-requests.api'
 import {
   Badge,
@@ -20,6 +21,7 @@ import {
 
 export function AnalysisRequestPage() {
   const user = useSession((state) => state.user)
+  const { signInHref } = useAuthLinks()
   const [projectName, setProjectName] = useState('')
   const [projectUrl, setProjectUrl] = useState('')
   const [description, setDescription] = useState('')
@@ -49,7 +51,7 @@ export function AnalysisRequestPage() {
           Sign in to pay the review fee and submit your project to the governor council queue.
         </p>
         <Button asChild className="rounded-full">
-          <Link to="/auth/signin">Sign in to continue</Link>
+          <Link to={signInHref}>Sign in to continue</Link>
         </Button>
       </Card>
     )

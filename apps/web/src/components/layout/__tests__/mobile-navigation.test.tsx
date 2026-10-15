@@ -64,11 +64,11 @@ describe('MobileNavigation', () => {
     }
     expect(within(sheet).getByRole('link', { name: 'Sign in' })).toHaveAttribute(
       'href',
-      '/auth/signin',
+      '/auth/signin?next=%2Fapp',
     )
     expect(within(sheet).getByRole('link', { name: 'Get started' })).toHaveAttribute(
       'href',
-      '/auth/signup',
+      '/auth/signup?next=%2Fapp',
     )
   })
 

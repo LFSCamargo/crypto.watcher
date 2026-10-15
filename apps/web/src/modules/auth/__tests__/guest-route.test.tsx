@@ -17,6 +17,7 @@ function renderGuestRoute(initialPath: string) {
           <Route path="/auth/signin" element={<p>Sign in form</p>} />
         </Route>
         <Route path="/app" element={<p>App home</p>} />
+        <Route path="/app/governance" element={<p>Governance</p>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -60,5 +61,17 @@ describe('GuestRoute', () => {
 
     expect(screen.queryByText('Sign in form')).not.toBeInTheDocument()
     expect(screen.queryByText('App home')).not.toBeInTheDocument()
+  })
+
+  it('honours a safe intended destination for authenticated users', () => {
+    useAuthStatus.mockReturnValue({ isAuthenticated: true, isReady: true })
+    renderGuestRoute('/auth/signin?next=%2Fapp%2Fgovernance')
+    expect(screen.getByText('Governance')).toBeInTheDocument()
+  })
+
+  it('falls back to the app for external destinations', () => {
+    useAuthStatus.mockReturnValue({ isAuthenticated: true, isReady: true })
+    renderGuestRoute('/auth/signin?next=https%3A%2F%2Fevil.example')
+    expect(screen.getByText('App home')).toBeInTheDocument()
   })
 })
