@@ -377,8 +377,8 @@ with its PRs, screenshots, checks and unresolved dependencies linked here.
 | --- | --- | --- |
 | R0 — Audit, design decisions and baseline | verified | [DESIGN.md](./redesign/DESIGN.md), `baseline-metrics.json`, `r0-*` screenshots, `e2e/baseline.spec.ts` |
 | R1 — Foundations and shared shell | verified | Glass tokens + fallbacks in `styles/index.css`, Card/Dialog/Sheet/Menu variants, `components/layout/*` shell with unit tests, `e2e/shell.spec.ts`, `r1-*` screenshots |
-| R2 — Landing page | implementing | |
-| R3 — Sign-in, Get started and account entry | planned | |
+| R2 — Landing page | verified | `modules/marketing` sections + `landing-page.test.tsx`, `e2e/landing.spec.ts`, [`r2-metrics.json`](./redesign/r2-metrics.json) (home perf 63→64, a11y 96→100, CLS 0), `r2-landing-*` screenshots |
+| R3 — Sign-in, Get started and account entry | implementing | |
 | R4 — Projects, reports and research data | planned | |
 | R5 — Analysis queue and request journey | planned | |
 | R6 — Resources, documentation and blog | planned | |

@@ -1,0 +1,66 @@
+{
+  "stage": "r2",
+  "capturedAt": "2026-10-15",
+  "environment": "local vite preview, Lighthouse 12 default mobile throttling, Node 22.13",
+  "lighthouse": {
+    "app-reference-bitcoin": {
+      "performance": 64,
+      "accessibility": 96,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8931,
+      "tbtMs": 26,
+      "cls": 0.0
+    },
+    "blog-launch-story": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8027,
+      "tbtMs": 20,
+      "cls": 0.0
+    },
+    "blog": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 7877,
+      "tbtMs": 20,
+      "cls": 0.0
+    },
+    "docs-faq": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8038,
+      "tbtMs": 24,
+      "cls": 0.0
+    },
+    "docs": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8031,
+      "tbtMs": 23,
+      "cls": 0.0
+    },
+    "home": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 7961,
+      "tbtMs": 29,
+      "cls": 0
+    }
+  },
+  "bundle": {
+    "jsGzipBytes": 1535292,
+    "cssGzipBytes": 14731,
+    "initialGzipBytes": 296413
+  }
+}

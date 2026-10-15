@@ -97,6 +97,8 @@ export default defineConfig({
         'src/modules/auth/components/password-strength-field.tsx',
         'src/modules/projects/components/**/*.tsx',
         'src/modules/market/components/**/*.tsx',
+        'src/modules/marketing/components/**/*.tsx',
+        'src/modules/marketing/pages/landing-page.tsx',
       ],
       exclude: [
         '**/__tests__/**',

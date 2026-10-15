@@ -1,133 +1,86 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { RiArrowRightLine, RiCheckLine } from '@remixicon/react'
-import { HeaderLogo } from '../../../components/brand/header-logo'
 import { Button } from '../../../components/ui'
+import { useSession } from '../../../store/session'
 import { ProjectSearch } from '../../projects/components/project-search'
-import { getTopRatedProjects } from '../../projects/lib/curated-projects'
-import { TopRatedProjectCard } from './top-rated-project-card'
+import { ReportPreviewCard } from './report-preview-card'
 
 const trustPoints = [
-  '100+ projects reviewed',
-  'Authority-verified scores',
+  'Scores published by a vetted governor council',
   'No wallet needed to browse',
+  'Review requests are free during launch',
 ]
 
 export function HeroSection() {
-  const topRated = getTopRatedProjects(8)
+  const user = useSession((state) => state.user)
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="container-wide relative z-10 pt-16 md:pt-24">
-        <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <HeaderLogo />
-          </motion.div>
+    <section aria-labelledby="hero-title" className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_28rem_at_75%_35%,hsl(var(--primary)/0.28),transparent_70%),radial-gradient(30rem_24rem_at_15%_70%,hsl(var(--chart-2)/0.14),transparent_70%)]"
+      />
+      <div className="container-wide relative z-10 grid items-center gap-12 pb-16 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24">
+        <div className="flex flex-col items-center text-center animate-in fade-in duration-500 lg:items-start lg:text-left">
+          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/70 px-4 py-1.5 text-sm font-semibold">
+            <span aria-hidden className="flex h-2 w-2 rounded-full bg-success" />
+            Expert-governed crypto risk reviews
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-semibold"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-success" />
-            Blockchain risk review company
-          </motion.div>
-
-          <motion.h1
-            className="heading-1 mb-5 text-balance"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
+          <h1 id="hero-title" className="heading-1 mb-5 text-balance">
             Is this crypto project{' '}
             <span className="rounded-xl bg-primary px-3 text-primary-foreground">
               safe
             </span>
             ?
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            className="body-large mx-auto mb-8 max-w-xl text-balance"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            Search any project and see a clear safety score reviewed by our authority
-            panel — before you invest a single dollar.
-          </motion.p>
+          <p className="body-large mb-8 max-w-xl text-balance">
+            Search a project and read a safety score and structured report from vetted
+            reviewers — before you allocate capital.
+          </p>
 
-          <motion.div
-            className="w-full max-w-xl"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
+          <div className="w-full max-w-xl">
             <ProjectSearch placeholder="Try “Bitcoin”, “Uniswap”, “Solana”…" />
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button asChild size="lg" className="gap-2">
               <Link to="/app">
-                Browse safe projects
-                <RiArrowRightLine className="h-5 w-5" />
+                Browse projects
+                <RiArrowRightLine className="h-5 w-5" aria-hidden />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/app/analysis-request">Request a review</Link>
-            </Button>
-          </motion.div>
+            {user ? (
+              <Button asChild variant="outline" size="lg">
+                <Link to="/app/analysis-request">Request a review</Link>
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="lg">
+                <Link to="/auth/signup">Get started</Link>
+              </Button>
+            )}
+          </div>
 
-          <motion.ul
-            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
+          <ul className="mt-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-6">
             {trustPoints.map((point) => (
               <li
                 key={point}
                 className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
               >
-                <RiCheckLine className="h-4 w-4 text-success" />
+                <RiCheckLine
+                  className="h-4 w-4 shrink-0 text-success-strong"
+                  aria-hidden
+                />
                 {point}
               </li>
             ))}
-          </motion.ul>
+          </ul>
         </div>
 
-        <motion.div
-          className="mt-16 md:mt-20"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          <div className="mb-5 flex items-end justify-between">
-            <div>
-              <h2 className="text-xl font-bold">Top rated projects</h2>
-              <p className="text-sm text-muted-foreground">
-                Top credit ratings from our review authority
-              </p>
-            </div>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/app">View all</Link>
-            </Button>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 pb-10">
-            {topRated.map((project, index) => (
-              <TopRatedProjectCard key={project.slug} project={project} index={index} />
-            ))}
-          </div>
-        </motion.div>
+        <div className="flex justify-center lg:justify-end">
+          <ReportPreviewCard />
+        </div>
       </div>
     </section>
   )

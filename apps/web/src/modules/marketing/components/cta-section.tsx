@@ -1,45 +1,39 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { RiAddLine, RiArrowRightLine } from '@remixicon/react'
+import { RiArrowRightLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
 
 export function CTASection() {
   return (
-    <section className="border-t border-border">
-      <div className="container-wide section-padding">
-        <motion.div
-          className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl bg-foreground p-10 text-center text-background md:p-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
-            <RiAddLine className="h-4 w-4" />
-            Request a review
-          </span>
-          <h2 className="heading-2 max-w-2xl">
-            Want a project reviewed by our authority panel?
+    <section
+      aria-labelledby="cta-title"
+      className="relative overflow-hidden border-t border-border"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(36rem_20rem_at_50%_60%,hsl(var(--primary)/0.3),transparent_70%)]"
+      />
+      <div className="container-wide section-padding relative">
+        <div className="glass-card glass-sheen mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-3xl p-8 text-center md:p-12">
+          <h2 id="cta-title" className="heading-2 max-w-2xl text-balance">
+            Want a project reviewed by the council?
           </h2>
-          <p className="max-w-xl text-background/70">
-            Submit any DApp or protocol, pay the review fee, and our expert governor
-            council will investigate and publish a structured safety report.
+          <p className="max-w-xl text-muted-foreground">
+            Submit a DApp or protocol and the governor council will analyse it and publish
+            a structured safety report. Review requests are free during launch; any future
+            fee schedule is set through CWT governance.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" variant="secondary" className="gap-2">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Button asChild size="lg" className="gap-2">
               <Link to="/app/analysis-request">
                 Request a review
-                <RiArrowRightLine className="h-5 w-5" />
+                <RiArrowRightLine className="h-5 w-5" aria-hidden />
               </Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              className="bg-background text-foreground hover:bg-background/90"
-            >
-              <Link to="/app">Browse projects</Link>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/app/in-analysis">See what’s in analysis</Link>
             </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AppHeader } from '../app-header'
@@ -24,7 +24,10 @@ function renderHeader(route = '/app', onOpenSearch = vi.fn()) {
 }
 
 describe('AppHeader', () => {
-  afterEach(() => useSession.setState({ user: undefined }))
+  afterEach(() => {
+    cleanup()
+    useSession.setState({ user: undefined })
+  })
 
   it('exposes the primary destinations including governance', () => {
     renderHeader()

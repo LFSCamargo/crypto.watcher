@@ -69,7 +69,7 @@ apps/
     │   │   │   ├── store.ts         # Zustand slice
     │   │   │   ├── routes.tsx
     │   │   │   └── __tests__/
-    │   │   ├── marketing/           # Public landing page             [MVP]
+    │   │   ├── marketing/           # Public landing page: hero, report preview, methodology, lifecycle, references, governance, resources, CTA [MVP]
     │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── blog/                # News & launch articles (MD)     [MVP]
     │   │   │   ├── content/         # Markdown article sources
@@ -237,7 +237,7 @@ apps/
 
 | path | feature | access | phase |
 | --- | --- | --- | --- |
-| `/` | marketing (hero search + top rated) | public | `MVP` |
+| `/` | marketing (hero search, illustrative report preview, review lifecycle, reference assessments, governance, resources) | public | `MVP` |
 | `/auth/signin`, `/auth/signup`, `/auth/verify-otp`, `/auth/forgot-password`, `/auth/reset-password` | auth (guest-only; redirects when signed in) | public | `MVP` |
 | `/auth/onboarding` | auth (post-signup; requires session) | 🔒 | `MVP` |
 | `/app` | projects (Safe Projects App Store) | public | `MVP` |

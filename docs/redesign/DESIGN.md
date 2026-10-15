@@ -106,6 +106,10 @@ scroll under a surface (header, mobile nav) uses the denser nav alpha.
   page transitions are opacity only and disabled under reduced motion.
 - **Focus.** 2px `ring` with 2px offset on every interactive element; skip link to
   `#main-content`; focus moves to the main region on route change.
+- **Brand yellow as text.** `--primary` (#ffca0a) on cream is 1.5:1, so it is never a
+  text color. Use `text-primary-strong` (dark amber in light mode, brand yellow in
+  dark mode) for accent text such as the wordmark. Remaining `text-primary` text
+  usages are migrated screen by screen in R4–R7.
 
 ## 4. Screen references
 
@@ -114,7 +118,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | Screen | Hierarchy | Glass surfaces |
 | --- | --- | --- |
 | Shell | Logo · Projects · In Analysis · Governance · Resources · search · theme · account. Mobile: sticky header (logo, search, menu) + bottom bar (Projects, In Analysis, Governance, Menu) opening a sheet with resources and account actions. | Header, bottom bar, menu sheet, command palette |
-| Landing | Hero (claim, sub-claim, Browse projects / Get started, search) → illustrative report preview (labeled "Illustrative") → how review works (4 lifecycle steps) → expert model pillars → governance vs score separation → resources → final CTA. | Hero report-preview card, final CTA card |
+| Landing | Hero (claim, sub-claim, search, Browse projects / Get started — Request a review when signed in) → illustrative report preview (figcaption "Illustrative example") → methodology pillars → 5-step review lifecycle → 4 reference assessments (labeled, linked to `/app/reference/:slug`, no charts) → CWT governance vs score separation → resources → final CTA. Implemented in R2. | Hero report-preview card, final CTA card |
 | Auth | Single centered glass panel over the grid; title, one-line purpose, form, inline errors (`role="alert"`), secondary links. Desktop adds a short value column. | Auth panel |
 | Onboarding | 3 steps (how scores work, how to participate, optional wallet) with progress, Back, Skip. | Step panel |
 | Catalog | Title + count, search + category chips (URL-backed), source legend (Reference vs Council report), card grid, empty state with reset, API projects section with its own loading/error. | Filter bar (flat) |
