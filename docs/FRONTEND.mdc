@@ -12,6 +12,11 @@ alwaysApply: true
 
 ## Tech Stack
 
+The proposed full-application redesign is tracked in
+[REDESIGN_PLAN](./REDESIGN_PLAN.md). Its R0–R8 milestones describe incremental UI
+delivery, not changes to the product phases below. Existing behavior remains the
+baseline until each milestone is implemented and verified; governance stays `[MVP]`.
+
 From the [README](../README.md): Vite + React + TypeScript + TailwindCSS,
 Shadcn/UI (fully rounded, Uber-inspired cream/yellow palette), Zustand, React Hook Form,
 React Router, Sonner, Remix Icons, Raleway font. Web3: RainbowKit, Wagmi, Viem.
