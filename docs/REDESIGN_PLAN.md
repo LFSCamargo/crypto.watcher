@@ -1,8 +1,36 @@
 # Application redesign implementation plan
 
-Status: proposed implementation plan; no application behavior changed.
-Planning branch: `feat/application-redesign-plan`, created from local `master`
-at `49fa525`. Inventory reviewed on 2026-10-15.
+Status: replanned 2026-10-15 and in implementation on `feat/redesign-foundations`
+(see the [milestone tracker](#milestone-tracker)). Original planning branch:
+`feat/application-redesign-plan`, created from local `master` at `49fa525`.
+
+## Replan — verified starting point (2026-10-15)
+
+- An earlier R0/R1 attempt (Playwright specs, `docs/redesign/*`, header and
+  mobile-navigation components) was reverted; only this plan was committed
+  (`d69ef3e`). `apps/web/e2e/` and `docs/redesign/` started empty and the
+  `test:e2e` script existed without a `@playwright/test` dependency or config.
+- The local API had no database (`/health` reported `degraded`). Postgres and
+  MailHog now run from `docker-compose.dev.yml`; migrations apply cleanly but no
+  seed script exists, so the database is empty. Browser journeys therefore mock
+  the HTTP API at the network layer with typed fixtures (`apps/web/e2e/fixtures.ts`)
+  instead of depending on database contents. This keeps them deterministic in CI.
+- Server capability audit (drives copy in R2, R5 and R6):
+  - `POST /analysis-requests` always stores `feeAmount = '0'`; there is no payment
+    endpoint or transaction verification. Fee/payment copy must not claim that a
+    fee is charged today. Fee schedules remain a CWT governance parameter.
+  - `GET /projects/:id/score` returns a **safety** score in basis points
+    (0–10000, higher is safer) computed from the governor authority vote tally.
+    The UI shows it on a 0–100 scale; it is never inverted into a risk score.
+  - Curated reference assets (`/app/reference/:slug`) use static frontend data
+    (`modules/projects/lib/curated-*`). They are reference assessments, not
+    published council reports, and must be labeled as such.
+  - The governor "Mark safe / Mark unsafe" panel only showed a success toast
+    without calling any API. It must not simulate a recorded decision.
+  - There is no evidence-submission API; "Submit evidence" links pointed at the
+    analysis-request form.
+- Baseline gates (`check:spaghetti`, `knip`, web `lint`, `typecheck`, `test`) were
+  green before implementation started.
 
 ## Objective and boundaries
 
@@ -47,9 +75,8 @@ stays accessible throughout the redesign and remains a launch requirement.
   paid, confirmed or queued-for-payment states.
 - Project detail currently links “Submit evidence” to the analysis-request form.
   Distinguish those actions; do not present a request as completed evidence intake.
-- The docs mention Playwright, but this checkout has no `apps/web/e2e/` directory
-  or Playwright configuration found in the file inventory. Establish executable
-  browser tests in R0 rather than assuming a working suite exists.
+- The docs mention Playwright, but this checkout had no Playwright configuration.
+  R0 establishes executable browser tests rather than assuming a working suite.
 
 These are source-review findings. Live visual screenshots, API capability checks
 and usability baselines are R0 deliverables, not completed audits.
@@ -60,6 +87,27 @@ Use a clear research workspace: restrained brand color, strong typography,
 readable report sections and compact data summaries. Retain recognizable branding
 as the starting point; compare concrete desktop/mobile designs in R0 before
 changing fonts, palette or logo. Distinguish brand emphasis from risk/status colors.
+
+### Liquid-glass design language
+
+The redesign is guided by a liquid-glass visual language (translucent, layered
+surfaces) applied on top of the existing cream/yellow/black brand palette. The
+exact recipe lives in [redesign/DESIGN.md](./redesign/DESIGN.md).
+
+- **One token layer.** `--glass-*` CSS variables (tint, border, highlight, shadow,
+  blur, saturation) for both themes in `apps/web/src/styles/index.css`, consumed
+  through shared `glass-*` component classes. No ad-hoc `bg-x/80 backdrop-blur`.
+- **Where glass applies.** Sticky header, mobile navigation, command palette,
+  dialogs, popovers and dropdown menus, landing hero and report-preview cards,
+  floating CTAs and elevated summary cards over the page grid background.
+- **Where it does not.** Long-form reading surfaces (docs and blog article
+  bodies, report text, forms) stay opaque for legibility.
+- **Depth.** Inner top highlight, 1px translucent border, soft diffuse shadow and
+  large radii; motion is gentle opacity/scale and honors reduced motion.
+- **Guardrails.** WCAG AA contrast over the busiest background a surface can sit
+  on; an opaque fallback under `prefers-reduced-transparency` and when
+  `backdrop-filter` is unsupported; at most three simultaneous blurred layers per
+  view because `backdrop-filter` is GPU-costly. Lighthouse must not regress.
 
 Public navigation exposes Projects, In Analysis, Resources and Governance, with
 Sign in and Get started for guests. Signed-in users get account actions and a
@@ -321,5 +369,18 @@ For every implementation PR:
 
 The first implementation task is **R0: route/state baseline and design reference
 package**. Track each milestone as planned → implementing → verified → released,
-with its PRs, screenshots, checks and unresolved dependencies linked here when work
-begins. All milestones are currently planned.
+with its PRs, screenshots, checks and unresolved dependencies linked here.
+
+## Milestone tracker
+
+| Milestone | Status | Notes |
+| --- | --- | --- |
+| R0 — Audit, design decisions and baseline | verified | [DESIGN.md](./redesign/DESIGN.md), `baseline-metrics.json`, `r0-*` screenshots, `e2e/baseline.spec.ts` |
+| R1 — Foundations and shared shell | implementing | |
+| R2 — Landing page | planned | |
+| R3 — Sign-in, Get started and account entry | planned | |
+| R4 — Projects, reports and research data | planned | |
+| R5 — Analysis queue and request journey | planned | |
+| R6 — Resources, documentation and blog | planned | |
+| R7 — Profile, governance, reviewer and operator surfaces | planned | |
+| R8 — Full regression, rollout and cleanup | planned | |

@@ -9,7 +9,6 @@
     "unresolved"
   ],
   "ignoreWorkspaces": ["contracts"],
-  "ignoreBinaries": ["playwright"],
   "ignoreDependencies": ["@nx/js", "@fontsource/jetbrains-mono", "@fontsource/raleway"],
   "ignore": [
     "apps/api/src/core/chain/**",

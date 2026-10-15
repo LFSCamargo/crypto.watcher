@@ -90,12 +90,18 @@ apps/
     │   │   └── notifications/      # In-app notification center        [Phase 1]
     │   ├── styles/                  # Tailwind base + theme
     │   └── public/                  # Static assets, robots.txt, sitemap.xml (generated)
-    ├── e2e/                         # Playwright tests
+    ├── e2e/                         # Playwright journeys [MVP]
+    │   ├── fixtures.ts              # Network-level API mock + theme option
+    │   ├── baseline.spec.ts         # Redirects, browsing, auth, requests, governance
+    │   └── capture.spec.ts          # Opt-in redesign screenshots (CAPTURE_STAGE)
+    ├── playwright.config.ts         # desktop 1440×900 + Pixel 7, vite preview server
+    ├── tsconfig.e2e.json            # Typecheck for e2e/ (part of `typecheck`)
     ├── lighthouse.config.json       # Lighthouse URLs + score thresholds [MVP]
     ├── lighthouse-reports/          # Generated audit JSON (gitignored)
     ├── scripts/
     │   ├── generate-seo-files.ts    # Build-time robots.txt + sitemap.xml [MVP]
     │   ├── run-lighthouse.ts        # Production preview + Lighthouse CLI [MVP]
+    │   ├── report-bundle-size.ts    # Raw/gzip chunk sizes after build  [MVP]
     │   └── sync-crypto-icons.mjs
     └── package.json
 ```
@@ -375,6 +381,13 @@ interface VotingState {
 - Tests: Vitest + Testing Library in `__tests__/` as `*.test.tsx` only (render
   components/hooks — no plain `*.test.ts` lib unit tests); Playwright e2e in
   `e2e/`. Coverage thresholds in `vite.config.ts`. `[MVP]`
+- Browser journeys: `pnpm --filter web test:e2e` builds the app, serves it with
+  `vite preview` (API base `/api`) and runs Chromium on desktop and mobile
+  viewports. `e2e/fixtures.ts` answers every `/api/*` call from in-memory state and
+  aborts all cross-origin requests, so journeys never depend on the database,
+  public RPCs or market APIs. CI runs them in the `apps/web` job. `[MVP]`
+- Bundle report: `pnpm --filter web exec tsx scripts/report-bundle-size.ts` after a
+  build prints raw/gzip sizes per chunk and the initial payload. `[MVP]`
 - Lighthouse: `pnpm --filter web lighthouse` builds the app, serves `vite preview`,
   audits public routes from `lighthouse.config.json`, and fails when category
   scores fall below configured thresholds. CI runs this after the web build
