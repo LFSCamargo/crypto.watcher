@@ -125,7 +125,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | API project | Identity + lifecycle status → official score card (meaning, round, provenance) → council findings (lifecycle text; separate reference link) → "Market context" (not part of the score) → discussion. Side column: review progress steps, on-chain record, request CTA. Implemented in R4. | Score summary card (`.glass-card`) |
 | Reference asset | Identity + "Reference assessment" badge and note → analyst review sections → market context; side column: reference index (meaning, disclaimer), audit coverage, "Request a council review". Partner trade links removed. Implemented in R4. | None blurred (flat cards) |
 | Queue / request | Queue: request-status legend ("a request is not a review"), request cards with status chip, next step and council notes, team triage actions, council projects in analysis. Request: grouped form with inline validation, what happens next (free during launch), your requests list, persistent focused success panel linking to the queue. Implemented in R5. | Request form panel (`.glass-panel`) |
-| Docs / blog | Sticky glass sidebar on desktop, glass sheet on mobile; opaque reading column (max 70ch), on-page heading anchors. | Sidebar, mobile sheet |
+| Docs / blog | Sticky glass sidebar on desktop, glass sheet on mobile (current page as trigger label); opaque reading column (max 72ch), section anchors, "On this page" on `xl`, previous/next pager (docs), "More from the blog" (articles); wide tables scroll in a focusable region. Single `main` (layouts render a `div`). Implemented in R6. | Sidebar, mobile sheet |
 | Profile / reviewer / governance / admin | Profile: identity header, settings form, wallet status, request history. Reviewer: council status, weight, credential explanation. Governance: state legend, proposal list, detail with lifecycle and participation guidance. Admin: role-gated forms with explicit forbidden state. | Header summary cards |
 
 ## 5. Data gaps (require separate product/API work)
@@ -148,6 +148,9 @@ Each row is the content hierarchy implementers follow (top to bottom).
   write after the R4 voting removal; wallet sign-in is a message signature only.
 - Score in the project list payload — `GET /projects` omits the score, so council
   cards say "Score on the report" for published projects instead of a number.
+- Token symbol — docs and the UI call the governance token CWT, but
+  `GovernanceToken.sol` deploys symbol `WATCH` (also used in the tokenomics meta
+  description). Product must pick one name before launch; R6 did not rename either.
 - Rating labels — scores map to "S&P"/"Moody's"-style letter grades
   (`lib/ratings/credit-rating.ts`). These are Crypto Watcher's own scale, not ratings
   issued by those agencies; product/legal should confirm the naming before launch.

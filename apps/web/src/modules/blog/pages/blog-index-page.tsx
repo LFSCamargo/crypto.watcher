@@ -18,41 +18,44 @@ export function BlogIndexPage() {
 
       {featuredPost && (
         <section className="mb-10">
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Featured
-          </p>
-          <BlogPostCard post={featuredPost} featured />
+          </h2>
+          <BlogPostCard post={featuredPost} featured headingLevel="h3" />
         </section>
       )}
 
       {otherPosts.length > 0 && (
         <section>
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             More articles
-          </p>
+          </h2>
           <div className="grid gap-6 md:grid-cols-2">
             {otherPosts.map((post) => (
-              <BlogPostCard key={post.slug} post={post} />
+              <BlogPostCard key={post.slug} post={post} headingLevel="h3" />
             ))}
           </div>
         </section>
       )}
 
-      <section className="mt-12 rounded-3xl border border-border bg-card p-6 md:p-8">
+      <section className="glass-card-flat mt-12 rounded-3xl p-6 md:p-8">
         <h2 className="text-xl font-bold">Ready to explore?</h2>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Browse expert-reviewed projects, read the whitepaper, or request an official
-          risk analysis for your protocol.
+          Browse council-reviewed projects, read the whitepaper, or request a review of a
+          project — free during launch.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <Button asChild className="gap-2">
             <Link to="/app">
-              Launch App
-              <ArrowRight size={16} />
+              Browse projects
+              <ArrowRight size={16} aria-hidden />
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/docs/whitepaper">Read Whitepaper</Link>
+            <Link to="/app/analysis-request">Request a review</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/docs/whitepaper">Read the whitepaper</Link>
           </Button>
         </div>
       </section>

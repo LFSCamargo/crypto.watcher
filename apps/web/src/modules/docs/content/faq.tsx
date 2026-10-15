@@ -32,7 +32,7 @@ export function DocsFAQ() {
             items={[
               'Scores come from vetted expert reviewers, not crowd votes',
               'Transparent methodology and conflict-of-interest disclosure',
-              'Public can submit evidence and report incidents — but not set the score',
+              'Anyone can discuss a project and share evidence — but not set the score',
               'Protocol governed by CWT holders; project scores governed by experts',
             ]}
           />
@@ -49,24 +49,23 @@ export function DocsFAQ() {
         <DocsFaqItem question="Who publishes project risk scores?">
           <DocsP>
             Only vetted governors/admins on the expert council. They investigate projects,
-            audit available information, evaluate risks and publish structured reports with
-            an official score.
+            audit available information, evaluate risks and publish structured reports
+            with an official score.
           </DocsP>
         </DocsFaqItem>
         <DocsFaqItem question="Can regular users vote on project scores?">
           <DocsP>
-            No. Regular users cannot influence the final risk score through tokens or public
-            voting. You can read reports, submit evidence, report incidents and discuss —
-            but score authority stays with the governor council.
+            No. Regular users cannot influence the final risk score through tokens or
+            public voting. You can read reports and share evidence in the discussion, but
+            score authority stays with the governor council.
           </DocsP>
         </DocsFaqItem>
         <DocsFaqItem question="How can I contribute without voting on scores?">
           <DocsList
             items={[
-              'Submit evidence for governor review',
-              'Report incidents or suspicious activity',
-              'Participate in public comments and discussion',
-              'Request a paid review for a project you care about',
+              'Share evidence and sources in project comments for governors to consider',
+              'Request a review for a project you care about (free during launch)',
+              'Report incidents through a dedicated flow (planned)',
             ]}
           />
         </DocsFaqItem>
@@ -76,9 +75,9 @@ export function DocsFAQ() {
         <DocsFaqItem question="How are reviewers selected?">
           <DocsP>
             Reviewers are carefully selected and vetted by the platform for demonstrated
-            expertise in areas such as smart contract security, protocol design, tokenomics,
-            compliance, infrastructure and on-chain analysis. Roster changes are subject to
-            protocol governance.
+            expertise in areas such as smart contract security, protocol design,
+            tokenomics, compliance, infrastructure and on-chain analysis. Roster changes
+            are subject to protocol governance.
           </DocsP>
         </DocsFaqItem>
         <DocsFaqItem question="How are reviewers held accountable?">
@@ -121,8 +120,8 @@ export function DocsFAQ() {
         <DocsFaqItem question="What can I vote on with CWT?">
           <DocsP>
             Protocol decisions only: reviewer council roster, review methodology, fee
-            schedules, treasury allocations and similar platform parameters. You cannot use
-            CWT to vote on individual project risk scores.
+            schedules, treasury allocations and similar platform parameters. You cannot
+            use CWT to vote on individual project risk scores.
           </DocsP>
         </DocsFaqItem>
       </DocsSection>
@@ -133,7 +132,13 @@ export function DocsFAQ() {
             Crypto Watcher supports any wallet that works with WalletConnect, including:
           </DocsP>
           <DocsList
-            items={['MetaMask', 'Rainbow', 'Coinbase Wallet', 'Trust Wallet', 'And many more']}
+            items={[
+              'MetaMask',
+              'Rainbow',
+              'Coinbase Wallet',
+              'Trust Wallet',
+              'And many more',
+            ]}
           />
         </DocsFaqItem>
         <DocsFaqItem question="Are the smart contracts audited?">

@@ -51,6 +51,7 @@ export function DocsTokenomics() {
       <DocsSection icon={ChartLineDown} title="Token Distribution">
         <DocsSubheading>Initial Allocation</DocsSubheading>
         <DocsTable
+          label="Token Distribution table"
           headers={['Category', 'Allocation', 'Vesting']}
           rows={[
             ['Protocol Treasury', '40%', 'Governed by DAO for reviewer ops + grants'],
@@ -83,16 +84,18 @@ export function DocsTokenomics() {
         />
         <DocsSubheading>Revenue model</DocsSubheading>
         <DocsP>
-          The primary revenue source is fees paid by parties who request a formal review
-          (projects, teams, or interested users). These fees are directed to the protocol
-          treasury.
+          The planned revenue source is fees paid by parties who request a formal review
+          (projects, teams, or interested users), directed to the protocol treasury.
+          Review requests are free during launch; any fee schedule will be set through CWT
+          governance and announced before it applies.
         </DocsP>
         <DocsSubheading>Reviewer Compensation</DocsSubheading>
         <DocsP>
-          Governors are compensated from the treasury for completed reviews and high-quality
-          work. Compensation parameters, fee schedules and treasury allocations are decided
-          through CWT governance — not by individual projects or public token votes on scores.
-          This model is designed to align with professional audit and research practices. `[Phase 1]`
+          Governors are compensated from the treasury for completed reviews and
+          high-quality work. Compensation parameters, fee schedules and treasury
+          allocations are decided through CWT governance — not by individual projects or
+          public token votes on scores. This model is designed to align with professional
+          audit and research practices. `[Phase 1]`
         </DocsP>
       </DocsSection>
 

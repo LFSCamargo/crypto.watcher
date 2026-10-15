@@ -113,6 +113,13 @@ export default defineConfig({
         'src/modules/market/components/**/*.tsx',
         'src/modules/marketing/components/**/*.tsx',
         'src/modules/marketing/pages/landing-page.tsx',
+        'src/modules/docs/layouts/**/*.tsx',
+        'src/modules/docs/components/docs-section.tsx',
+        'src/modules/docs/components/docs-table.tsx',
+        'src/modules/docs/lib/**/*.ts',
+        'src/modules/blog/layouts/**/*.tsx',
+        'src/modules/blog/pages/**/*.tsx',
+        'src/modules/blog/components/blog-post-card.tsx',
       ],
       exclude: [
         '**/__tests__/**',

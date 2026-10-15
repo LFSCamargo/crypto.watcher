@@ -29,7 +29,7 @@ Crypto Watcher is an **expert-governed** risk analysis platform. Official scores
 - Infrastructure and operational resilience
 - On-chain analysis
 
-Regular users **do not vote on the final risk score**. You can browse reports, comment, submit evidence, and report incidents — but score authority stays with governors who are selected, accountable, and transparent about conflicts of interest.
+Regular users **do not vote on the final risk score**. You can browse reports, join the discussion, and share evidence in comments — but score authority stays with governors who are selected, accountable, and transparent about conflicts of interest.
 
 That is intentional. We reject vote-to-rate systems where project ratings can be purchased or brigaded. Trust must come from **reviewer expertise**, not token ownership.
 
@@ -38,7 +38,7 @@ That is intentional. We reject vote-to-rate systems where project ratings can be
 Every project follows the same lifecycle:
 
 1. **Review requested** — a team or user pays to enter the queue.
-2. **In analysis** — governors investigate; the community submits evidence.
+2. **In analysis** — governors investigate; the community shares evidence in the discussion.
 3. **Governor review** — findings are synthesized into a structured report.
 4. **Report published** — the official score is shown to everyone.
 
@@ -46,7 +46,7 @@ Published outcomes can be anchored **on-chain** for auditability. The governance
 
 ## This is our first launch — and we want you in the room
 
-We have spent months building the foundation: a public safety index, expert score display, governor governance, evidence submission, on-chain registry contracts, and the infrastructure to run it all with transparency.
+We have spent months building the foundation: a public safety index, expert score display, governor governance, public project discussion, on-chain registry contracts, and the infrastructure to run it all with transparency.
 
 Now we are opening the doors.
 

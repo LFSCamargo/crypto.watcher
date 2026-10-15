@@ -10,7 +10,7 @@ What launches:
 
 - Project catalog with lifecycle states and expert risk scores
 - Structured review reports (methodology, findings, risk factors, conflicts disclosed)
-- Public off-chain commenting and evidence submission
+- Public off-chain commenting, with evidence shared in the discussion
 - Wallet + email authentication
 - Governor-only score publication with expertise tags
 - Per-project on-chain registry for published outcomes

@@ -37,7 +37,7 @@ test.describe('redesign capture', () => {
         test(route.name, async ({ page, api }, testInfo) => {
           if (route.signedIn) api.signIn()
           await page.goto(route.path)
-          await expect(page.locator('main').first()).not.toBeEmpty()
+          await expect(page.locator('main')).not.toBeEmpty()
           await page.waitForLoadState('networkidle')
           await page.screenshot({
             path: `${outDir}${stage}-${route.name}-${testInfo.project.name}-${theme}.jpg`,

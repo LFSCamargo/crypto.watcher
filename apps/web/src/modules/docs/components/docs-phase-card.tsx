@@ -26,13 +26,19 @@ export function DocsPhaseCard({
         >
           {phase}
         </span>
-        {active && <span className="text-xs font-medium text-primary">Current</span>}
+        {active && (
+          <span className="text-xs font-medium text-primary-strong">Current</span>
+        )}
       </div>
       <h3 className="mb-3 font-semibold text-foreground">{title}</h3>
       <ul className="space-y-2">
         {items.map((item) => (
           <li key={item} className="flex gap-2 text-sm text-muted-foreground">
-            <CheckCircle size={16} weight="fill" className="mt-0.5 shrink-0 text-primary" />
+            <CheckCircle
+              size={16}
+              weight="fill"
+              className="mt-0.5 shrink-0 text-primary-strong"
+            />
             {item}
           </li>
         ))}

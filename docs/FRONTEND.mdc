@@ -53,6 +53,10 @@ apps/
     │   │   │   ├── footer-link-group.tsx
     │   │   │   ├── resources-menu.tsx
     │   │   │   ├── use-route-focus.ts # Focus <main> after client navigation
+    │   │   │   ├── resource-layout.tsx # Docs/blog reading layout (sidebar, sheet, pager)
+    │   │   │   ├── resource-nav-links.tsx / resource-pager.tsx / on-this-page.tsx
+    │   │   │   ├── use-page-headings.ts # Section h2 ids for "On this page"
+    │   │   │   ├── use-hash-scroll.ts # Scroll to #anchor once lazy content renders
     │   │   │   └── __tests__/
     │   │   └── ui/                  # Shadcn/UI primitives (shared); Card glass variants, Sheet
     │   ├── lib/                     # api client, wagmi/viem config, utils
@@ -150,7 +154,14 @@ apps/
 ### blog `[MVP]`
 - Public blog at `/blog` with markdown-sourced articles (launch story, progress updates, roadmap).
 - Content in `modules/blog/content/*.md`; metadata in `lib/posts.ts`; rendered via internal markdown parser in `lib/render-markdown.tsx`.
-- Featured post on index, sidebar navigation, launch CTAs on article pages.
+- Featured post on index, shared `ResourceLayout` navigation ("Blog" landmark, mobile sheet), "More from the blog" related articles and launch CTAs on article pages.
+- Copy describes shipped capability only: evidence is shared in project comments and review requests are free during launch. `[MVP]`
+
+### docs `[MVP]`
+- `/docs`, `/docs/whitepaper`, `/docs/tokenomics`, `/docs/governance`, `/docs/faq` inside `ResourceLayout`: sticky glass sidebar ("Documentation" landmark, `aria-current`) on desktop, a "Documentation menu" sheet below `lg`, opaque reading column, previous/next pager and an "On this page" list on `xl`.
+- `DocsSection` derives a stable anchor id from its title (`lib/section-id.ts`) with a "Link to …" anchor; deep links such as `/docs/faq#reviews-scores` scroll after lazy content loads.
+- `DocsTable` renders a labelled, keyboard-focusable scroll region so wide tables never overflow the page.
+- Governance docs state that in-app voting and delegation are not available yet (votes and `delegate` are wallet transactions); tokenomics marks review fees as planned. `[MVP]`
 
 ### comments `[MVP]`
 - Public comment thread (read by all, post when authenticated). Guests get a "Sign in to comment" link that returns to the project; a failed post keeps the draft and shows an inline alert. Comments inform the council but never change the score.

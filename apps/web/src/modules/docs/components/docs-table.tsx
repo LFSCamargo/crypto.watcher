@@ -3,16 +3,23 @@ import { Card } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
 
 export function DocsTable({
+  label,
   headers,
   rows,
 }: {
+  label: string
   headers: string[]
   rows: ReactNode[][]
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div
+        role="region"
+        aria-label={label}
+        tabIndex={0}
+        className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <table className="w-full min-w-[32rem] text-sm">
           <thead>
             <tr className="border-b border-border bg-secondary/40 text-left">
               {headers.map((header) => (
