@@ -31,7 +31,7 @@ export function CouncilProjectsSection({ search }: { search: string }) {
 
       {isLoading ? (
         <div
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
           aria-label="Loading council projects"
         >
           {Array.from({ length: 3 }).map((_, index) => (
@@ -63,7 +63,7 @@ export function CouncilProjectsSection({ search }: { search: string }) {
           </Button>
         </div>
       ) : projects.length > 0 ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
             <li key={project.id}>
               <ProjectCard project={project} />

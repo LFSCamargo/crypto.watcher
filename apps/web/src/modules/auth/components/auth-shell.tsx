@@ -24,8 +24,9 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(28rem_22rem_at_70%_45%,hsl(var(--primary)/0.22),transparent_70%)]"
       />
       <aside className="hidden flex-col gap-8 lg:flex">
-        <Link to="/" className="inline-flex" aria-label="Crypto Watcher home">
+        <Link to="/" className="inline-flex">
           <ShieldLogo size="md" />
+          <span className="sr-only"> home</span>
         </Link>
         <div>
           <p className="heading-3 max-w-sm text-balance">

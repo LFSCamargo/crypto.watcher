@@ -1,6 +1,6 @@
 import { ApiError } from '../../../lib/api/client'
 
-export const NETWORK_ERROR_MESSAGE =
+const NETWORK_ERROR_MESSAGE =
   'We couldn’t reach Crypto Watcher. Check your connection and try again.'
 
 const SERVER_ERROR_MESSAGE =

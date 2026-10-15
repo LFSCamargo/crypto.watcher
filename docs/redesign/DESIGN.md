@@ -156,3 +156,34 @@ Each row is the content hierarchy implementers follow (top to bottom).
 - Rating labels — scores map to "S&P"/"Moody's"-style letter grades
   (`lib/ratings/credit-rating.ts`). These are Crypto Watcher's own scale, not ratings
   issued by those agencies; product/legal should confirm the naming before launch.
+
+## 6. R8 regression and release audit
+
+- **Inventory regression.** `apps/web/e2e/regression.spec.ts` (desktop project) loads
+  every inventory route — guest, signed-in user and team/admin variants — in light and
+  dark. Each route must not scroll horizontally at 360, 768, 720 (1440 at 200% zoom)
+  and 1440 CSS pixels, must render exactly one `h1`, and must have no axe-core
+  WCAG 2.0/2.1 A/AA violations. Guest routes are also tabbed through (every focus
+  target visible), and the shell is checked under reduced transparency (opaque nav)
+  and reduced motion.
+- **Fixes found by the audit.** The header search button now uses its visible text
+  as its accessible name (with `aria-keyshortcuts`). The auth-shell logo link and the
+  account menu trigger have accessible names that contain their visible text. Dark
+  `--destructive` darkened to `0 72% 45%` so white text on destructive badges is 5.8:1.
+  Catalog (`/app`) card grids got `grid-cols-1` so they no longer overflow at 360px.
+- **Resilience.** Direct entry and reload (auth, analysis), history navigation
+  (catalog), API failures (sign-in, request submit, profile save, governance reads)
+  and expired sessions or reset links are covered by the milestone journeys in
+  `apps/web/e2e/`. Email templates are covered by `packages/email-templates` tests.
+- **Results vs R0** ([`r8-metrics.json`](./r8-metrics.json), same method as R0).
+  Lighthouse on the six audited routes: performance 44–63 → 64, accessibility 96 → 100,
+  best practices 96 (unchanged), SEO 100 (unchanged), CLS 0.28–0.435 → 0 on every
+  route. LCP is unchanged (≈ 8 s under mobile throttling, now under 8.2 s on every route;
+  the home route dropped from 10 s). Initial payload 302 KB → 296 KB gzip; total JS
+  1.53 MB → 1.55 MB gzip (wallet chunks, loaded on demand).
+- **Screenshots.** `screenshots/r8-*` captures the full inventory (desktop and mobile,
+  both themes) for comparison with `r0-*`.
+- **Rollout.** Not exercised from this workspace: no preview/staging deployment or
+  release history is reachable here. Before release, record the current production
+  build, deploy via the existing Docker/Coolify stack, smoke-test the inventory routes
+  and watch existing error reporting; roll back by redeploying the recorded build.

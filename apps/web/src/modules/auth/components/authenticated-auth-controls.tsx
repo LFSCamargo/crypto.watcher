@@ -44,18 +44,22 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Account menu for ${displayName}`}
           className="flex items-center gap-2 rounded-full border border-foreground/10 bg-background/60 py-1 pl-1 pr-1.5 transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
         >
           <Avatar className="h-8 w-8">
-            {user.avatarUrl ? (
-              <AvatarImage src={user.avatarUrl} alt={displayName} />
-            ) : null}
-            <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
+            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
+            <AvatarFallback
+              aria-hidden
+              className="bg-primary text-xs font-bold text-primary-foreground"
+            >
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-[120px] truncate text-sm font-semibold sm:inline">
+          <span className="sr-only">Account menu for {displayName}</span>
+          <span
+            aria-hidden
+            className="hidden max-w-[120px] truncate text-sm font-semibold sm:inline"
+          >
             {displayName}
           </span>
         </button>

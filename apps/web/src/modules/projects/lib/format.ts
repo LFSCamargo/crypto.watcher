@@ -1,6 +1,6 @@
 import type { ProjectState } from '../../../lib/api/types'
 
-export type ProjectStateTone = 'info' | 'warning' | 'success'
+type ProjectStateTone = 'info' | 'warning' | 'success'
 
 interface ProjectStateMeta {
   label: string

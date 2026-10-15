@@ -403,6 +403,11 @@ interface SessionState {
   viewports. `e2e/fixtures.ts` answers every `/api/*` call from in-memory state and
   aborts all cross-origin requests, so journeys never depend on the database,
   public RPCs or market APIs. CI runs them in the `apps/web` job. `[MVP]`
+- Inventory regression: `e2e/regression.spec.ts` checks every inventory route in
+  both themes for horizontal overflow at 360/768/1440 px and 200% zoom, a single
+  `h1`, axe-core WCAG 2.1 AA violations (`@axe-core/playwright`), keyboard focus
+  visibility, and reduced transparency/motion fallbacks. Runs in the desktop project
+  only. `[MVP]`
 - Bundle report: `pnpm --filter web exec tsx scripts/report-bundle-size.ts` after a
   build prints raw/gzip sizes per chunk and the initial payload. `[MVP]`
 - Lighthouse: `pnpm --filter web lighthouse` builds the app, serves `vite preview`,

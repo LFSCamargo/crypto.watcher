@@ -51,12 +51,15 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
           <button
             type="button"
             onClick={onOpenSearch}
-            aria-label="Search projects"
+            aria-keyshortcuts="Meta+K Control+K"
             className="flex h-10 w-full items-center gap-2 rounded-full border border-foreground/10 bg-background/60 px-4 pr-2.5 text-sm text-muted-foreground transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <RiSearchLine className="h-4 w-4" aria-hidden />
             <span className="flex-1 text-left">Search projects…</span>
-            <kbd className="inline-flex items-center gap-0.5 rounded-md border border-border bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+            <kbd
+              aria-hidden
+              className="inline-flex items-center gap-0.5 rounded-md border border-border bg-secondary px-2 py-0.5 text-[10px] font-semibold"
+            >
               ⌘K
             </kbd>
           </button>

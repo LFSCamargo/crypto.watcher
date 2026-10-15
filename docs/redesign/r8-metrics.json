@@ -1,0 +1,108 @@
+{
+  "stage": "r8",
+  "capturedAt": "2026-10-15",
+  "environment": "local vite preview, Lighthouse 12 default mobile throttling, Node 22.13",
+  "lighthouse": {
+    "app-reference-bitcoin": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8123,
+      "tbtMs": 28,
+      "cls": 0.0
+    },
+    "blog-launch-story": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8042,
+      "tbtMs": 34,
+      "cls": 0.0
+    },
+    "blog": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8029,
+      "tbtMs": 22,
+      "cls": 0.0
+    },
+    "docs-faq": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8033,
+      "tbtMs": 21,
+      "cls": 0.0
+    },
+    "docs": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 8183,
+      "tbtMs": 24,
+      "cls": 0.0
+    },
+    "home": {
+      "performance": 64,
+      "accessibility": 100,
+      "bestPractices": 96,
+      "seo": 100,
+      "lcpMs": 7955,
+      "tbtMs": 35,
+      "cls": 0.0
+    }
+  },
+  "bundle": {
+    "jsGzipBytes": 1547543,
+    "cssGzipBytes": 14395,
+    "initialGzipBytes": 295915,
+    "largest": [
+      {
+        "file": "web3.js",
+        "bytes": 2461195,
+        "gzipBytes": 473927
+      },
+      {
+        "file": "metamask-sdk.js",
+        "bytes": 554655,
+        "gzipBytes": 169951
+      },
+      {
+        "file": "vendor-react.js",
+        "bytes": 434248,
+        "gzipBytes": 135901
+      },
+      {
+        "file": "core.js",
+        "bytes": 485082,
+        "gzipBytes": 133131
+      },
+      {
+        "file": "index.js",
+        "bytes": 275111,
+        "gzipBytes": 113348
+      },
+      {
+        "file": "index.es.js",
+        "bytes": 395162,
+        "gzipBytes": 113307
+      },
+      {
+        "file": "index.js",
+        "bytes": 355531,
+        "gzipBytes": 90233
+      },
+      {
+        "file": "motion.js",
+        "bytes": 129229,
+        "gzipBytes": 42910
+      }
+    ]
+  }
+}
