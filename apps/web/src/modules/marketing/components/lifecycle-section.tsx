@@ -3,7 +3,8 @@ import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { RiPauseLine, RiPlayLine } from '@remixicon/react'
 import { Button, type Tone } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
-import { lifecycleSteps } from '../lib/lifecycle-steps'
+import { lifecycleSteps, lifecycleToneColor } from '../lib/lifecycle-steps'
+import { LifecycleTrack } from './lifecycle-track'
 import { SectionGlow } from './section-glow'
 import { SectionHeading } from './section-heading'
 
@@ -46,7 +47,6 @@ export function LifecycleSection() {
   }, [touring, active])
 
   const step = lifecycleSteps[active] ?? lifecycleSteps[0]!
-  const progress = `${(active / LAST) * 80}%`
 
   return (
     <section
@@ -87,24 +87,11 @@ export function LifecycleSection() {
           </div>
 
           <div className="relative">
-            <div
-              aria-hidden
-              className="absolute left-[10%] right-[10%] top-6 hidden h-1 rounded-full bg-border md:block"
-            />
-            <div
-              aria-hidden
-              className="absolute left-[10%] top-6 hidden h-1 rounded-full bg-gradient-to-r from-tone-amber via-tone-violet to-tone-teal transition-[width] duration-700 ease-glass md:block"
-              style={{ width: progress }}
-            />
-            <span
-              aria-hidden
-              className="absolute top-[0.85rem] z-10 hidden h-[2.3rem] w-[2.3rem] -translate-x-1/2 rounded-full bg-tone-amber/25 blur-md transition-[left] duration-700 ease-glass md:block"
-              style={{ left: `calc(10% + ${active * 20}%)` }}
-            />
-
+            <div aria-hidden className="hidden aspect-[20/3] md:block" />
+            <LifecycleTrack active={active} />
             <ol
               aria-label="Review lifecycle"
-              className="relative grid gap-3 md:grid-cols-5"
+              className="relative z-10 grid gap-3 md:absolute md:inset-0 md:grid-cols-5 md:gap-2"
             >
               {lifecycleSteps.map((item, index) => {
                 const reached = index <= active
@@ -113,16 +100,50 @@ export function LifecycleSection() {
                   <li
                     key={item.title}
                     className={cn(
-                      'relative flex items-center gap-4 rounded-2xl p-3 transition-colors md:flex-col md:gap-3 md:text-center',
+                      'relative flex items-center gap-4 rounded-2xl p-3 transition-colors md:h-full md:flex-col md:justify-end md:gap-2 md:bg-transparent md:p-2 md:shadow-none md:ring-0 md:hover:bg-transparent',
                       current
                         ? 'bg-background shadow-sm ring-1 ring-border'
                         : 'hover:bg-background/60',
                     )}
                   >
+                    {index < LAST ? (
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 32 64"
+                        preserveAspectRatio="none"
+                        className="absolute left-5 top-12 h-[calc(100%-1.25rem)] w-8 overflow-visible md:hidden"
+                      >
+                        <path
+                          d="M16 0 C 16 24, 28 24, 16 64"
+                          fill="none"
+                          stroke={
+                            index < active
+                              ? lifecycleToneColor(item.tone)
+                              : 'hsl(var(--border))'
+                          }
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                        <path
+                          d="M11 52 L16 62 L21 52"
+                          fill="none"
+                          stroke={
+                            index < active
+                              ? lifecycleToneColor(item.tone)
+                              : 'hsl(var(--muted-foreground))'
+                          }
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    ) : null}
                     <span
                       aria-hidden
                       className={cn(
-                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-500 ease-glass',
+                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-500 ease-glass md:hidden',
                         reached
                           ? nodeTone[item.tone]
                           : 'bg-background text-muted-foreground ring-border',
@@ -131,7 +152,13 @@ export function LifecycleSection() {
                     >
                       {index + 1}
                     </span>
-                    <h3 className="font-bold">
+                    <h3
+                      className={cn(
+                        'font-bold md:w-full md:rounded-2xl md:px-2 md:py-2 md:text-center',
+                        current &&
+                          'md:bg-background md:shadow-sm md:ring-1 md:ring-border',
+                      )}
+                    >
                       <button
                         type="button"
                         aria-current={current ? 'step' : undefined}

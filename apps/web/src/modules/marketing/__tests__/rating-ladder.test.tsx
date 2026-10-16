@@ -61,4 +61,17 @@ describe('RatingLadder', () => {
       expect(link.textContent).toMatch(/DeFi/)
     }
   })
+
+  it('opens the radar-style preview when a listed coin is hovered', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<RatingLadder />)
+
+    await user.hover(screen.getByRole('link', { name: 'USDC reference assessment' }))
+
+    expect(await screen.findByRole('heading', { name: 'USDC' })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Reference index' })).toHaveTextContent('97')
+    expect(
+      screen.getByText('Click the coin to open the full assessment'),
+    ).toBeInTheDocument()
+  })
 })

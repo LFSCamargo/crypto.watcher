@@ -1,12 +1,7 @@
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '../../../components/ui/hover-card'
 import { getCuratedProject } from '../../projects/lib/curated-projects'
-import { RadarAssetPreview } from './radar-asset-preview'
+import { AssetPreviewHover } from './asset-preview-hover'
 
 const SWEEP_SECONDS = 6
 const SWEEP_LEAD_DEG = 60
@@ -61,39 +56,31 @@ export function HeroRadar() {
               className="absolute hidden -translate-x-1/2 -translate-y-1/2 md:block"
               style={{ left, top }}
             >
-              <HoverCard openDelay={120} closeDelay={120}>
-                <HoverCardTrigger asChild>
-                  <Link
-                    to={`/app/reference/${asset.slug}`}
-                    className="group pointer-events-auto relative block rounded-full transition-transform duration-300 ease-glass hover:scale-125 focus-visible:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
-                  >
-                    <span
-                      data-orbit-asset
-                      className="flex h-11 w-11 animate-radar-ping items-center justify-center rounded-full border border-foreground/10 bg-background shadow-sm transition-shadow group-hover:shadow-[0_0_0_6px_hsl(var(--primary)/0.3)] motion-reduce:animate-none"
-                      style={ping}
-                    >
-                      <img
-                        src={`/icons/${asset.slug}.png`}
-                        alt=""
-                        width={28}
-                        height={28}
-                        decoding="async"
-                        className="h-7 w-7 rounded-full"
-                      />
-                    </span>
-                    <span className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold text-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                      {name}
-                      <span className="sr-only"> reference assessment</span>
-                    </span>
-                  </Link>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  side="bottom"
-                  className="max-h-[min(34rem,70vh)] w-[22rem] overflow-y-auto"
+              <AssetPreviewHover slug={asset.slug}>
+                <Link
+                  to={`/app/reference/${asset.slug}`}
+                  className="group pointer-events-auto relative block rounded-full transition-transform duration-300 ease-glass hover:scale-125 focus-visible:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                 >
-                  <RadarAssetPreview slug={asset.slug} />
-                </HoverCardContent>
-              </HoverCard>
+                  <span
+                    data-orbit-asset
+                    className="flex h-11 w-11 animate-radar-ping items-center justify-center rounded-full border border-foreground/10 bg-background shadow-sm transition-shadow group-hover:shadow-[0_0_0_6px_hsl(var(--primary)/0.3)] motion-reduce:animate-none"
+                    style={ping}
+                  >
+                    <img
+                      src={`/icons/${asset.slug}.png`}
+                      alt=""
+                      width={28}
+                      height={28}
+                      decoding="async"
+                      className="h-7 w-7 rounded-full"
+                    />
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 top-full mt-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold text-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                    {name}
+                    <span className="sr-only"> reference assessment</span>
+                  </span>
+                </Link>
+              </AssetPreviewHover>
             </li>
           )
         })}
