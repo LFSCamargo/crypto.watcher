@@ -110,6 +110,38 @@ describe('RadarAssetPreview', () => {
     expect(await screen.findByText('No recorded exploits')).toBeInTheDocument()
   })
 
+  it('draws network revenue and fee charts for chain assets such as Solana', async () => {
+    const now = Date.now()
+    mockApi({
+      'GET /protocol-metrics/projects/solana': [
+        200,
+        snapshot({
+          slug: 'solana',
+          entityType: 'chain',
+          name: 'Solana',
+          category: 'Chain',
+          chains: ['Solana'],
+          revenue30d: 165_000_000,
+          revenueHistory: [
+            { timestamp: now - 86_400_000, value: 4_700_000 },
+            { timestamp: now, value: 5_100_000 },
+          ],
+          fees30d: 400_000_000,
+          feesHistory: [
+            { timestamp: now - 86_400_000, value: 11_000_000 },
+            { timestamp: now, value: 12_000_000 },
+          ],
+        }),
+      ],
+    })
+    renderWithProviders(<RadarAssetPreview slug="solana" />)
+
+    const live = await screen.findByRole('group', { name: 'Live protocol data' })
+    expect(within(live).getByText('Network revenue (30d)')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Network revenue' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Network fees' })).toBeInTheDocument()
+  })
+
   it('keeps the reference grade when live data is unavailable', async () => {
     mockApi({ 'GET /protocol-metrics/projects/uniswap': [404, {}] })
     renderWithProviders(<RadarAssetPreview slug="uniswap" />)

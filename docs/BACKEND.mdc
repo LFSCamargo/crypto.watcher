@@ -146,7 +146,7 @@ apps/
 - Protocol snapshots include TVL trends/history (365-day retention), fees/revenue/DEX volume charts, chain/token breakdown, mcap, exploit incidents, and an **on-chain valuation model** (`protocol-valuation.ts`, methodology `CW-Valuation-v1`). `valuation.compositeBreakdown` lists each composite component that applies to the entity type (`fundamentals`, `security`, `governance`, `value`, `feeSustainability`) with its 0–100 score (or null) and effective share; scored shares sum to 1 and `Σ score × share = compositeScore`.
 - Valuation computes annualized fees/revenue, revenue capture rate, revenue growth (30d/1y), fee sustainability, governance-quality proxy (chain diversification), security score, composite score, and P/S — using `lib/safe-math/` guards (no divide-by-zero).
 - **Stablecoin** snapshots (USDC, USDT) use DeFi Llama stablecoin supply data: circulating supply history and supply-by-chain breakdown — not protocol TVL.
-- Chain snapshots include TVL trends/history plus network-wide DEX volume and fees paid (overview endpoints).
+- Chain snapshots include TVL trends/history plus network-wide DEX volume, fees paid, and revenue captured (`/overview/fees/{chain}?dataType=dailyRevenue`). Overview calls set `excludeTotalDataChartBreakdown=true` so chart history still arrives without the protocol-level breakdown payload. Snapshot version `7` invalidates caches that omitted chain revenue.
 - Ordered fallback targets per slug (`metrics-target.ts`); explicit unavailable list for assets with no feed.
 - Cached in PostgreSQL (`protocol_metrics_cache`) for 3 hours with in-memory L1 cache and stale DB fallback.
 

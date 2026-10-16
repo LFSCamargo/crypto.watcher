@@ -78,7 +78,7 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── marketing/           # Public landing page: hero (radar + animated report preview), methodology, lifecycle, references, governance, resources, CTA [MVP]
     │   │   │   ├── components/hero-radar.tsx # Radar sweep; asset chips ping as it passes and link to reference pages
-    │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, composite breakdown
+    │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, revenue/fee sparklines, composite breakdown
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
     │   │   │   ├── components/asset-ticker.tsx # Mouse-only marquee of reference grades (aria-hidden)
     │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
@@ -167,7 +167,7 @@ apps/
 - **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts with **1W/1M/3M/1Y** ranges, chain + token bar breakdowns, **on-chain valuation model**, security incidents).
 - **On-chain valuation:** always surfaced via `ProtocolValuationSection` — shows computed metrics when DeFi Llama fee/revenue data exists, or an explanatory empty state (stablecoin, missing fees, missing revenue).
 - **Stablecoin** projects (USDC, USDT): circulating supply, supply history, and supply-by-chain bar chart.
-- **Chain** projects (L1/L2): TVL plus network-wide DEX volume and fees paid — DeFi activity locked on the network, not a single protocol entity.
+- **Chain** projects (L1/L2): TVL plus network-wide DEX volume, fees paid, and revenue captured (validator/protocol share of fees — not a dapp P&L). Charts use **1W/1M/3M/1Y** ranges when DeFi Llama indexes the series.
 - Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
 
 ### blog `[MVP]`

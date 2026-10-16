@@ -73,9 +73,11 @@ export function ProtocolValuationPanel({
 
       {isChain ? (
         <p className="mb-3 text-xs text-muted-foreground">
-          Network-wide DeFi fees paid on this chain — not a single protocol&apos;s
-          revenue. Revenue capture, P/S, and governance scores do not apply at the chain
-          level.
+          Network-wide fees paid on this chain
+          {valuation.revenueAnnualizedUsd != null
+            ? " and the share captured as revenue (validators / the protocol). This is not a single dapp's P&L."
+            : " — not a single protocol's revenue."}{' '}
+          P/S and governance scores do not apply at the chain level.
         </p>
       ) : null}
 
@@ -84,33 +86,32 @@ export function ProtocolValuationPanel({
           label={isChain ? 'Network fees (annualized)' : 'Fees (annualized)'}
           value={formatCompactUsd(valuation.feesAnnualizedUsd)}
         />
-        {!isChain ? (
+        {valuation.revenueAnnualizedUsd != null ? (
           <>
             <MetricRow
-              label="Revenue (annualized)"
+              label={isChain ? 'Network revenue (annualized)' : 'Revenue (annualized)'}
               value={formatCompactUsd(valuation.revenueAnnualizedUsd)}
             />
             <MetricRow
-              label="Revenue capture"
+              label={isChain ? 'Network revenue capture' : 'Revenue capture'}
               value={formatPercent(valuation.revenueCaptureRate)}
             />
             <MetricRow
-              label="Revenue growth (30d)"
+              label={isChain ? 'Network revenue growth (30d)' : 'Revenue growth (30d)'}
               value={formatPercentChange(valuation.revenueGrowth30d)}
             />
             <MetricRow
-              label="Revenue growth (1y)"
+              label={isChain ? 'Network revenue growth (1y)' : 'Revenue growth (1y)'}
               value={formatPercentChange(valuation.revenueGrowth1y)}
             />
             <MetricRow
               label="Revenue / TVL"
               value={formatPercent(valuation.revenueToTvlRatio)}
             />
-            <MetricRow
-              label="P/S ratio"
-              value={formatRatio(valuation.priceToSalesRatio)}
-            />
           </>
+        ) : null}
+        {!isChain ? (
+          <MetricRow label="P/S ratio" value={formatRatio(valuation.priceToSalesRatio)} />
         ) : null}
         <MetricRow label="Fee / TVL" value={formatPercent(valuation.feeToTvlRatio)} />
       </div>

@@ -1,6 +1,6 @@
 import type { ProtocolValuation } from './protocol-valuation.types'
 
-export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 6
+export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 7
 
 export type MetricsEntityType = 'protocol' | 'chain' | 'stablecoin'
 

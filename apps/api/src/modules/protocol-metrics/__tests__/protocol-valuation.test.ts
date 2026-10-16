@@ -101,6 +101,26 @@ describe('computeProtocolValuation', () => {
     expect(valuation!.governanceQualityScore).toBeNull()
   })
 
+  it('uses chain network revenue when DeFi Llama reports it', () => {
+    const valuation = computeProtocolValuation({
+      entityType: 'chain',
+      tvl: 8_200_000_000,
+      mcap: null,
+      fees30d: 400_000_000,
+      revenue30d: 165_000_000,
+      feesHistory: buildDailyHistory(30, 13_000_000),
+      revenueHistory: buildDailyHistory(30, 5_500_000),
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    expect(valuation!.revenueAnnualizedUsd).toBeGreaterThan(0)
+    expect(valuation!.revenueCaptureRate).toBeGreaterThan(0)
+    expect(valuation!.revenueCaptureRate).toBeLessThan(100)
+  })
+
   it('explains how each component compounds into the composite', () => {
     const now = Date.now()
     const valuation = computeProtocolValuation({

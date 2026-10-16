@@ -87,7 +87,10 @@ export function HeroRadar() {
                     </span>
                   </Link>
                 </HoverCardTrigger>
-                <HoverCardContent side="bottom" className="w-[22rem]">
+                <HoverCardContent
+                  side="bottom"
+                  className="max-h-[min(34rem,70vh)] w-[22rem] overflow-y-auto"
+                >
                   <RadarAssetPreview slug={asset.slug} />
                 </HoverCardContent>
               </HoverCard>

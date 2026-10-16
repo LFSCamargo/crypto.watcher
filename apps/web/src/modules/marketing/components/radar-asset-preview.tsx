@@ -7,6 +7,7 @@ import {
   getProjectReviewProfile,
   getVerdictLabel,
 } from '../../projects/lib/curated-project-reviews'
+import { MetricHistoryChart } from '../../protocol-metrics/components/metric-history-chart'
 import { useProtocolMetrics } from '../../protocol-metrics/hooks/use-protocol-metrics'
 import {
   formatCompactUsd,
@@ -34,7 +35,10 @@ function LiveMetrics({ metrics }: { metrics: ProtocolMetricsSnapshot }) {
     },
     { label: 'Fees (30d)', value: metrics.fees30d },
     { label: 'DEX volume (30d)', value: metrics.dexVolume30d },
-    { label: 'Revenue (30d)', value: metrics.revenue30d },
+    {
+      label: metrics.entityType === 'chain' ? 'Network revenue (30d)' : 'Revenue (30d)',
+      value: metrics.revenue30d,
+    },
   ].filter((fact) => fact.value != null)
 
   return (
@@ -54,6 +58,20 @@ function LiveMetrics({ metrics }: { metrics: ProtocolMetricsSnapshot }) {
           </div>
         ))}
       </dl>
+      {metrics.revenueHistory.length >= 2 ? (
+        <MetricHistoryChart
+          title={metrics.entityType === 'chain' ? 'Network revenue' : 'Revenue'}
+          history={metrics.revenueHistory}
+          variant="sparkline"
+        />
+      ) : null}
+      {metrics.feesHistory.length >= 2 ? (
+        <MetricHistoryChart
+          title={metrics.entityType === 'chain' ? 'Network fees' : 'Fees'}
+          history={metrics.feesHistory}
+          variant="sparkline"
+        />
+      ) : null}
       <p
         className={cn(
           'flex items-center gap-1.5 text-xs font-semibold',

@@ -120,6 +120,44 @@ describe('buildChainMetricsSnapshot', () => {
     expect(snapshot?.fees24h).toBe(7_500_000)
     expect(snapshot?.chainBreakdown).toEqual([])
   })
+
+  it('includes network revenue totals and history for chains', () => {
+    const now = Math.floor(Date.now() / 1000)
+    const snapshot = buildChainMetricsSnapshot(
+      'solana',
+      'Solana',
+      [
+        { date: now - 86_400, tvl: 8_000_000_000 },
+        { date: now, tvl: 8_200_000_000 },
+      ],
+      null,
+      {
+        total24h: 12_000_000,
+        total7d: 80_000_000,
+        total30d: 400_000_000,
+        totalDataChart: [
+          [now - 86_400, 11_000_000],
+          [now, 12_000_000],
+        ],
+      },
+      {
+        total24h: 5_000_000,
+        total7d: 32_000_000,
+        total30d: 165_000_000,
+        totalDataChart: [
+          [now - 86_400, 4_700_000],
+          [now, 5_000_000],
+        ],
+      },
+    )
+
+    expect(snapshot?.revenue24h).toBe(5_000_000)
+    expect(snapshot?.revenue7d).toBe(32_000_000)
+    expect(snapshot?.revenue30d).toBe(165_000_000)
+    expect(snapshot?.revenueHistory).toHaveLength(2)
+    expect(snapshot?.revenueHistory.at(-1)?.value).toBe(5_000_000)
+    expect(snapshot?.valuation?.revenueAnnualizedUsd).toBeGreaterThan(0)
+  })
 })
 
 describe('ProtocolMetricsCache', () => {
@@ -182,7 +220,7 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
     )
 
     service['memory'].set(
-      'protocol-metrics:v6:aave',
+      'protocol-metrics:v7:aave',
       cached!,
       PROTOCOL_METRICS_CACHE_TTL_MS,
     )
@@ -256,16 +294,30 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
         status: 200,
         json: async () => ({ total24h: 7_500_000 }),
       })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ total24h: 5_100_000, totalDataChart: [[now, 5_100_000]] }),
+      })
     const repository = createRepositoryMock()
     const service = new ProtocolMetricsService(fetchImpl, repository)
 
     const snapshot = await service.getProjectProtocolMetrics('ethereum')
 
-    expect(fetchImpl).toHaveBeenCalledTimes(3)
+    expect(fetchImpl).toHaveBeenCalledTimes(4)
     expect(snapshot.entityType).toBe('chain')
     expect(snapshot.tvl).toBe(39_000_000_000)
     expect(snapshot.dexVolume24h).toBe(880_000_000)
     expect(snapshot.fees24h).toBe(7_500_000)
+    expect(snapshot.revenue24h).toBe(5_100_000)
+    expect(fetchImpl.mock.calls.map(([url]) => String(url))).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('/overview/fees/Ethereum?'),
+        expect.stringContaining('dataType=dailyFees'),
+        expect.stringContaining('dataType=dailyRevenue'),
+        expect.stringContaining('excludeTotalDataChartBreakdown=true'),
+      ]),
+    )
     expect(repository.upsert).toHaveBeenCalledOnce()
   })
 
