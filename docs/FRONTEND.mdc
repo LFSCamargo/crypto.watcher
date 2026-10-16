@@ -47,7 +47,8 @@ apps/
     │   ├── components/
     │   │   ├── layout/              # Shell pieces [MVP]
     │   │   │   ├── navigation.ts    # Primary/resource/footer link registry (single source)
-    │   │   │   ├── app-header.tsx   # Glass header: Primary nav, Resources menu, search, auth
+    │   │   │   ├── app-header.tsx   # Floating glass pill: Primary nav, Resources menu, search, auth
+    │   │   │   ├── use-compact-header.ts # Pill state: compact on scroll, expands on hover/click/top
     │   │   │   ├── mobile-navigation.tsx # Fixed bottom bar + "Menu" sheet (resources, account)
     │   │   │   ├── app-footer.tsx   # Link groups + request CTA + disclaimer
     │   │   │   ├── footer-link-group.tsx
@@ -74,7 +75,9 @@ apps/
     │   │   │   ├── store.ts         # Zustand slice
     │   │   │   ├── routes.tsx
     │   │   │   └── __tests__/
-    │   │   ├── marketing/           # Public landing page: hero, report preview, methodology, lifecycle, references, governance, resources, CTA [MVP]
+    │   │   ├── marketing/           # Public landing page: hero (radar + animated report preview), methodology, lifecycle, references, governance, resources, CTA [MVP]
+    │   │   │   ├── components/hero-radar.tsx # Decorative radar sweep; asset chips ping as it passes
+    │   │   │   └── hooks/use-count-up.ts # Eased score count-up (instant under reduced motion)
     │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── blog/                # News & launch articles (MD)     [MVP]
     │   │   │   ├── content/         # Markdown article sources

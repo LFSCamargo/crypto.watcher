@@ -99,6 +99,6 @@ test.describe('dark theme', () => {
   test('applies the dark class and keeps the header surface', async ({ page }) => {
     await page.goto('/app')
     await expect(page.locator('html')).toHaveClass(/dark/)
-    await expect(page.getByRole('banner')).toHaveClass(/glass-nav/)
+    await expect(page.getByRole('banner').locator('[data-size]')).toHaveClass(/glass-nav/)
   })
 })

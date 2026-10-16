@@ -8,6 +8,9 @@ import { ThemeToggle } from '../theme/theme-toggle'
 import { Button } from '../ui/button'
 import { primaryNavItems } from './navigation'
 import { ResourcesMenu } from './resources-menu'
+import { useCompactHeader } from './use-compact-header'
+
+const pillMotion = 'duration-500 ease-glass motion-reduce:transition-none'
 
 interface AppHeaderProps {
   onOpenSearch: () => void
@@ -15,18 +18,39 @@ interface AppHeaderProps {
 
 export function AppHeader({ onOpenSearch }: AppHeaderProps) {
   const isSignedIn = useSession((state) => Boolean(state.user))
+  const { compact, expand, onPointerEnter, onPointerLeave } = useCompactHeader()
 
   return (
-    <header className="glass-nav sticky top-0 z-40">
-      <div className="container-wide flex h-16 items-center gap-3">
+    <header className="pointer-events-none sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <div
+        data-size={compact ? 'compact' : 'expanded'}
+        onClick={compact ? expand : undefined}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        className={cn(
+          'glass-nav glass-pill pointer-events-auto mx-auto flex items-center rounded-full transition-[max-width,height,padding,gap]',
+          pillMotion,
+          compact ? 'h-12 max-w-4xl gap-2 px-2' : 'h-16 max-w-7xl gap-3 px-3 sm:px-5',
+        )}
+      >
         <Link
           to="/"
           className="shrink-0 rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Logo size="sm" wordmarkClassName="hidden sm:inline" />
+          <Logo
+            size="sm"
+            wordmarkClassName={cn(
+              'hidden overflow-hidden whitespace-nowrap transition-[max-width,opacity] sm:inline-block',
+              pillMotion,
+              compact ? 'max-w-0 opacity-0' : 'max-w-[14rem] opacity-100',
+            )}
+          />
         </Link>
 
-        <nav aria-label="Primary" className="ml-2 hidden items-center gap-1 lg:flex">
+        <nav
+          aria-label="Primary"
+          className={cn('hidden items-center gap-1 lg:flex', !compact && 'ml-2')}
+        >
           {primaryNavItems.map((item) => (
             <NavLink
               key={item.href}
@@ -47,18 +71,40 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
           <ResourcesMenu />
         </nav>
 
-        <div className="ml-auto hidden flex-1 justify-end md:flex md:max-w-xs xl:max-w-sm">
+        <div
+          className={cn(
+            'ml-auto hidden flex-1 justify-end transition-[max-width] md:flex',
+            pillMotion,
+            compact ? 'md:max-w-10' : 'md:max-w-xs xl:max-w-sm',
+          )}
+        >
           <button
             type="button"
             onClick={onOpenSearch}
             aria-keyshortcuts="Meta+K Control+K"
-            className="flex h-10 w-full items-center gap-2 rounded-full border border-foreground/10 bg-background/60 px-4 pr-2.5 text-sm text-muted-foreground transition-colors hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn(
+              'flex h-10 w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-full border border-foreground/10 bg-background/60 text-sm text-muted-foreground transition-[padding,border-color] hover:border-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              pillMotion,
+              compact ? 'px-3' : 'px-4 pr-2.5',
+            )}
           >
-            <RiSearchLine className="h-4 w-4" aria-hidden />
-            <span className="flex-1 text-left">Search projects…</span>
+            <RiSearchLine className="h-4 w-4 shrink-0" aria-hidden />
+            <span
+              className={cn(
+                'flex-1 text-left transition-opacity',
+                pillMotion,
+                compact && 'opacity-0',
+              )}
+            >
+              Search projects…
+            </span>
             <kbd
               aria-hidden
-              className="inline-flex items-center gap-0.5 rounded-md border border-border bg-secondary px-2 py-0.5 text-[10px] font-semibold"
+              className={cn(
+                'inline-flex items-center gap-0.5 rounded-md border border-border bg-secondary px-2 py-0.5 text-[10px] font-semibold transition-opacity',
+                pillMotion,
+                compact && 'opacity-0',
+              )}
             >
               ⌘K
             </kbd>
@@ -81,7 +127,7 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
               asChild
               variant="outline"
               size="sm"
-              className="hidden gap-1 xl:inline-flex"
+              className={cn('hidden gap-1', !compact && 'xl:inline-flex')}
             >
               <Link to="/app/analysis-request">
                 <RiAddLine aria-hidden />

@@ -3,6 +3,7 @@ import { RiArrowRightLine, RiCheckLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
 import { useSession } from '../../../store/session'
 import { ProjectSearch } from '../../projects/components/project-search'
+import { HeroRadar } from './hero-radar'
 import { ReportPreviewCard } from './report-preview-card'
 
 const trustPoints = [
@@ -29,7 +30,11 @@ export function HeroSection() {
 
           <h1 id="hero-title" className="heading-1 mb-5 text-balance">
             Is this crypto project{' '}
-            <span className="rounded-xl bg-primary px-3 text-primary-foreground">
+            <span className="relative isolate inline-block px-3 text-primary-foreground">
+              <span
+                aria-hidden
+                className="absolute inset-0 -z-10 origin-left animate-highlight-draw rounded-xl bg-primary motion-reduce:animate-none"
+              />
               safe
             </span>
             ?
@@ -78,8 +83,11 @@ export function HeroSection() {
           </ul>
         </div>
 
-        <div className="flex justify-center lg:justify-end">
-          <ReportPreviewCard />
+        <div className="relative flex justify-center lg:justify-end">
+          <div className="relative w-full max-w-md">
+            <HeroRadar />
+            <ReportPreviewCard />
+          </div>
         </div>
       </div>
     </section>
