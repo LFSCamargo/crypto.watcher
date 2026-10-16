@@ -61,6 +61,39 @@ describe('LifecycleSection', () => {
     expect(screen.getByRole('button', { name: 'Play tour' })).toBeInTheDocument()
   })
 
+  it('draws the active step farther along a vector track', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<LifecycleSection />)
+    const track = container.querySelector('[data-lifecycle-track]')
+    expect(track?.tagName.toLowerCase()).toBe('svg')
+    expect(track?.querySelectorAll('[data-station]')).toHaveLength(5)
+
+    const progress = track?.querySelector('[data-track-progress]')
+    const start = Number(progress?.getAttribute('stroke-dashoffset'))
+    const startX = track?.querySelector('[data-track-marker]')?.getAttribute('data-x')
+    expect(start).toBeGreaterThan(0)
+    expect(track?.querySelector('[data-station="0"]')).toHaveAttribute(
+      'data-reached',
+      'true',
+    )
+    expect(track?.querySelector('[data-station="4"]')).toHaveAttribute(
+      'data-reached',
+      'false',
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Score shown' }))
+
+    expect(Number(progress?.getAttribute('stroke-dashoffset'))).toBeLessThan(start)
+    expect(Number(progress?.getAttribute('stroke-dashoffset'))).toBe(0)
+    expect(track?.querySelector('[data-track-marker]')?.getAttribute('data-x')).not.toBe(
+      startX,
+    )
+    expect(track?.querySelector('[data-station="4"]')).toHaveAttribute(
+      'data-reached',
+      'true',
+    )
+  })
+
   it('stops the tour when the reader picks a step', async () => {
     vi.stubGlobal('IntersectionObserver', IntersectingObserver)
     const user = userEvent.setup()

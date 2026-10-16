@@ -16,6 +16,7 @@ import {
   type CuratedProject,
 } from '../../projects/lib/curated-projects'
 import { buildGradeLadder } from '../lib/grade-ladder'
+import { AssetPreviewHover } from './asset-preview-hover'
 
 type Category = CuratedProject['category']
 
@@ -178,31 +179,33 @@ export function RatingLadder() {
               <ul aria-label={`${rung.grade} assets`} className="space-y-1.5">
                 {rung.projects.slice(0, PREVIEW_LIMIT).map((project) => (
                   <li key={project.slug}>
-                    <Link
-                      to={`/app/reference/${project.slug}`}
-                      aria-label={`${project.name} reference assessment`}
-                      className="group flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <ProjectIcon
-                        symbol={project.symbol}
-                        name={project.name}
-                        slug={project.slug}
-                        className="h-9 w-9"
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-semibold">
-                          {project.name}
+                    <AssetPreviewHover slug={project.slug} side="left">
+                      <Link
+                        to={`/app/reference/${project.slug}`}
+                        aria-label={`${project.name} reference assessment`}
+                        className="group flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <ProjectIcon
+                          symbol={project.symbol}
+                          name={project.name}
+                          slug={project.slug}
+                          className="h-9 w-9"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-semibold">
+                            {project.name}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            {project.symbol} · {projectCategories[project.category]}
+                          </span>
                         </span>
-                        <span className="block text-xs text-muted-foreground">
-                          {project.symbol} · {projectCategories[project.category]}
-                        </span>
-                      </span>
-                      <span className="font-bold tabular-nums">{project.score}</span>
-                      <RiArrowRightLine
-                        aria-hidden
-                        className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-                      />
-                    </Link>
+                        <span className="font-bold tabular-nums">{project.score}</span>
+                        <RiArrowRightLine
+                          aria-hidden
+                          className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                        />
+                      </Link>
+                    </AssetPreviewHover>
                   </li>
                 ))}
               </ul>

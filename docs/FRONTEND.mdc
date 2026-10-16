@@ -79,10 +79,12 @@ apps/
     │   │   ├── marketing/           # Public landing page: hero (radar + animated report preview), methodology, lifecycle, references, governance, resources, CTA [MVP]
     │   │   │   ├── components/hero-radar.tsx # Radar sweep; asset chips ping as it passes and link to reference pages
     │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, revenue/fee sparklines, composite breakdown
+    │   │   │   ├── components/asset-preview-hover.tsx # Shared hover card used by the radar, ticker, and rating ladder
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
-    │   │   │   ├── components/asset-ticker.tsx # Mouse-only marquee of reference grades (aria-hidden)
+    │   │   │   ├── components/asset-ticker.tsx # Mouse-only marquee; hovering a coin opens the radar preview (aria-hidden)
     │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
-    │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA) with category filter and per-grade asset list
+    │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA); listed coins open the radar preview
+    │   │   │   ├── components/lifecycle-track.tsx # SVG review timeline: cubic route, stations, traveling marker
     │   │   │   ├── components/reveal.tsx, spotlight-card.tsx # Scroll reveal; pointer-following card glow
     │   │   │   ├── lib/             # lifecycle-steps.ts (tour copy), grade-ladder.ts (grade buckets)
     │   │   │   └── hooks/use-count-up.ts # Eased score count-up (instant under reduced motion)
