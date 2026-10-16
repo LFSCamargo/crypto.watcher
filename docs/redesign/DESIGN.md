@@ -100,6 +100,13 @@ scroll under a surface (header, mobile nav) uses the denser nav alpha.
   (in review / moderate), `destructive` (failed / elevated risk), `info` (reference
   data). Brand yellow is emphasis only, never a status. Every status chip carries text
   and an icon, not color alone.
+- **Landing palette.** Six tones — amber (brand), coral, violet, sky, teal, pink —
+  each with a base (`--tone-*`, glows and tile fills) and a strong variant
+  (`--tone-*-strong`, text and icons; ≥ 4.6:1 on page, card and tinted tile in both
+  themes). Sections each own two tones: hero amber/sky/violet, methodology teal/violet,
+  lifecycle coral/sky (steps run amber → teal), references amber/pink, governance
+  violet/sky, resources coral/teal, CTA amber/violet/teal. Resource links keep one
+  tone everywhere (menu, landing, mobile).
 - **Chart palette.** `--chart-1..5` tokens; price line uses `--chart-1` with gradient
   fill, comparison series `--chart-2..5`.
 - **Motion.** `--ease-glass: cubic-bezier(.2,.8,.2,1)`, durations 160/240/320 ms;
@@ -118,7 +125,7 @@ Each row is the content hierarchy implementers follow (top to bottom).
 | Screen | Hierarchy | Glass surfaces |
 | --- | --- | --- |
 | Shell | Floating rounded glass pill (`.glass-nav.glass-pill`): Logo · Projects · In Analysis · Governance · Resources · search · theme · account. Scrolling down compacts it (shorter, narrower, wordmark and search text fade, "Request a review" hidden); hovering or clicking expands it, a click keeps it open until the reader scrolls another 48px, and returning to the top restores full size. Width/height/padding animate with `--ease-glass`; reduced motion disables the transition. Mobile: sticky pill (logo, search, menu) + bottom bar (Projects, In Analysis, Governance, Menu) opening a sheet with resources and account actions. | Header, bottom bar, menu sheet, command palette |
-| Landing | Hero (claim with a drawn yellow highlighter on "safe", sub-claim, search, Browse projects / Get started — Request a review when signed in) → illustrative report preview (figcaption "Illustrative example") over a "watcher" radar: a yellow sweep rotates every 6s and asset chips ping as it passes (md+). The preview is audited live: a scan line sweeps the card, the score counts up to 82 (announced once as text), finding bars fill in sequence and the "Report published" badge stamps in. Decorative layers are `aria-hidden`; reduced motion shows the final frame. CSS-only apart from the count-up → methodology pillars → 5-step review lifecycle → 4 reference assessments (labeled, linked to `/app/reference/:slug`, no charts) → CWT governance vs score separation → resources → final CTA. Implemented in R2. | Hero report-preview card, final CTA card |
+| Landing | Hero (claim with a drawn yellow highlighter on "safe", sub-claim, search, Browse projects / Get started — Request a review when signed in) → illustrative report preview (figcaption "Illustrative example") over a "watcher" radar: a yellow sweep rotates every 6s and asset chips ping as it passes (md+); each chip is a link to its reference assessment, scales up and shows its name on hover/focus, and sits on a layer above the card. The hero search is a button that opens the global command palette (no second inline search). The preview is audited live: a scan line sweeps the card, the score counts up to 82 (announced once as text), finding bars fill in sequence and the "Report published" badge stamps in. Decorative layers are `aria-hidden`; reduced motion shows the final frame. CSS-only apart from the count-up → methodology pillars → 5-step review lifecycle → 4 reference assessments (labeled, linked to `/app/reference/:slug`, no charts) → CWT governance vs score separation → resources → final CTA. Implemented in R2. | Hero report-preview card, final CTA card |
 | Auth | Single centered glass panel over the grid; title, one-line purpose, form, inline errors (`role="alert"`), secondary links. Desktop adds a short value column. | Auth panel |
 | Onboarding | 3 steps (how scores work, how to participate, optional wallet) with progress, Back, Skip. | Step panel |
 | Catalog | Title + request CTA → search (URL `?search=`, debounced, history replace) → **Council projects** first (own loading / retry / empty states) → **Reference assessments** (source note, category chips with `aria-pressed`, count, 24-per-page "Show more", empty state with Clear filters). Implemented in R4. | None blurred; cards use `.glass-card-flat` |

@@ -107,6 +107,8 @@ export default defineConfig({
         'src/modules/scoring/components/score-panel.tsx',
         'src/components/ui/form-alert.tsx',
         'src/components/ui/form-field.tsx',
+        'src/components/ui/tone-icon.tsx',
+        'src/modules/marketing/hooks/**/*.ts',
         'src/modules/analysis/components/**/*.tsx',
         'src/modules/analysis/pages/**/*.tsx',
         'src/modules/analysis/lib/**/*.ts',

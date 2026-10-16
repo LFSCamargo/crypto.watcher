@@ -16,6 +16,32 @@ export default {
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
+        tone: {
+          amber: {
+            DEFAULT: 'hsl(var(--tone-amber) / <alpha-value>)',
+            strong: 'hsl(var(--tone-amber-strong) / <alpha-value>)',
+          },
+          coral: {
+            DEFAULT: 'hsl(var(--tone-coral) / <alpha-value>)',
+            strong: 'hsl(var(--tone-coral-strong) / <alpha-value>)',
+          },
+          violet: {
+            DEFAULT: 'hsl(var(--tone-violet) / <alpha-value>)',
+            strong: 'hsl(var(--tone-violet-strong) / <alpha-value>)',
+          },
+          sky: {
+            DEFAULT: 'hsl(var(--tone-sky) / <alpha-value>)',
+            strong: 'hsl(var(--tone-sky-strong) / <alpha-value>)',
+          },
+          teal: {
+            DEFAULT: 'hsl(var(--tone-teal) / <alpha-value>)',
+            strong: 'hsl(var(--tone-teal-strong) / <alpha-value>)',
+          },
+          pink: {
+            DEFAULT: 'hsl(var(--tone-pink) / <alpha-value>)',
+            strong: 'hsl(var(--tone-pink-strong) / <alpha-value>)',
+          },
+        },
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',

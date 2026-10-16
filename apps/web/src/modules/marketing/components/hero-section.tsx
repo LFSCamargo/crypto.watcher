@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { RiArrowRightLine, RiCheckLine } from '@remixicon/react'
+import { RiArrowRightLine, RiCheckLine, RiSearchLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
+import { useCommandPaletteStore } from '../../../store/command-palette'
 import { useSession } from '../../../store/session'
-import { ProjectSearch } from '../../projects/components/project-search'
 import { HeroRadar } from './hero-radar'
 import { ReportPreviewCard } from './report-preview-card'
+import { SectionGlow } from './section-glow'
 
 const trustPoints = [
   'Scores published by a vetted governor council',
@@ -14,12 +15,17 @@ const trustPoints = [
 
 export function HeroSection() {
   const user = useSession((state) => state.user)
+  const openSearch = useCommandPaletteStore((state) => state.setOpen)
 
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(40rem_28rem_at_75%_35%,hsl(var(--primary)/0.28),transparent_70%),radial-gradient(30rem_24rem_at_15%_70%,hsl(var(--chart-2)/0.14),transparent_70%)]"
+      <SectionGlow
+        spots={[
+          { tone: 'amber', at: '75% 35%', size: '40rem 28rem', strength: 0.28 },
+          { tone: 'sky', at: '12% 75%', size: '30rem 24rem', strength: 0.16 },
+          { tone: 'violet', at: '98% 95%', size: '30rem 22rem', strength: 0.18 },
+          { tone: 'pink', at: '45% 5%', size: '26rem 16rem', strength: 0.1 },
+        ]}
       />
       <div className="container-wide relative z-10 grid items-center gap-12 pb-16 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24">
         <div className="flex flex-col items-center text-center animate-in fade-in duration-500 lg:items-start lg:text-left">
@@ -45,9 +51,23 @@ export function HeroSection() {
             reviewers — before you allocate capital.
           </p>
 
-          <div className="w-full max-w-xl">
-            <ProjectSearch placeholder="Try “Bitcoin”, “Uniswap”, “Solana”…" />
-          </div>
+          <button
+            type="button"
+            onClick={() => openSearch(true)}
+            aria-keyshortcuts="Meta+K Control+K"
+            className="flex h-14 w-full max-w-xl items-center gap-3 rounded-full border border-foreground/10 bg-background/80 px-5 text-left text-muted-foreground shadow-sm transition-[border-color,box-shadow] duration-300 ease-glass hover:border-tone-amber/60 hover:shadow-[0_0_0_4px_hsl(var(--tone-amber)/0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+          >
+            <RiSearchLine className="h-5 w-5 shrink-0 text-foreground" aria-hidden />
+            <span className="flex-1 truncate">
+              Search a project — try Bitcoin, Uniswap or Solana
+            </span>
+            <kbd
+              aria-hidden
+              className="hidden rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-semibold sm:inline-flex"
+            >
+              ⌘K
+            </kbd>
+          </button>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button asChild size="lg" className="gap-2">

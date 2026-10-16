@@ -1,7 +1,9 @@
 import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HeroSection } from '../components/hero-section'
 import { renderWithProviders } from '../../../test/render'
+import { useCommandPaletteStore } from '../../../store/command-palette'
 
 function stubReducedMotion(matches: boolean) {
   vi.stubGlobal(
@@ -33,6 +35,7 @@ describe('HeroSection', () => {
   afterEach(() => {
     cleanup()
     vi.unstubAllGlobals()
+    useCommandPaletteStore.setState({ open: false })
   })
 
   it('counts the example score up to its final value', async () => {
@@ -60,11 +63,30 @@ describe('HeroSection', () => {
     )
   })
 
-  it('keeps the orbiting assets decorative', () => {
+  it('links every radar asset to its reference assessment', () => {
     stubReducedMotion(false)
     renderWithProviders(<HeroSection />)
+    const assets = screen.getByRole('list', { name: 'Featured reference assessments' })
+    const links = within(assets).getAllByRole('link')
+    expect(links).toHaveLength(6)
+    expect(within(assets).getByRole('link', { name: /Bitcoin/ })).toHaveAttribute(
+      'href',
+      '/app/reference/bitcoin',
+    )
+    for (const link of links) {
+      expect(link.getAttribute('href')).toMatch(/^\/app\/reference\/[a-z0-9-]+$/)
+      expect(link).toHaveAccessibleName(/reference assessment$/)
+    }
+  })
+
+  it('opens the global search instead of an inline search field', async () => {
+    stubReducedMotion(false)
+    const user = userEvent.setup()
+    renderWithProviders(<HeroSection />)
     const hero = screen.getByRole('region', { name: /Is this crypto project safe/ })
-    expect(within(hero).queryAllByRole('img')).toHaveLength(0)
-    expect(hero.querySelectorAll('[data-orbit-asset]').length).toBeGreaterThan(0)
+    expect(within(hero).queryByRole('combobox')).not.toBeInTheDocument()
+    expect(within(hero).queryByRole('searchbox')).not.toBeInTheDocument()
+    await user.click(within(hero).getByRole('button', { name: /Search a project/ }))
+    expect(useCommandPaletteStore.getState().open).toBe(true)
   })
 })

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { RiCheckLine, RiCloseLine } from '@remixicon/react'
-import { Button, Card } from '../../../components/ui'
+import { RiCheckLine, RiCloseLine, RiGovernmentLine } from '@remixicon/react'
+import { Button, Card, ToneIcon } from '../../../components/ui'
+import { SectionGlow } from './section-glow'
 import { SectionHeading } from './section-heading'
 
 const governs = [
@@ -14,13 +15,20 @@ export function GovernanceSection() {
   return (
     <section
       aria-labelledby="governance-title"
-      className="border-t border-border bg-card/40"
+      className="relative overflow-hidden border-t border-border bg-card/40"
     >
-      <div className="container-wide section-padding grid gap-10 lg:grid-cols-2 lg:items-center">
+      <SectionGlow
+        spots={[
+          { tone: 'violet', at: '85% 50%', size: '40rem 30rem', strength: 0.2 },
+          { tone: 'sky', at: '5% 90%' },
+        ]}
+      />
+      <div className="container-wide section-padding relative grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>
           <SectionHeading
             id="governance-title"
             eyebrow="Protocol governance"
+            tone="violet"
             title="Governed by CWT holders"
             align="start"
             description="CWT holders vote on how the protocol runs — never on individual project scores."
@@ -34,8 +42,15 @@ export function GovernanceSection() {
             </Button>
           </div>
         </div>
-        <Card className="p-6">
-          <h3 className="mb-4 font-bold">What token holders decide</h3>
+        <Card className="relative overflow-hidden p-6 ring-1 ring-tone-violet/25">
+          <span
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-tone-violet via-tone-sky to-tone-teal"
+          />
+          <div className="mb-4 flex items-center gap-3">
+            <ToneIcon icon={RiGovernmentLine} tone="violet" />
+            <h3 className="font-bold">What token holders decide</h3>
+          </div>
           <ul className="space-y-3">
             {governs.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm">

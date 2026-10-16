@@ -49,6 +49,25 @@ test.describe('landing page', () => {
     await expect(page).toHaveURL(/\/app\/reference\/[a-z0-9-]+$/)
   })
 
+  test('radar assets open their reference assessment', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Radar assets are shown from the md breakpoint')
+    await page.goto('/')
+    await page
+      .getByRole('list', { name: 'Featured reference assessments' })
+      .getByRole('link', { name: 'Bitcoin reference assessment' })
+      .click()
+    await expect(page).toHaveURL(/\/app\/reference\/bitcoin$/)
+  })
+
+  test('the hero search opens the global search', async ({ page }) => {
+    await page.goto('/')
+    await page
+      .getByRole('region', { name: /Is this crypto project safe/ })
+      .getByRole('button', { name: /Search a project/ })
+      .click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+  })
+
   test('hero actions are reachable by keyboard', async ({ page }) => {
     await page.goto('/')
     const browse = page

@@ -53,6 +53,18 @@
     --chart-3: 38 92% 50%;
     --chart-4: 280 52% 52%;
     --chart-5: 0 72% 51%;
+    --tone-amber: 45 100% 52%;
+    --tone-amber-strong: 32 95% 30%;
+    --tone-coral: 6 90% 62%;
+    --tone-coral-strong: 4 72% 42%;
+    --tone-violet: 262 80% 64%;
+    --tone-violet-strong: 262 55% 48%;
+    --tone-sky: 200 90% 55%;
+    --tone-sky-strong: 205 85% 34%;
+    --tone-teal: 168 70% 42%;
+    --tone-teal-strong: 172 80% 25%;
+    --tone-pink: 330 85% 64%;
+    --tone-pink-strong: 330 62% 42%;
 
     --radius: 1rem;
 
@@ -120,6 +132,18 @@
     --chart-3: 38 92% 55%;
     --chart-4: 280 60% 70%;
     --chart-5: 0 72% 60%;
+    --tone-amber: 45 100% 55%;
+    --tone-amber-strong: 45 100% 62%;
+    --tone-coral: 6 90% 62%;
+    --tone-coral-strong: 8 95% 72%;
+    --tone-violet: 262 85% 70%;
+    --tone-violet-strong: 262 90% 80%;
+    --tone-sky: 200 90% 60%;
+    --tone-sky-strong: 200 90% 70%;
+    --tone-teal: 168 70% 48%;
+    --tone-teal-strong: 168 70% 60%;
+    --tone-pink: 330 85% 66%;
+    --tone-pink-strong: 330 90% 78%;
 
     --glass-tint: 0 0% 8%;
     --glass-nav-alpha: 0.88;

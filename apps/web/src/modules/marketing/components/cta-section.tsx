@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { RiArrowRightLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
+import { SectionGlow } from './section-glow'
 
 export function CTASection() {
   return (
@@ -8,9 +9,12 @@ export function CTASection() {
       aria-labelledby="cta-title"
       className="relative overflow-hidden border-t border-border"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(36rem_20rem_at_50%_60%,hsl(var(--primary)/0.3),transparent_70%)]"
+      <SectionGlow
+        spots={[
+          { tone: 'amber', at: '50% 60%', size: '36rem 20rem', strength: 0.3 },
+          { tone: 'violet', at: '15% 30%', strength: 0.2 },
+          { tone: 'teal', at: '85% 80%', strength: 0.18 },
+        ]}
       />
       <div className="container-wide section-padding relative">
         <div className="glass-card glass-sheen mx-auto flex max-w-3xl flex-col items-center gap-5 rounded-3xl p-8 text-center md:p-12">

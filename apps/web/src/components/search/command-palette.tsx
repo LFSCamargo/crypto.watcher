@@ -1,18 +1,7 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RiSearchLine } from '@remixicon/react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { useProjects } from '../../modules/projects/hooks/use-projects'
 import { buildProjectSearchResults } from '../../modules/projects/lib/search-projects'
 import { ProjectSearchResults } from '../../modules/projects/components/project-search-results'

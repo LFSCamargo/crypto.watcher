@@ -2,14 +2,24 @@ import { Link } from 'react-router-dom'
 import { Button } from '../../../components/ui'
 import { getTopRatedProjects } from '../../projects/lib/curated-projects'
 import { ReferenceAssessmentLink } from './reference-assessment-link'
+import { SectionGlow } from './section-glow'
 import { SectionHeading } from './section-heading'
 
 export function ReferenceAssessmentsSection() {
   const projects = getTopRatedProjects(4)
 
   return (
-    <section aria-labelledby="references-title" className="border-t border-border">
-      <div className="container-wide section-padding">
+    <section
+      aria-labelledby="references-title"
+      className="relative overflow-hidden border-t border-border"
+    >
+      <SectionGlow
+        spots={[
+          { tone: 'amber', at: '50% 0%', size: '44rem 22rem', strength: 0.2 },
+          { tone: 'pink', at: '95% 90%' },
+        ]}
+      />
+      <div className="container-wide section-padding relative">
         <SectionHeading
           id="references-title"
           eyebrow="Explore"
