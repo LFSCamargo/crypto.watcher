@@ -61,6 +61,7 @@ describe('ProtocolValuationSection', () => {
             revenueToTvlRatio: 0.18,
             feeToTvlRatio: 0.36,
             priceToSalesRatio: 12,
+            compositeBreakdown: [],
             methodologyVersion: 'CW-Valuation-v1',
           },
         }}
@@ -91,6 +92,7 @@ describe('ProtocolValuationSection', () => {
             revenueToTvlRatio: null,
             feeToTvlRatio: 22.5,
             priceToSalesRatio: null,
+            compositeBreakdown: [],
             methodologyVersion: 'CW-Valuation-v1',
           },
         }}
@@ -117,7 +119,9 @@ describe('ProtocolValuationSection', () => {
     )
 
     expect(screen.getByText('On-chain valuation unavailable')).toBeInTheDocument()
-    expect(screen.getByText(/DeFi Llama has not indexed daily fee data/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/DeFi Llama has not indexed daily fee data/i),
+    ).toBeInTheDocument()
   })
 
   it('explains why stablecoins skip the valuation model', () => {
@@ -132,6 +136,8 @@ describe('ProtocolValuationSection', () => {
     )
 
     expect(screen.getByText('Valuation model not applicable')).toBeInTheDocument()
-    expect(screen.getByText(/Stablecoins are assessed on reserve quality/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Stablecoins are assessed on reserve quality/i),
+    ).toBeInTheDocument()
   })
 })

@@ -77,6 +77,7 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── marketing/           # Public landing page: hero (radar + animated report preview), methodology, lifecycle, references, governance, resources, CTA [MVP]
     │   │   │   ├── components/hero-radar.tsx # Radar sweep; asset chips ping as it passes and link to reference pages
+    │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, composite breakdown
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
     │   │   │   └── hooks/use-count-up.ts # Eased score count-up (instant under reduced motion)
     │   │   ├── docs/                # Product docs pages              [MVP]

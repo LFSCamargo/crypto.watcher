@@ -155,13 +155,22 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
           <p className="mb-2 text-sm font-medium">Financial activity</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {data.dexVolume24h != null ? (
-              <StatCell label="DEX volume 24h" value={formatCompactUsd(data.dexVolume24h)} />
+              <StatCell
+                label="DEX volume 24h"
+                value={formatCompactUsd(data.dexVolume24h)}
+              />
             ) : null}
             {data.dexVolume7d != null ? (
-              <StatCell label="DEX volume 7d" value={formatCompactUsd(data.dexVolume7d)} />
+              <StatCell
+                label="DEX volume 7d"
+                value={formatCompactUsd(data.dexVolume7d)}
+              />
             ) : null}
             {data.dexVolume30d != null ? (
-              <StatCell label="DEX volume 30d" value={formatCompactUsd(data.dexVolume30d)} />
+              <StatCell
+                label="DEX volume 30d"
+                value={formatCompactUsd(data.dexVolume30d)}
+              />
             ) : null}
             <StatCell label="Fees 24h" value={formatCompactUsd(data.fees24h)} />
             <StatCell label="Fees 7d" value={formatCompactUsd(data.fees7d)} />

@@ -57,15 +57,25 @@ describe('BreakdownBarChart', () => {
     const bars = container.querySelectorAll('[data-testid="breakdown-bar"]')
     expect(bars.length).toBe(2)
     expect(
-      Number.parseInt(bars[0]?.getAttribute('style')?.match(/height:\s*(\d+)px/)?.[1] ?? '0', 10),
+      Number.parseInt(
+        bars[0]?.getAttribute('style')?.match(/height:\s*(\d+)px/)?.[1] ?? '0',
+        10,
+      ),
     ).toBeGreaterThan(
-      Number.parseInt(bars[1]?.getAttribute('style')?.match(/height:\s*(\d+)px/)?.[1] ?? '0', 10),
+      Number.parseInt(
+        bars[1]?.getAttribute('style')?.match(/height:\s*(\d+)px/)?.[1] ?? '0',
+        10,
+      ),
     )
   })
 
   it('shows empty state when there is no breakdown data', () => {
     renderWithProviders(
-      <BreakdownBarChart title="TVL by chain" items={[]} formatValue={(value) => `$${value}`} />,
+      <BreakdownBarChart
+        title="TVL by chain"
+        items={[]}
+        formatValue={(value) => `$${value}`}
+      />,
     )
 
     expect(screen.getByText('No breakdown data available.')).toBeInTheDocument()

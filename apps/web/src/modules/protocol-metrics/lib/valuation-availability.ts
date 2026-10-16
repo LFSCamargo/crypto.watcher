@@ -36,7 +36,11 @@ export function getValuationAvailability(
     }
   }
 
-  if (snapshot.entityType === 'protocol' && hasFeeSummary && snapshot.revenue30d == null) {
+  if (
+    snapshot.entityType === 'protocol' &&
+    hasFeeSummary &&
+    snapshot.revenue30d == null
+  ) {
     return {
       status: 'unavailable',
       title: 'Revenue data missing',

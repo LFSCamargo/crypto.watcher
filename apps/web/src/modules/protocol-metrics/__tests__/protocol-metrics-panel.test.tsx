@@ -69,6 +69,7 @@ const mockSnapshot = {
     revenueToTvlRatio: 1.4,
     feeToTvlRatio: 2.9,
     priceToSalesRatio: 27.4,
+    compositeBreakdown: [],
     methodologyVersion: 'CW-Valuation-v1',
   },
   cachedAt: '2024-01-01T00:00:00.000Z',

@@ -4,11 +4,7 @@ import {
   resolveMetricsTargets,
   type MetricsTarget,
 } from './metrics-target'
-import {
-  computePercentChange,
-  DAY_MS,
-  findClosestTvl,
-} from './protocol-metrics-changes'
+import { computePercentChange, DAY_MS, findClosestTvl } from './protocol-metrics-changes'
 import {
   aggregateTvlHistoryFromChains,
   extractChainBreakdown,
@@ -21,7 +17,10 @@ import {
   sumChainTvls,
   toMs,
 } from './protocol-metrics-extractors'
-import { PROTOCOL_METRICS_CACHE_TTL_MS, ProtocolMetricsCache } from './protocol-metrics.cache'
+import {
+  PROTOCOL_METRICS_CACHE_TTL_MS,
+  ProtocolMetricsCache,
+} from './protocol-metrics.cache'
 import {
   protocolMetricsRepository,
   type ProtocolMetricsRepository,
@@ -186,7 +185,10 @@ function emptyFinancials() {
   }
 }
 
-function buildTvlTrends(tvlHistory: { timestamp: number; tvl: number }[], cachedAt: Date) {
+function buildTvlTrends(
+  tvlHistory: { timestamp: number; tvl: number }[],
+  cachedAt: Date,
+) {
   const currentTvl = tvlHistory.at(-1)?.tvl ?? 0
   const lastTimestamp = tvlHistory.at(-1)?.timestamp ?? cachedAt.getTime()
 
@@ -409,7 +411,10 @@ export class ProtocolMetricsService {
     return attachValuation(rest)
   }
 
-  private remember(slug: string, snapshot: ProtocolMetricsSnapshot): ProtocolMetricsSnapshot {
+  private remember(
+    slug: string,
+    snapshot: ProtocolMetricsSnapshot,
+  ): ProtocolMetricsSnapshot {
     const enriched = this.enrichSnapshot(snapshot)
     this.memory.set(memoryCacheKey(slug), enriched)
     return enriched

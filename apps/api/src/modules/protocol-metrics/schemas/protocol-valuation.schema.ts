@@ -11,6 +11,19 @@ export const ProtocolValuationSchema = z
     governanceQualityScore: z.number().nullable(),
     securityScore: z.number().nullable(),
     compositeScore: z.number().nullable(),
+    compositeBreakdown: z.array(
+      z.object({
+        component: z.enum([
+          'fundamentals',
+          'security',
+          'governance',
+          'value',
+          'feeSustainability',
+        ]),
+        score: z.number().nullable(),
+        share: z.number(),
+      }),
+    ),
     revenueToTvlRatio: z.number().nullable(),
     feeToTvlRatio: z.number().nullable(),
     priceToSalesRatio: z.number().nullable(),

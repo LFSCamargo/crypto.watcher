@@ -13,6 +13,8 @@ import {
 } from '../../../lib/safe-math/safe-math'
 import type {
   ChainTvlBreakdown,
+  CompositeBreakdownEntry,
+  CompositeComponent,
   ProtocolMetricsSnapshot,
   ProtocolValuation,
   TimeSeriesPoint,
@@ -99,12 +101,18 @@ function computeFeeSustainabilityScore(
 ): number | null {
   const feeYieldScore =
     annualizedFees != null && tvl > 0
-      ? clamp(((safeDivide(annualizedFees, tvl, 0) ?? 0) / TARGET_FEE_YIELD) * 100, 0, 100)
+      ? clamp(
+          ((safeDivide(annualizedFees, tvl, 0) ?? 0) / TARGET_FEE_YIELD) * 100,
+          0,
+          100,
+        )
       : null
 
   const windowStart = referenceTimestamp - WINDOW_30D * DAY_MS
   const dailyFees = feesHistory
-    .filter((point) => point.timestamp >= windowStart && point.timestamp <= referenceTimestamp)
+    .filter(
+      (point) => point.timestamp >= windowStart && point.timestamp <= referenceTimestamp,
+    )
     .map((point) => point.value)
     .filter((value) => value >= 0)
 
@@ -174,6 +182,31 @@ function computeValueScore(
   ])
 }
 
+interface CompositeInput {
+  component: CompositeComponent
+  score: number | null
+  weight: number
+}
+
+function buildCompositeBreakdown(
+  components: CompositeInput[],
+): CompositeBreakdownEntry[] {
+  const applicable = components.filter(({ weight }) => weight > 0)
+  const scoredWeight = applicable.reduce(
+    (sum, { score, weight }) =>
+      score != null && Number.isFinite(score) ? sum + weight : sum,
+    0,
+  )
+  return applicable.map(({ component, score, weight }) => {
+    const finiteScore = score == null ? null : finiteOrNull(score)
+    return {
+      component,
+      score: finiteScore,
+      share: finiteScore != null && scoredWeight > 0 ? weight / scoredWeight : 0,
+    }
+  })
+}
+
 export function computeProtocolValuationFromSnapshot(
   snapshot: ProtocolMetricsSnapshot,
 ): ProtocolValuation | null {
@@ -191,7 +224,10 @@ export function computeProtocolValuationFromSnapshot(
     totalExploitLossUsd: snapshot.totalExploitLossUsd,
   }
 
-  const referenceTimestamp = resolveReferenceTimestamp(input.feesHistory, input.revenueHistory)
+  const referenceTimestamp = resolveReferenceTimestamp(
+    input.feesHistory,
+    input.revenueHistory,
+  )
   const hasFinancials =
     input.fees30d != null ||
     input.revenue30d != null ||
@@ -255,12 +291,16 @@ export function computeProtocolValuationFromSnapshot(
 
   const revenueToTvlRatio =
     revenueAnnualizedUsd != null && input.tvl > 0
-      ? finiteOrNull(safeMultiply(safeDivide(revenueAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0)
+      ? finiteOrNull(
+          safeMultiply(safeDivide(revenueAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0,
+        )
       : null
 
   const feeToTvlRatio =
     feesAnnualizedUsd != null && input.tvl > 0
-      ? finiteOrNull(safeMultiply(safeDivide(feesAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0)
+      ? finiteOrNull(
+          safeMultiply(safeDivide(feesAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0,
+        )
       : null
 
   const priceToSalesRatio =
@@ -279,13 +319,28 @@ export function computeProtocolValuationFromSnapshot(
     priceToSalesRatio,
   )
 
-  const compositeScore = weightedAverage([
-    { value: fundamentalsScore, weight: 0.35 },
-    { value: securityScore, weight: input.entityType === 'protocol' ? 0.3 : 0 },
-    { value: governanceQualityScore, weight: input.entityType === 'stablecoin' ? 0 : 0.15 },
-    { value: valueScore, weight: 0.2 },
-    { value: feeSustainabilityScore, weight: input.entityType === 'chain' ? 0.35 : 0 },
-  ])
+  const compositeComponents: CompositeInput[] = [
+    { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
+    {
+      component: 'security',
+      score: securityScore,
+      weight: input.entityType === 'protocol' ? 0.3 : 0,
+    },
+    {
+      component: 'governance',
+      score: governanceQualityScore,
+      weight: input.entityType === 'stablecoin' ? 0 : 0.15,
+    },
+    { component: 'value', score: valueScore, weight: 0.2 },
+    {
+      component: 'feeSustainability',
+      score: feeSustainabilityScore,
+      weight: input.entityType === 'chain' ? 0.35 : 0,
+    },
+  ]
+  const compositeScore = weightedAverage(
+    compositeComponents.map(({ score, weight }) => ({ value: score, weight })),
+  )
 
   if (
     feesAnnualizedUsd == null &&
@@ -307,6 +362,7 @@ export function computeProtocolValuationFromSnapshot(
     governanceQualityScore,
     securityScore,
     compositeScore,
+    compositeBreakdown: buildCompositeBreakdown(compositeComponents),
     revenueToTvlRatio,
     feeToTvlRatio,
     priceToSalesRatio,
@@ -314,7 +370,9 @@ export function computeProtocolValuationFromSnapshot(
   }
 }
 
-export function hasDisplayableValuation(valuation: ProtocolValuation | null | undefined): boolean {
+export function hasDisplayableValuation(
+  valuation: ProtocolValuation | null | undefined,
+): boolean {
   if (!valuation) return false
   return (
     valuation.compositeScore != null ||

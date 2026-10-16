@@ -79,6 +79,15 @@ describe('HeroSection', () => {
     }
   })
 
+  it('previews protocol details when a radar asset is hovered', async () => {
+    stubReducedMotion(false)
+    const user = userEvent.setup()
+    renderWithProviders(<HeroSection />)
+    await user.hover(screen.getByRole('link', { name: 'Uniswap reference assessment' }))
+    expect(await screen.findByRole('heading', { name: 'Uniswap' })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Reference index' })).toHaveTextContent('93')
+  })
+
   it('opens the global search instead of an inline search field', async () => {
     stubReducedMotion(false)
     const user = userEvent.setup()

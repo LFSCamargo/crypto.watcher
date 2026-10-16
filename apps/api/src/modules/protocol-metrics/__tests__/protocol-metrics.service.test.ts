@@ -25,8 +25,14 @@ describe('buildProtocolMetricsSnapshot', () => {
         url: 'https://aave.com',
         chains: ['Ethereum'],
         tvl: [
-          { date: Math.floor((now - 30 * DAY_MS) / 1000), totalLiquidityUSD: 10_000_000_000 },
-          { date: Math.floor((now - 7 * DAY_MS) / 1000), totalLiquidityUSD: 11_000_000_000 },
+          {
+            date: Math.floor((now - 30 * DAY_MS) / 1000),
+            totalLiquidityUSD: 10_000_000_000,
+          },
+          {
+            date: Math.floor((now - 7 * DAY_MS) / 1000),
+            totalLiquidityUSD: 11_000_000_000,
+          },
           { date: Math.floor((now - DAY_MS) / 1000), totalLiquidityUSD: 12_000_000_000 },
           { date: Math.floor(now / 1000), totalLiquidityUSD: 12_600_000_000 },
         ],
@@ -60,25 +66,21 @@ describe('buildProtocolMetricsSnapshot', () => {
 describe('buildStablecoinMetricsSnapshot', () => {
   it('builds circulating supply metrics with chain breakdown', () => {
     const now = Math.floor(Date.now() / 1000)
-    const snapshot = buildStablecoinMetricsSnapshot(
-      'usd-coin',
-      '2',
-      {
-        id: '2',
-        name: 'USD Coin',
-        symbol: 'USDC',
-        url: 'https://www.circle.com/usdc/',
-        pegMechanism: 'fiat-backed',
-        currentChainBalances: {
-          Ethereum: { peggedUSD: 40_000_000_000 },
-          Base: { peggedUSD: 10_000_000_000 },
-        },
-        tokens: [
-          { date: now - 30 * 86_400, circulating: { peggedUSD: 70_000_000_000 } },
-          { date: now, circulating: { peggedUSD: 74_000_000_000 } },
-        ],
+    const snapshot = buildStablecoinMetricsSnapshot('usd-coin', '2', {
+      id: '2',
+      name: 'USD Coin',
+      symbol: 'USDC',
+      url: 'https://www.circle.com/usdc/',
+      pegMechanism: 'fiat-backed',
+      currentChainBalances: {
+        Ethereum: { peggedUSD: 40_000_000_000 },
+        Base: { peggedUSD: 10_000_000_000 },
       },
-    )
+      tokens: [
+        { date: now - 30 * 86_400, circulating: { peggedUSD: 70_000_000_000 } },
+        { date: now, circulating: { peggedUSD: 74_000_000_000 } },
+      ],
+    })
 
     expect(snapshot?.entityType).toBe('stablecoin')
     expect(snapshot?.tvl).toBe(74_000_000_000)
@@ -98,8 +100,18 @@ describe('buildChainMetricsSnapshot', () => {
         { date: now - 86_400, tvl: 38_000_000_000 },
         { date: now, tvl: 39_000_000_000 },
       ],
-      { total24h: 880_000_000, total7d: 6_500_000_000, total30d: 25_000_000_000, change_1d: 2.1 },
-      { total24h: 7_500_000, total7d: 59_000_000, total30d: 240_000_000, change_1d: -1.2 },
+      {
+        total24h: 880_000_000,
+        total7d: 6_500_000_000,
+        total30d: 25_000_000_000,
+        change_1d: 2.1,
+      },
+      {
+        total24h: 7_500_000,
+        total7d: 59_000_000,
+        total30d: 240_000_000,
+        change_1d: -1.2,
+      },
     )
 
     expect(snapshot?.entityType).toBe('chain')
@@ -169,7 +181,11 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
       new Date(now),
     )
 
-    service['memory'].set('protocol-metrics:v6:aave', cached!, PROTOCOL_METRICS_CACHE_TTL_MS)
+    service['memory'].set(
+      'protocol-metrics:v6:aave',
+      cached!,
+      PROTOCOL_METRICS_CACHE_TTL_MS,
+    )
 
     const snapshot = await service.getProjectProtocolMetrics('aave')
 

@@ -3,7 +3,10 @@ export const DAY_MS = 24 * 60 * 60 * 1000
 export const TVL_HISTORY_DAYS = 365
 export const METRIC_HISTORY_DAYS = 365
 
-export function computePercentChange(current: number, past: number | null): number | null {
+export function computePercentChange(
+  current: number,
+  past: number | null,
+): number | null {
   if (past === null || past <= 0) return null
   return ((current - past) / past) * 100
 }

@@ -15,7 +15,9 @@ export function formatPercentChange(value: number | null | undefined): string {
   return `${sign}${value.toFixed(2)}%`
 }
 
-export function changeTone(value: number | null | undefined): 'positive' | 'negative' | 'neutral' {
+export function changeTone(
+  value: number | null | undefined,
+): 'positive' | 'negative' | 'neutral' {
   if (value == null || !Number.isFinite(value) || value === 0) return 'neutral'
   return value > 0 ? 'positive' : 'negative'
 }
