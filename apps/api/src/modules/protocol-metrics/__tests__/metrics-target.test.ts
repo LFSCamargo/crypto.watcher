@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  CHAIN_PRIMARY_SLUGS,
-  resolveMetricsTargets,
-} from '../metrics-target'
+import { CHAIN_PRIMARY_SLUGS, resolveMetricsTargets } from '../metrics-target'
 
 describe('resolveMetricsTargets', () => {
   it('prefers chain TVL for layer-1 network slugs', () => {

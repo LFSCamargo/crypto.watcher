@@ -1,6 +1,7 @@
-import { ChartLineUp, TrendUp, TrendDown } from '@phosphor-icons/react'
+import { useId } from 'react'
+import { RiShieldStarLine } from '@remixicon/react'
 import { useScore } from '../hooks/use-score'
-import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '../../../components/ui'
+import { Skeleton } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
 import {
   getCreditRatingGroupLabel,
@@ -10,106 +11,65 @@ import {
 import { CreditRatingBadge } from './credit-rating-badge'
 
 export function ScorePanel({ projectId }: { projectId: string }) {
+  const titleId = useId()
   const { data, isLoading, isError } = useScore(projectId)
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-5 w-24" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-4 w-32" />
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (isError || !data) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ChartLineUp size={18} className="text-muted-foreground" />
-            Score
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No score available yet. The governor council may still be reviewing this project.
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const score = normalizeSafetyScore(data.value)
-  const creditRating = data.creditRating ?? resolveCreditRatingFromSafetyScore(score)
-  const isInvestmentGrade = creditRating.group === 'investment_grade'
+  const score = data ? normalizeSafetyScore(data.value) : 0
+  const creditRating = data
+    ? (data.creditRating ?? resolveCreditRatingFromSafetyScore(score))
+    : undefined
+  const isInvestmentGrade = creditRating?.group === 'investment_grade'
 
   return (
-    <Card className={cn(isInvestmentGrade ? 'border-emerald-500/20' : 'border-amber-500/20')}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ChartLineUp size={18} className="text-primary" />
-          Risk rating
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <CreditRatingBadge rating={creditRating} showGroup />
+    <section aria-labelledby={titleId} className="glass-card glass-sheen space-y-4 p-6">
+      <h2 id={titleId} className="flex items-center gap-2 text-base font-semibold">
+        <RiShieldStarLine aria-hidden className="h-5 w-5 text-primary-strong" />
+        Official safety score
+      </h2>
 
-        <div className="flex items-end gap-3">
-          <span
-            className={cn(
-              'text-4xl font-bold',
-              isInvestmentGrade ? 'text-emerald-400' : 'text-amber-400',
-            )}
-          >
-            {score.toFixed(1)}
-          </span>
-          <span className="mb-1 text-muted-foreground">/ 100 safety score</span>
-          {isInvestmentGrade ? (
-            <TrendUp size={24} className="mb-1 text-emerald-400" weight="bold" />
-          ) : (
-            <TrendDown size={24} className="mb-1 text-amber-400" weight="bold" />
-          )}
+      {isLoading ? (
+        <div className="space-y-3" aria-label="Loading score">
+          <Skeleton className="h-12 w-32" />
+          <Skeleton className="h-4 w-48" />
         </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Rating group</span>
+      ) : isError || !data || !creditRating ? (
+        <div className="space-y-1 text-sm">
+          <p className="font-semibold">No official score yet</p>
+          <p className="text-muted-foreground">
+            Scores appear only after the governor council publishes its report.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
             <span
               className={cn(
-                'font-medium',
-                isInvestmentGrade ? 'text-emerald-400' : 'text-amber-400',
+                'text-5xl font-bold tabular-nums',
+                isInvestmentGrade ? 'text-success-strong' : 'text-warning-strong',
               )}
             >
-              {getCreditRatingGroupLabel(creditRating.group)}
+              {score.toFixed(1)}
             </span>
+            <span className="mb-1.5 text-muted-foreground">/ 100</span>
+            <CreditRatingBadge rating={creditRating} />
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-muted">
-            <div
-              className={cn(
-                'h-full transition-all duration-500',
-                isInvestmentGrade
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-400',
-              )}
-              style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-          <p>Round {data.round}</p>
-          {data.breakdown && (
-            <p className="mt-1">
-              Based on {Object.keys(data.breakdown).length} review factors
+          <div>
+            <div aria-hidden className="h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className={cn('h-full', isInvestmentGrade ? 'bg-success' : 'bg-warning')}
+                style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+              />
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Higher is safer. {getCreditRatingGroupLabel(creditRating.group)} on the
+              council&apos;s rating scale.
             </p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+          <p className="rounded-2xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+            Published by the governor council · Round {data.round}
+          </p>
+        </>
+      )}
+    </section>
   )
 }

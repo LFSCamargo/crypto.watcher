@@ -18,7 +18,7 @@ export async function renderOtpEmail(props: OtpEmailProps): Promise<RenderedEmai
     '',
     props.code,
     '',
-    `This code expires in ${props.expiresMinutes} minutes.`,
+    `This code expires in ${props.expiresMinutes} minutes. Requesting a new code makes earlier codes stop working.`,
   ].join('\n')
 
   return { subject: copy.subject, html, text }

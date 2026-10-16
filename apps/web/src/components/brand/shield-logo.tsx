@@ -32,7 +32,7 @@ export function ShieldLogo({
       </span>
       {showWordmark && (
         <span className={cn('font-bold tracking-tight text-foreground', config.text)}>
-          Crypto<span className="text-primary">Watcher</span>
+          Crypto<span className="text-primary-strong">Watcher</span>
         </span>
       )}
     </div>

@@ -69,6 +69,7 @@ const mockSnapshot = {
     revenueToTvlRatio: 1.4,
     feeToTvlRatio: 2.9,
     priceToSalesRatio: 27.4,
+    compositeBreakdown: [],
     methodologyVersion: 'CW-Valuation-v1',
   },
   cachedAt: '2024-01-01T00:00:00.000Z',
@@ -119,5 +120,40 @@ describe('ProtocolMetricsPanel', () => {
     expect(screen.getByText('Daily fees')).toBeInTheDocument()
     expect(screen.getByText('On-chain valuation model')).toBeInTheDocument()
     expect(screen.getAllByTestId('metric-chart').length).toBeGreaterThan(0)
+  })
+
+  it('shows network revenue stats and chart for chain snapshots', () => {
+    vi.mocked(useProtocolMetrics).mockReturnValue({
+      data: {
+        ...mockSnapshot,
+        slug: 'solana',
+        entityType: 'chain' as const,
+        defillamaId: 'chain:Solana',
+        name: 'Solana',
+        category: 'Chain',
+        website: null,
+        chains: ['Solana'],
+        mcap: null,
+        chainBreakdown: [],
+        tokenComposition: [],
+        exploits: [],
+        exploitCount: 0,
+        totalExploitLossUsd: null,
+        revenue24h: 5_100_000,
+        revenue7d: 32_000_000,
+        revenue30d: 165_000_000,
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as never)
+
+    renderWithProviders(<ProtocolMetricsPanel slug="solana" />)
+
+    expect(screen.getByText('On-chain DeFi activity')).toBeInTheDocument()
+    expect(screen.getByText('Network revenue 24h')).toBeInTheDocument()
+    expect(screen.getByText('$5.10M')).toBeInTheDocument()
+    expect(screen.getByText('Daily network revenue')).toBeInTheDocument()
+    expect(screen.getByText('Network revenue (annualized)')).toBeInTheDocument()
   })
 })

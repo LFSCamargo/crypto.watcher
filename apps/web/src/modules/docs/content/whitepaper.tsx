@@ -34,8 +34,8 @@ export function DocsWhitepaper() {
           rating systems often lack transparency or can be manipulated.
         </DocsP>
         <DocsP>
-          Crypto Watcher introduces a professional approach to project risk assessment:
-          a vetted governor council with expertise in smart contract security, protocol
+          Crypto Watcher introduces a professional approach to project risk assessment: a
+          vetted governor council with expertise in smart contract security, protocol
           design, tokenomics, compliance, infrastructure and on-chain analysis publishes
           official scores and structured reports. Trust comes from reviewer expertise and
           transparency — not from token-weighted public voting or popularity.
@@ -51,7 +51,10 @@ export function DocsWhitepaper() {
           investors must rely on limited public information.
         </DocsP>
         <DocsSubheading>Rating Manipulation</DocsSubheading>
-        <DocsP>Traditional and crowd-sourced rating systems are vulnerable to manipulation through:</DocsP>
+        <DocsP>
+          Traditional and crowd-sourced rating systems are vulnerable to manipulation
+          through:
+        </DocsP>
         <DocsList
           items={[
             'Vote-to-rate models where influence can be purchased',
@@ -84,9 +87,9 @@ export function DocsWhitepaper() {
         <DocsList
           items={[
             'Reading expert reports and published scores',
-            'Submitting evidence for governor review',
-            'Reporting incidents and suspicious activity',
-            'Participating in open discussion and comments',
+            'Sharing evidence and sources in project comments',
+            'Requesting a review of a project (free during launch)',
+            'Reporting incidents through a dedicated flow (planned)',
           ]}
         />
         <DocsSubheading>Per-Project On-Chain Registry</DocsSubheading>
@@ -129,8 +132,8 @@ export function DocsWhitepaper() {
               governor misconduct
             </>,
             <>
-              <strong className="text-foreground">Explicitly excluded:</strong> Pay-to-rate,
-              vote-to-rate, or purchasable score influence
+              <strong className="text-foreground">Explicitly excluded:</strong>{' '}
+              Pay-to-rate, vote-to-rate, or purchasable score influence
             </>,
           ]}
         />
@@ -186,9 +189,10 @@ export function DocsWhitepaper() {
       <DocsSection icon={ShieldCheck} title="Conclusion">
         <DocsP>
           Crypto Watcher creates a trustworthy information layer for crypto investing by
-          combining expert review with transparent methodology — similar to how people trust
-          security auditors, credit rating agencies and professional analysts. Influence on
-          scores is earned through expertise and accountability, not token ownership.
+          combining expert review with transparent methodology — similar to how people
+          trust security auditors, credit rating agencies and professional analysts.
+          Influence on scores is earned through expertise and accountability, not token
+          ownership.
         </DocsP>
       </DocsSection>
     </div>

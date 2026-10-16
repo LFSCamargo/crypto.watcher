@@ -1,5 +1,8 @@
 import { apiFetch } from '../../../lib/api/client'
-import { ProtocolMetricsUnavailableError, isApiUnavailable } from '../lib/protocol-metrics-errors'
+import {
+  ProtocolMetricsUnavailableError,
+  isApiUnavailable,
+} from '../lib/protocol-metrics-errors'
 import { normalizeProtocolMetricsSnapshot } from '../lib/normalize-protocol-metrics-snapshot'
 import type { ProtocolMetricsSnapshot } from '../lib/protocol-metrics.types'
 
@@ -17,9 +20,13 @@ function parseProtocolMetricsResponse(raw: unknown): ProtocolMetricsSnapshot {
   return snapshot
 }
 
-export async function fetchProjectProtocolMetrics(slug: string): Promise<ProtocolMetricsSnapshot> {
+export async function fetchProjectProtocolMetrics(
+  slug: string,
+): Promise<ProtocolMetricsSnapshot> {
   try {
-    const response = await apiFetch<ProtocolMetricsSnapshot>(`/protocol-metrics/projects/${slug}`)
+    const response = await apiFetch<ProtocolMetricsSnapshot>(
+      `/protocol-metrics/projects/${slug}`,
+    )
     return parseProtocolMetricsResponse(response)
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('API 404')) {
@@ -30,7 +37,9 @@ export async function fetchProjectProtocolMetrics(slug: string): Promise<Protoco
       throw error
     }
 
-    throw new ProtocolMetricsUnavailableError('Unable to load protocol metrics right now.')
+    throw new ProtocolMetricsUnavailableError(
+      'Unable to load protocol metrics right now.',
+    )
   }
 }
 

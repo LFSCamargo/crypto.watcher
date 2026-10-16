@@ -31,11 +31,11 @@ export function DocsIntroduction() {
 
       <DocsSection icon={ShieldCheck} title="What is Crypto Watcher?">
         <DocsP>
-          In the fast-moving world of cryptocurrency, making informed investment
-          decisions is crucial. Crypto Watcher provides a transparent system for
-          analyzing the risk and potential of crypto projects through{' '}
-          <strong className="text-foreground">expert review</strong>, structured
-          reports and evidence-based scoring.
+          In the fast-moving world of cryptocurrency, making informed investment decisions
+          is crucial. Crypto Watcher provides a transparent system for analyzing the risk
+          and potential of crypto projects through{' '}
+          <strong className="text-foreground">expert review</strong>, structured reports
+          and evidence-based scoring.
         </DocsP>
         <DocsP>
           Unlike crowd-sourced rating sites, Crypto Watcher restricts review authority to
@@ -71,12 +71,12 @@ export function DocsIntroduction() {
             {
               title: 'Review Requested',
               description:
-                'A user or team requests analysis; the project enters the review queue.',
+                'A user or team requests a review; the request enters the review queue.',
             },
             {
               title: 'Analysis Period',
               description:
-                'Governors investigate; anyone can comment and submit evidence.',
+                'Governors investigate; anyone signed in can comment and share evidence.',
             },
             {
               title: 'Governor Review',
@@ -103,12 +103,12 @@ export function DocsIntroduction() {
             {
               title: 'Participate in discussion',
               description:
-                'Comment, submit evidence and report incidents to help governors investigate.',
+                'Share evidence and sources in project comments to help governors investigate.',
             },
             {
               title: 'Request a review',
               description:
-                'Submit a project for the governor council to investigate.',
+                'Submit a project for the governor council to investigate — free during launch.',
             },
           ]}
         />
@@ -116,12 +116,12 @@ export function DocsIntroduction() {
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild className="gap-2">
             <Link to="/docs/whitepaper">
-              Read Whitepaper
-              <ArrowRight size={16} />
+              Read the whitepaper
+              <ArrowRight size={16} aria-hidden />
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/app">Launch App</Link>
+            <Link to="/app">Browse projects</Link>
           </Button>
         </div>
       </DocsSection>

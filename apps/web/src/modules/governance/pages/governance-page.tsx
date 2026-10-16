@@ -1,112 +1,108 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Scales, ArrowRight } from '@phosphor-icons/react'
+import { RiBookOpenLine, RiScales3Line } from '@remixicon/react'
+import { Button, FormAlert, Skeleton } from '../../../components/ui'
+import { PageHero } from '../../../components/layout/page-hero'
+import { GovernanceFaq } from '../components/governance-faq'
+import { GovernanceMilestones } from '../components/governance-milestones'
+import { GovernanceToday } from '../components/governance-today'
+import { ProposalCard } from '../components/proposal-card'
+import { ProposalStateLegend } from '../components/proposal-state-legend'
 import { useGovernanceProposals } from '../hooks/use-governance'
-import { getProposalStateBadge } from '../lib/proposal-state-badge'
-import {
-  Card,
-  CardContent,
-  Badge,
-  Skeleton,
-  Button,
-} from '../../../components/ui'
 
 export function GovernancePage() {
-  const { data, isLoading, isError } = useGovernanceProposals()
-
-  if (isLoading) {
-    return (
-      <section>
-        <div className="mb-8">
-          <Skeleton className="mb-2 h-8 w-48" />
-          <Skeleton className="h-5 w-96" />
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="mb-2 h-6 w-3/4" />
-                <Skeleton className="h-4 w-24" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  if (isError) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">Failed to load governance proposals.</p>
-        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-          Try again
-        </Button>
-      </Card>
-    )
-  }
+  const { data, isLoading, isError, refetch, isRefetching } = useGovernanceProposals()
 
   return (
-    <section>
-      <motion.div
-        className="mb-8"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="heading-2 mb-2 flex items-center gap-3">
-          <Scales size={28} className="text-primary" weight="duotone" />
-          Governance
-        </h1>
-        <p className="body-large">
-          CWT holders vote on protocol parameters — reviewer policy, methodology and
-          accountability. Project scores are published by the expert governor council.
-        </p>
-      </motion.div>
+    <div className="space-y-12">
+      <PageHero
+        icon={RiScales3Line}
+        tone="violet"
+        accentTone="amber"
+        eyebrow="Protocol governance"
+        title="Governance"
+        status="Pre-launch · CWT not minted"
+        description={
+          <p>
+            CWT is planned as the protocol&apos;s governance token for the reviewer
+            roster, methodology and accountability rules. It hasn&apos;t been minted and
+            no mint date is set. Project scores are published by the governor council and
+            are never put to a token vote.
+          </p>
+        }
+        actions={
+          <>
+            <Button asChild className="gap-1.5 rounded-full">
+              <Link to="/docs/governance">
+                <RiBookOpenLine aria-hidden className="h-4 w-4" />
+                How governance will work
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/docs/tokenomics">Planned tokenomics</Link>
+            </Button>
+          </>
+        }
+        stats={[
+          { label: 'CWT status', value: 'Not minted' },
+          { label: 'Mint date', value: 'Not scheduled' },
+          { label: 'On-chain proposals', value: data?.length ?? '—' },
+        ]}
+      />
 
-      <div className="space-y-4">
-        {data?.map((proposal, index) => (
-          <motion.div
-            key={proposal.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
-            <Link to={`/app/governance/${proposal.onchainId}`}>
-              <Card className="group card-hover cursor-pointer">
-                <CardContent className="flex items-center justify-between p-6">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate font-semibold group-hover:text-primary">
-                      {proposal.title}
-                    </h3>
-                    <div className="mt-2 flex items-center gap-3">
-                      <Badge variant={getProposalStateBadge(proposal.state)}>
-                        {proposal.state}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        ID: {proposal.onchainId.slice(0, 8)}...
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowRight
-                    size={20}
-                    className="text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary"
-                  />
-                </CardContent>
-              </Card>
-            </Link>
-          </motion.div>
-        ))}
+      <GovernanceMilestones />
 
-        {data?.length === 0 && (
-          <Card className="p-12 text-center">
-            <Scales size={48} className="mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">No proposals indexed yet.</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Be the first to create a governance proposal.
+      <GovernanceToday />
+
+      <section aria-labelledby="proposals-title" className="space-y-4">
+        <div className="space-y-1">
+          <h2 id="proposals-title" className="text-xl font-semibold">
+            On-chain proposals
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Protocol proposals appear here once the Governor contract is live.
+          </p>
+        </div>
+        <ProposalStateLegend />
+        {isLoading ? (
+          <div className="space-y-3" aria-busy="true">
+            {[0, 1, 2].map((index) => (
+              <Skeleton key={index} className="h-24 w-full rounded-3xl" />
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="space-y-3">
+            <FormAlert>
+              Proposals couldn&apos;t be loaded. Check your connection and try again.
+            </FormAlert>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => void refetch()}
+              disabled={isRefetching}
+            >
+              Try again
+            </Button>
+          </div>
+        ) : data?.length ? (
+          <ul className="space-y-3">
+            {data.map((proposal) => (
+              <li key={proposal.id}>
+                <ProposalCard proposal={proposal} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="glass-card-flat rounded-3xl border-dashed p-10 text-center">
+            <p className="font-medium">No proposals yet.</p>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Proposals open once CWT is minted and the Governor contract is deployed.
+              Nothing has been submitted on-chain so far.
             </p>
-          </Card>
+          </div>
         )}
-      </div>
-    </section>
+      </section>
+
+      <GovernanceFaq />
+    </div>
   )
 }

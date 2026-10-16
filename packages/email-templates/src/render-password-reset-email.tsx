@@ -19,7 +19,7 @@ export async function renderPasswordResetEmail(
     'We received a request to reset your Crypto Watcher password.',
     `Open this link to choose a new password: ${props.resetUrl}`,
     '',
-    `This link expires in ${props.expiresMinutes} minutes.`,
+    `This link works once and expires in ${props.expiresMinutes} minutes. If it has expired, request a new one from the sign-in page.`,
   ].join('\n')
 
   return { subject: SUBJECT, html, text }

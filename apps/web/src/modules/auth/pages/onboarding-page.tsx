@@ -1,174 +1,174 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   RiArrowLeftLine,
   RiArrowRightLine,
-  RiCheckLine,
-  RiSearchLine,
+  RiChat3Line,
   RiShieldCheckLine,
   RiWallet3Line,
 } from '@remixicon/react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useLinkPublicKey } from '../hooks/use-session'
-import { useSession } from '../../../store/session'
-import { Button, Card, Input, Label } from '../../../components/ui'
+import { FormAlert } from '../../../components/ui/form-alert'
+import { useAuthStatus, useLinkPublicKey } from '../hooks/use-session'
+import { useReturnTo } from '../hooks/use-auth-links'
+import { authErrorMessage } from '../lib/auth-error-message'
+import { safeReturnTo } from '../lib/return-to'
+import { Button, Input, Label } from '../../../components/ui'
 
-const onboardingSteps = [
-  {
-    icon: RiSearchLine,
-    title: 'Search any project',
-    body: 'Use the search bar (or press ⌘K / Ctrl+K anywhere) to look up a token, protocol or DApp. Browsing is free and needs no wallet.',
-  },
+const infoSteps = [
   {
     icon: RiShieldCheckLine,
-    title: 'Read the safety score',
-    body: 'Each project shows an authority-reviewed safety score, the review thesis, and any risks. Higher score means lower risk in our panel’s view.',
+    title: 'How scores work',
+    body: 'Safety scores run from 0 to 100 — higher is safer. They are published by a vetted governor council after a structured review, never by public or token-weighted voting.',
   },
   {
-    icon: RiCheckLine,
-    title: 'Comment & request reviews',
-    body: 'Share analysis in comments (a small anti-spam fee applies) and request a review for any project you want our authority panel to investigate.',
+    icon: RiChat3Line,
+    title: 'How you take part',
+    body: 'Read reports, join the discussion on any project and request a review for projects you care about. Requests are free during launch.',
   },
 ]
 
+const TOTAL_STEPS = infoSteps.length + 1
+const ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/
+
 export function OnboardingPage() {
   const navigate = useNavigate()
-  const user = useSession((state) => state.user)
+  const returnTo = useReturnTo()
+  const { isAuthenticated, isReady } = useAuthStatus()
   const linkKey = useLinkPublicKey()
   const [step, setStep] = useState(0)
   const [publicKey, setPublicKey] = useState('')
-
-  const isLastInfoStep = step === onboardingSteps.length - 1
-  const onWalletStep = step === onboardingSteps.length
-  const info = (onboardingSteps[step] ?? onboardingSteps[0])!
+  const [error, setError] = useState<string>()
+  const onWalletStep = step === infoSteps.length
+  const info = infoSteps[Math.min(step, infoSteps.length - 1)]!
 
   useEffect(() => {
-    if (!user) navigate('/auth/signin', { replace: true })
-  }, [user, navigate])
+    if (isReady && !isAuthenticated) navigate('/auth/signin', { replace: true })
+  }, [isReady, isAuthenticated, navigate])
 
-  if (!user) return null
+  if (!isAuthenticated) return null
 
   const finish = () => {
-    toast.success('You’re all set — welcome to Crypto Watcher!')
-    navigate('/app')
+    toast.success('You’re all set — welcome to Crypto Watcher.')
+    navigate(safeReturnTo(returnTo), { replace: true })
   }
 
-  const handleLink = async () => {
+  const handleLink = async (event: FormEvent) => {
+    event.preventDefault()
+    setError(undefined)
+    if (!ADDRESS_PATTERN.test(publicKey.trim())) {
+      setError('Enter a full 0x address (42 characters).')
+      return
+    }
     try {
-      await linkKey.mutateAsync(publicKey)
-      toast.success('Wallet linked!')
+      await linkKey.mutateAsync(publicKey.trim())
       finish()
-    } catch {
-      toast.error('Invalid wallet address or already linked')
+    } catch (caught) {
+      setError(
+        authErrorMessage(
+          caught,
+          {
+            400: 'That isn’t a valid wallet address.',
+            409: 'This address is already linked to another account.',
+          },
+          'We couldn’t link this address. Please try again.',
+        ),
+      )
     }
   }
 
-  const progress = onWalletStep ? onboardingSteps.length + 1 : step + 1
-  const total = onboardingSteps.length + 1
-
   return (
-    <div className="mx-auto flex max-w-xl flex-col py-10">
-      <div className="mb-6 flex items-center gap-2">
-        {Array.from({ length: total }).map((_, i) => (
+    <div className="mx-auto flex max-w-xl flex-col py-6 md:py-10">
+      <div className="mb-6 flex items-center gap-2" aria-hidden>
+        {Array.from({ length: TOTAL_STEPS }).map((_, index) => (
           <span
-            key={i}
+            key={index}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
-              i < progress ? 'bg-primary' : 'bg-secondary'
+              index <= step ? 'bg-primary' : 'bg-foreground/10'
             }`}
           />
         ))}
       </div>
 
-      <Card className="overflow-hidden p-8">
-        <AnimatePresence mode="wait">
-          {!onWalletStep ? (
-            <motion.div
-              key={`info-${step}`}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-                <info.icon className="h-7 w-7" />
-              </div>
-              <p className="mb-1 text-xs font-bold text-muted-foreground">
-                STEP {step + 1} OF {total}
-              </p>
-              <h1 className="heading-3 mb-2">{info.title}</h1>
-              <p className="text-muted-foreground">{info.body}</p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="wallet"
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-                <RiWallet3Line className="h-7 w-7" />
-              </div>
-              <p className="mb-1 text-xs font-bold text-muted-foreground">
-                LAST STEP — OPTIONAL
-              </p>
-              <h1 className="heading-3 mb-2">Link your wallet (optional)</h1>
-              <p className="mb-4 text-muted-foreground">
-                Add your public key to participate in protocol governance with CWT. Project
-                scores are published by our expert governor council — not by public voting.
-                You can also do this later from your profile.
-              </p>
-              <div className="space-y-2">
-                <Label htmlFor="publicKey">Wallet address</Label>
-                <Input
-                  id="publicKey"
-                  value={publicKey}
-                  onChange={(e) => setPublicKey(e.target.value)}
-                  placeholder="0x…"
-                  className="font-mono text-sm"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <section className="glass-panel rounded-3xl p-6 sm:p-8">
+        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          {onWalletStep
+            ? `Step ${TOTAL_STEPS} of ${TOTAL_STEPS} · Optional`
+            : `Step ${step + 1} of ${TOTAL_STEPS}`}
+        </p>
 
-        <div className="mt-8 flex items-center justify-between gap-3">
+        {!onWalletStep ? (
+          <div key={step} className="animate-in fade-in duration-200">
+            <div className="mb-5 mt-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+              <info.icon className="h-6 w-6" aria-hidden />
+            </div>
+            <h1 className="heading-3 mb-2">{info.title}</h1>
+            <p className="text-muted-foreground">{info.body}</p>
+          </div>
+        ) : (
+          <form
+            id="link-wallet"
+            onSubmit={(event) => void handleLink(event)}
+            className="animate-in fade-in duration-200"
+          >
+            <div className="mb-5 mt-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+              <RiWallet3Line className="h-6 w-6" aria-hidden />
+            </div>
+            <h1 className="heading-3 mb-2">Add a wallet address</h1>
+            <p className="mb-4 text-muted-foreground">
+              Linking a public address lets you take part in CWT protocol governance. It
+              does not connect your wallet or ask you to sign anything, and you can add it
+              later from your profile.
+            </p>
+            {error ? <FormAlert className="mb-4">{error}</FormAlert> : null}
+            <div className="space-y-2">
+              <Label htmlFor="publicKey">Wallet address</Label>
+              <Input
+                id="publicKey"
+                value={publicKey}
+                onChange={(e) => setPublicKey(e.target.value)}
+                placeholder="0x…"
+                autoComplete="off"
+                spellCheck={false}
+                aria-invalid={Boolean(error) || undefined}
+                className="font-mono text-sm"
+              />
+            </div>
+          </form>
+        )}
+
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
           <Button
             type="button"
             variant="ghost"
-            onClick={() => (step === 0 ? navigate('/app') : setStep((s) => s - 1))}
+            onClick={() => (step === 0 ? finish() : setStep((value) => value - 1))}
             className="gap-1"
           >
-            <RiArrowLeftLine className="h-4 w-4" />
+            {step === 0 ? null : <RiArrowLeftLine className="h-4 w-4" aria-hidden />}
             {step === 0 ? 'Skip' : 'Back'}
           </Button>
 
           {!onWalletStep ? (
             <Button
               type="button"
-              onClick={() => setStep((s) => s + 1)}
+              onClick={() => setStep((value) => value + 1)}
               className="gap-1"
             >
-              {isLastInfoStep ? 'Almost done' : 'Next'}
-              <RiArrowRightLine className="h-4 w-4" />
+              Next
+              <RiArrowRightLine className="h-4 w-4" aria-hidden />
             </Button>
           ) : (
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={finish}>
                 Skip for now
               </Button>
-              <Button
-                type="button"
-                onClick={handleLink}
-                disabled={!publicKey.startsWith('0x') || linkKey.isPending}
-              >
-                {linkKey.isPending ? 'Linking…' : 'Link & finish'}
+              <Button type="submit" form="link-wallet" disabled={linkKey.isPending}>
+                {linkKey.isPending ? 'Linking…' : 'Link and finish'}
               </Button>
             </div>
           )}
         </div>
-      </Card>
+      </section>
     </div>
   )
 }

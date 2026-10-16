@@ -16,6 +16,7 @@
 
     --primary: 47 100% 52%;
     --primary-foreground: 0 0% 4%;
+    --primary-strong: 40 92% 30%;
 
     --secondary: 45 32% 93%;
     --secondary-foreground: 0 0% 9%;
@@ -39,7 +40,47 @@
     --input: 42 22% 88%;
     --ring: 47 100% 48%;
 
+    --info: 211 72% 42%;
+    --info-foreground: 0 0% 100%;
+
+    /* Status text on tinted chips (AA on a 12-15% tint of the same hue). */
+    --success-strong: 152 60% 26%;
+    --warning-strong: 30 90% 30%;
+    --destructive-strong: 0 72% 40%;
+
+    --chart-1: 152 56% 38%;
+    --chart-2: 211 72% 48%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 52% 52%;
+    --chart-5: 0 72% 51%;
+    --tone-amber: 45 100% 52%;
+    --tone-amber-strong: 32 95% 30%;
+    --tone-coral: 6 90% 62%;
+    --tone-coral-strong: 4 72% 42%;
+    --tone-violet: 262 80% 64%;
+    --tone-violet-strong: 262 55% 48%;
+    --tone-sky: 200 90% 55%;
+    --tone-sky-strong: 205 85% 34%;
+    --tone-teal: 168 70% 42%;
+    --tone-teal-strong: 172 80% 25%;
+    --tone-pink: 330 85% 64%;
+    --tone-pink-strong: 330 62% 42%;
+
     --radius: 1rem;
+
+    /* Liquid glass — alpha values are tuned for WCAG AA (docs/redesign/DESIGN.md). */
+    --glass-tint: 45 44% 99%;
+    --glass-nav-alpha: 0.9;
+    --glass-card-alpha: 0.72;
+    --glass-panel-alpha: 0.94;
+    --glass-border: 0 0% 100% / 0.65;
+    --glass-edge: 42 22% 70% / 0.35;
+    --glass-highlight: 0 0% 100% / 0.85;
+    --glass-shadow: 30 20% 20% / 0.14;
+    --glass-blur: 20px;
+    --glass-saturate: 180%;
+
+    --ease-glass: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .dark {
@@ -55,6 +96,7 @@
 
     --primary: 47 100% 62%;
     --primary-foreground: 0 0% 4%;
+    --primary-strong: 47 100% 62%;
 
     --secondary: 0 0% 11%;
     --secondary-foreground: 45 28% 95%;
@@ -65,7 +107,7 @@
     --accent: 47 100% 62%;
     --accent-foreground: 0 0% 4%;
 
-    --destructive: 0 72% 56%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 52% 46%;
@@ -77,6 +119,60 @@
     --border: 0 0% 14%;
     --input: 0 0% 16%;
     --ring: 47 100% 55%;
+
+    --info: 211 90% 66%;
+    --info-foreground: 0 0% 4%;
+
+    --success-strong: 152 52% 46%;
+    --warning-strong: 38 92% 55%;
+    --destructive-strong: 0 80% 68%;
+
+    --chart-1: 152 52% 46%;
+    --chart-2: 211 90% 66%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 280 60% 70%;
+    --chart-5: 0 72% 60%;
+    --tone-amber: 45 100% 55%;
+    --tone-amber-strong: 45 100% 62%;
+    --tone-coral: 6 90% 62%;
+    --tone-coral-strong: 8 95% 72%;
+    --tone-violet: 262 85% 70%;
+    --tone-violet-strong: 262 90% 80%;
+    --tone-sky: 200 90% 60%;
+    --tone-sky-strong: 200 90% 70%;
+    --tone-teal: 168 70% 48%;
+    --tone-teal-strong: 168 70% 60%;
+    --tone-pink: 330 85% 66%;
+    --tone-pink-strong: 330 90% 78%;
+
+    --glass-tint: 0 0% 8%;
+    --glass-nav-alpha: 0.88;
+    --glass-card-alpha: 0.86;
+    --glass-panel-alpha: 0.92;
+    --glass-border: 0 0% 100% / 0.1;
+    --glass-edge: 0 0% 0% / 0.6;
+    --glass-highlight: 0 0% 100% / 0.07;
+    --glass-shadow: 0 0% 0% / 0.55;
+    --glass-blur: 24px;
+    --glass-saturate: 150%;
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root,
+    .dark {
+      --glass-nav-alpha: 1;
+      --glass-card-alpha: 1;
+      --glass-panel-alpha: 1;
+    }
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root,
+    .dark {
+      --glass-nav-alpha: 1;
+      --glass-card-alpha: 1;
+      --glass-panel-alpha: 1;
+    }
   }
 }
 
@@ -92,6 +188,20 @@
 
   html {
     scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -130,6 +240,63 @@
 
   .card-hover {
     @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* Liquid glass surfaces. Use the class that matches the layer, never ad-hoc blur. */
+  .glass-nav,
+  .glass-card,
+  .glass-panel {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+
+  .glass-nav {
+    background-color: hsl(var(--glass-tint) / var(--glass-nav-alpha));
+    box-shadow:
+      inset 0 -1px 0 hsl(var(--glass-edge)),
+      inset 0 1px 0 hsl(var(--glass-highlight));
+  }
+
+  .glass-pill {
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow:
+      0 0 0 1px hsl(var(--glass-edge)),
+      inset 0 1px 0 hsl(var(--glass-highlight)),
+      0 12px 40px -16px hsl(var(--glass-shadow));
+  }
+
+  .glass-card,
+  .glass-card-flat {
+    @apply rounded-3xl;
+    background-color: hsl(var(--glass-tint) / var(--glass-card-alpha));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow:
+      0 0 0 1px hsl(var(--glass-edge)),
+      inset 0 1px 0 hsl(var(--glass-highlight)),
+      0 12px 40px -16px hsl(var(--glass-shadow));
+  }
+
+  .glass-panel {
+    background-color: hsl(var(--glass-tint) / var(--glass-panel-alpha));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow:
+      0 0 0 1px hsl(var(--glass-edge)),
+      inset 0 1px 0 hsl(var(--glass-highlight)),
+      0 24px 64px -24px hsl(var(--glass-shadow));
+  }
+
+  .glass-sheen {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--glass-highlight)) 0%,
+      transparent 38%,
+      transparent 62%,
+      hsl(var(--primary) / 0.1) 100%
+    );
+  }
+
+  .skip-link {
+    @apply fixed left-4 top-3 z-[60] -translate-y-24 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background shadow-lg transition-transform focus-visible:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 }
 

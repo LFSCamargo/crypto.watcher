@@ -20,6 +20,8 @@ interface MetricHistoryChartProps {
   valueKey?: 'value' | 'tvl'
   defaultRange?: ChartRange
   rangeOptions?: ReadonlyArray<RangeOption>
+  /** Compact labelled sparkline for dense surfaces such as the landing hover card. */
+  variant?: 'panel' | 'sparkline'
 }
 
 function normalizeHistory(
@@ -39,6 +41,7 @@ export function MetricHistoryChart({
   valueKey = 'value',
   defaultRange = '3m',
   rangeOptions = METRIC_CHART_RANGE_OPTIONS,
+  variant = 'panel',
 }: MetricHistoryChartProps) {
   const [range, setRange] = useState<ChartRange>(defaultRange)
   const normalized = useMemo(
@@ -54,8 +57,28 @@ export function MetricHistoryChart({
 
   if (normalized.length < 2) return null
 
+  if (variant === 'sparkline') {
+    return (
+      <div role="img" aria-label={title} className="space-y-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-[11px] font-semibold">{title}</p>
+          <p className="text-[11px] tabular-nums text-muted-foreground">
+            {formatCompactUsd(normalized.at(-1)?.value ?? null)}
+          </p>
+        </div>
+        <PriceChart
+          history={toChartPoints(normalized)}
+          variant="compact"
+          layout="default"
+          defaultRange="1y"
+          showRangeSelector={false}
+        />
+      </div>
+    )
+  }
+
   const tone = changeTone(periodChange)
-  const variant =
+  const badgeVariant =
     tone === 'positive' ? 'success' : tone === 'negative' ? 'destructive' : 'secondary'
 
   return (
@@ -64,7 +87,7 @@ export function MetricHistoryChart({
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">{title}</p>
           {periodChange != null ? (
-            <Badge variant={variant} className="rounded-full px-2 py-0.5 text-xs">
+            <Badge variant={badgeVariant} className="rounded-full px-2 py-0.5 text-xs">
               {formatPercentChange(periodChange)}
             </Badge>
           ) : null}

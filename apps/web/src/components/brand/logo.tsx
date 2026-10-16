@@ -33,7 +33,7 @@ export function Logo({
       </picture>
       {showWordmark && (
         <span className={cn('text-2xl font-bold tracking-tight', wordmarkClassName)}>
-          Crypto<span className="text-primary">Watcher</span>
+          Crypto<span className="text-primary-strong">Watcher</span>
         </span>
       )}
     </span>

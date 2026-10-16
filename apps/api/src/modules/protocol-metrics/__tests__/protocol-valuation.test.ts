@@ -100,4 +100,83 @@ describe('computeProtocolValuation', () => {
     expect(valuation!.feeSustainabilityScore).toBeGreaterThan(0)
     expect(valuation!.governanceQualityScore).toBeNull()
   })
+
+  it('uses chain network revenue when DeFi Llama reports it', () => {
+    const valuation = computeProtocolValuation({
+      entityType: 'chain',
+      tvl: 8_200_000_000,
+      mcap: null,
+      fees30d: 400_000_000,
+      revenue30d: 165_000_000,
+      feesHistory: buildDailyHistory(30, 13_000_000),
+      revenueHistory: buildDailyHistory(30, 5_500_000),
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    expect(valuation!.revenueAnnualizedUsd).toBeGreaterThan(0)
+    expect(valuation!.revenueCaptureRate).toBeGreaterThan(0)
+    expect(valuation!.revenueCaptureRate).toBeLessThan(100)
+  })
+
+  it('explains how each component compounds into the composite', () => {
+    const now = Date.now()
+    const valuation = computeProtocolValuation({
+      entityType: 'protocol',
+      tvl: 1_000_000_000,
+      mcap: 500_000_000,
+      fees30d: 3_000_000,
+      revenue30d: 1_200_000,
+      feesHistory: buildDailyHistory(60, 100_000, now),
+      revenueHistory: buildDailyHistory(60, 40_000, now),
+      chainBreakdown: [
+        { chain: 'Ethereum', tvl: 700_000_000, share: 70 },
+        { chain: 'Arbitrum', tvl: 300_000_000, share: 30 },
+      ],
+      chainCount: 2,
+      exploitCount: 1,
+      totalExploitLossUsd: 2_000_000,
+    })
+
+    const breakdown = valuation!.compositeBreakdown
+    expect(breakdown.map((entry) => entry.component)).toEqual([
+      'fundamentals',
+      'security',
+      'governance',
+      'value',
+    ])
+    const scored = breakdown.filter((entry) => entry.score != null)
+    expect(scored.reduce((sum, entry) => sum + entry.share, 0)).toBeCloseTo(1, 6)
+    const recomposed = scored.reduce(
+      (sum, entry) => sum + (entry.score ?? 0) * entry.share,
+      0,
+    )
+    expect(recomposed).toBeCloseTo(valuation!.compositeScore!, 6)
+  })
+
+  it('gives unscored components no share and drops security for chains', () => {
+    const valuation = computeProtocolValuation({
+      entityType: 'chain',
+      tvl: 40_000_000_000,
+      mcap: null,
+      fees30d: 240_000_000,
+      revenue30d: null,
+      feesHistory: buildDailyHistory(30, 8_000_000),
+      revenueHistory: [],
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    const breakdown = valuation!.compositeBreakdown
+    expect(breakdown.some((entry) => entry.component === 'security')).toBe(false)
+    const fee = breakdown.find((entry) => entry.component === 'feeSustainability')
+    expect(fee?.score).toBe(valuation!.feeSustainabilityScore)
+    for (const entry of breakdown.filter((item) => item.score == null)) {
+      expect(entry.share).toBe(0)
+    }
+  })
 })

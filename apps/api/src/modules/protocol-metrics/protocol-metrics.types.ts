@@ -1,4 +1,6 @@
-export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 6
+import type { ProtocolValuation } from './protocol-valuation.types'
+
+export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 7
 
 export type MetricsEntityType = 'protocol' | 'chain' | 'stablecoin'
 
@@ -24,21 +26,7 @@ export interface TokenComposition {
   share: number
 }
 
-export interface ProtocolValuation {
-  feesAnnualizedUsd: number | null
-  revenueAnnualizedUsd: number | null
-  revenueCaptureRate: number | null
-  revenueGrowth30d: number | null
-  revenueGrowth1y: number | null
-  feeSustainabilityScore: number | null
-  governanceQualityScore: number | null
-  securityScore: number | null
-  compositeScore: number | null
-  revenueToTvlRatio: number | null
-  feeToTvlRatio: number | null
-  priceToSalesRatio: number | null
-  methodologyVersion: string
-}
+export type { ProtocolValuation }
 
 export interface ExploitRecord {
   date: string

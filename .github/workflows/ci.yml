@@ -83,6 +83,17 @@ jobs:
         run: pnpm exec nx run web:build
       - name: O1 complexity check
         run: pnpm run o1-check:web
+      - name: Install Playwright browser
+        run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Browser journeys (Playwright)
+        run: pnpm exec nx run web:test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
 
   contracts:
     name: contracts

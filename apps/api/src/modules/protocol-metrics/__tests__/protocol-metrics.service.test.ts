@@ -25,8 +25,14 @@ describe('buildProtocolMetricsSnapshot', () => {
         url: 'https://aave.com',
         chains: ['Ethereum'],
         tvl: [
-          { date: Math.floor((now - 30 * DAY_MS) / 1000), totalLiquidityUSD: 10_000_000_000 },
-          { date: Math.floor((now - 7 * DAY_MS) / 1000), totalLiquidityUSD: 11_000_000_000 },
+          {
+            date: Math.floor((now - 30 * DAY_MS) / 1000),
+            totalLiquidityUSD: 10_000_000_000,
+          },
+          {
+            date: Math.floor((now - 7 * DAY_MS) / 1000),
+            totalLiquidityUSD: 11_000_000_000,
+          },
           { date: Math.floor((now - DAY_MS) / 1000), totalLiquidityUSD: 12_000_000_000 },
           { date: Math.floor(now / 1000), totalLiquidityUSD: 12_600_000_000 },
         ],
@@ -60,25 +66,21 @@ describe('buildProtocolMetricsSnapshot', () => {
 describe('buildStablecoinMetricsSnapshot', () => {
   it('builds circulating supply metrics with chain breakdown', () => {
     const now = Math.floor(Date.now() / 1000)
-    const snapshot = buildStablecoinMetricsSnapshot(
-      'usd-coin',
-      '2',
-      {
-        id: '2',
-        name: 'USD Coin',
-        symbol: 'USDC',
-        url: 'https://www.circle.com/usdc/',
-        pegMechanism: 'fiat-backed',
-        currentChainBalances: {
-          Ethereum: { peggedUSD: 40_000_000_000 },
-          Base: { peggedUSD: 10_000_000_000 },
-        },
-        tokens: [
-          { date: now - 30 * 86_400, circulating: { peggedUSD: 70_000_000_000 } },
-          { date: now, circulating: { peggedUSD: 74_000_000_000 } },
-        ],
+    const snapshot = buildStablecoinMetricsSnapshot('usd-coin', '2', {
+      id: '2',
+      name: 'USD Coin',
+      symbol: 'USDC',
+      url: 'https://www.circle.com/usdc/',
+      pegMechanism: 'fiat-backed',
+      currentChainBalances: {
+        Ethereum: { peggedUSD: 40_000_000_000 },
+        Base: { peggedUSD: 10_000_000_000 },
       },
-    )
+      tokens: [
+        { date: now - 30 * 86_400, circulating: { peggedUSD: 70_000_000_000 } },
+        { date: now, circulating: { peggedUSD: 74_000_000_000 } },
+      ],
+    })
 
     expect(snapshot?.entityType).toBe('stablecoin')
     expect(snapshot?.tvl).toBe(74_000_000_000)
@@ -98,8 +100,18 @@ describe('buildChainMetricsSnapshot', () => {
         { date: now - 86_400, tvl: 38_000_000_000 },
         { date: now, tvl: 39_000_000_000 },
       ],
-      { total24h: 880_000_000, total7d: 6_500_000_000, total30d: 25_000_000_000, change_1d: 2.1 },
-      { total24h: 7_500_000, total7d: 59_000_000, total30d: 240_000_000, change_1d: -1.2 },
+      {
+        total24h: 880_000_000,
+        total7d: 6_500_000_000,
+        total30d: 25_000_000_000,
+        change_1d: 2.1,
+      },
+      {
+        total24h: 7_500_000,
+        total7d: 59_000_000,
+        total30d: 240_000_000,
+        change_1d: -1.2,
+      },
     )
 
     expect(snapshot?.entityType).toBe('chain')
@@ -107,6 +119,44 @@ describe('buildChainMetricsSnapshot', () => {
     expect(snapshot?.dexVolume24h).toBe(880_000_000)
     expect(snapshot?.fees24h).toBe(7_500_000)
     expect(snapshot?.chainBreakdown).toEqual([])
+  })
+
+  it('includes network revenue totals and history for chains', () => {
+    const now = Math.floor(Date.now() / 1000)
+    const snapshot = buildChainMetricsSnapshot(
+      'solana',
+      'Solana',
+      [
+        { date: now - 86_400, tvl: 8_000_000_000 },
+        { date: now, tvl: 8_200_000_000 },
+      ],
+      null,
+      {
+        total24h: 12_000_000,
+        total7d: 80_000_000,
+        total30d: 400_000_000,
+        totalDataChart: [
+          [now - 86_400, 11_000_000],
+          [now, 12_000_000],
+        ],
+      },
+      {
+        total24h: 5_000_000,
+        total7d: 32_000_000,
+        total30d: 165_000_000,
+        totalDataChart: [
+          [now - 86_400, 4_700_000],
+          [now, 5_000_000],
+        ],
+      },
+    )
+
+    expect(snapshot?.revenue24h).toBe(5_000_000)
+    expect(snapshot?.revenue7d).toBe(32_000_000)
+    expect(snapshot?.revenue30d).toBe(165_000_000)
+    expect(snapshot?.revenueHistory).toHaveLength(2)
+    expect(snapshot?.revenueHistory.at(-1)?.value).toBe(5_000_000)
+    expect(snapshot?.valuation?.revenueAnnualizedUsd).toBeGreaterThan(0)
   })
 })
 
@@ -169,7 +219,11 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
       new Date(now),
     )
 
-    service['memory'].set('protocol-metrics:v6:aave', cached!, PROTOCOL_METRICS_CACHE_TTL_MS)
+    service['memory'].set(
+      'protocol-metrics:v7:aave',
+      cached!,
+      PROTOCOL_METRICS_CACHE_TTL_MS,
+    )
 
     const snapshot = await service.getProjectProtocolMetrics('aave')
 
@@ -240,16 +294,30 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
         status: 200,
         json: async () => ({ total24h: 7_500_000 }),
       })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ total24h: 5_100_000, totalDataChart: [[now, 5_100_000]] }),
+      })
     const repository = createRepositoryMock()
     const service = new ProtocolMetricsService(fetchImpl, repository)
 
     const snapshot = await service.getProjectProtocolMetrics('ethereum')
 
-    expect(fetchImpl).toHaveBeenCalledTimes(3)
+    expect(fetchImpl).toHaveBeenCalledTimes(4)
     expect(snapshot.entityType).toBe('chain')
     expect(snapshot.tvl).toBe(39_000_000_000)
     expect(snapshot.dexVolume24h).toBe(880_000_000)
     expect(snapshot.fees24h).toBe(7_500_000)
+    expect(snapshot.revenue24h).toBe(5_100_000)
+    expect(fetchImpl.mock.calls.map(([url]) => String(url))).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('/overview/fees/Ethereum?'),
+        expect.stringContaining('dataType=dailyFees'),
+        expect.stringContaining('dataType=dailyRevenue'),
+        expect.stringContaining('excludeTotalDataChartBreakdown=true'),
+      ]),
+    )
     expect(repository.upsert).toHaveBeenCalledOnce()
   })
 

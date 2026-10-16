@@ -61,6 +61,7 @@ describe('ProtocolValuationSection', () => {
             revenueToTvlRatio: 0.18,
             feeToTvlRatio: 0.36,
             priceToSalesRatio: 12,
+            compositeBreakdown: [],
             methodologyVersion: 'CW-Valuation-v1',
           },
         }}
@@ -91,6 +92,7 @@ describe('ProtocolValuationSection', () => {
             revenueToTvlRatio: null,
             feeToTvlRatio: 22.5,
             priceToSalesRatio: null,
+            compositeBreakdown: [],
             methodologyVersion: 'CW-Valuation-v1',
           },
         }}
@@ -100,6 +102,40 @@ describe('ProtocolValuationSection', () => {
     expect(screen.getByText('Network fee valuation')).toBeInTheDocument()
     expect(screen.getByText(/Composite 81\/100/)).toBeInTheDocument()
     expect(screen.queryByText(/Partial valuation pending/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('Network revenue (annualized)')).not.toBeInTheDocument()
+  })
+
+  it('shows network revenue in the chain valuation when it is indexed', () => {
+    renderWithProviders(
+      <ProtocolValuationSection
+        data={{
+          ...baseSnapshot,
+          slug: 'solana',
+          entityType: 'chain',
+          valuation: {
+            feesAnnualizedUsd: 2_000_000_000,
+            revenueAnnualizedUsd: 800_000_000,
+            revenueCaptureRate: 40,
+            revenueGrowth30d: 8,
+            revenueGrowth1y: 20,
+            feeSustainabilityScore: 74,
+            governanceQualityScore: null,
+            securityScore: null,
+            compositeScore: 74,
+            revenueToTvlRatio: 9.8,
+            feeToTvlRatio: 24.4,
+            priceToSalesRatio: null,
+            compositeBreakdown: [],
+            methodologyVersion: 'CW-Valuation-v1',
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByText('Network revenue (annualized)')).toBeInTheDocument()
+    expect(screen.getByText('$800.00M')).toBeInTheDocument()
+    expect(screen.getByText('Network revenue capture')).toBeInTheDocument()
+    expect(screen.queryByText('P/S ratio')).not.toBeInTheDocument()
   })
 
   it('explains when valuation data is not available yet', () => {
@@ -117,7 +153,9 @@ describe('ProtocolValuationSection', () => {
     )
 
     expect(screen.getByText('On-chain valuation unavailable')).toBeInTheDocument()
-    expect(screen.getByText(/DeFi Llama has not indexed daily fee data/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/DeFi Llama has not indexed daily fee data/i),
+    ).toBeInTheDocument()
   })
 
   it('explains why stablecoins skip the valuation model', () => {
@@ -132,6 +170,8 @@ describe('ProtocolValuationSection', () => {
     )
 
     expect(screen.getByText('Valuation model not applicable')).toBeInTheDocument()
-    expect(screen.getByText(/Stablecoins are assessed on reserve quality/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Stablecoins are assessed on reserve quality/i),
+    ).toBeInTheDocument()
   })
 })

@@ -93,7 +93,10 @@ export function BreakdownBarChart({
             style={{ height: chartHeight }}
           >
             {items.map((item) => {
-              const barHeight = Math.max(Math.round((item.value / maxValue) * barAreaHeight), 4)
+              const barHeight = Math.max(
+                Math.round((item.value / maxValue) * barAreaHeight),
+                4,
+              )
 
               return (
                 <div

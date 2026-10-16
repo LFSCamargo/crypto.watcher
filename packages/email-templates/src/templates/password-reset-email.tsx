@@ -24,7 +24,8 @@ export function PasswordResetEmail({ resetUrl, expiresMinutes, logoUrl }: Passwo
         Reset password
       </Button>
       <Text className="mb-0 mt-6 text-sm leading-5 text-muted-foreground">
-        This link expires in {expiresMinutes} minutes.
+        This link works once and expires in {expiresMinutes} minutes. If it has expired, request a
+        new one from the sign-in page.
       </Text>
       <Text className="m-0 mt-3 text-sm leading-5 text-muted-foreground">
         If you did not request a password reset, you can safely ignore this email.

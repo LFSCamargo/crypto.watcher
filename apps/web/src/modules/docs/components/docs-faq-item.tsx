@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Card } from '../../../components/ui'
+import { Disclosure } from '../../../components/ui'
 
 export function DocsFaqItem({
   question,
@@ -9,11 +9,13 @@ export function DocsFaqItem({
   children: ReactNode
 }) {
   return (
-    <Card className="p-5">
-      <h3 className="mb-2 font-semibold text-foreground">{question}</h3>
-      <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-        {children}
-      </div>
-    </Card>
+    <Disclosure
+      title={question}
+      headingLevel={3}
+      className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/30"
+      contentClassName="space-y-3 text-sm leading-relaxed text-muted-foreground"
+    >
+      {children}
+    </Disclosure>
   )
 }

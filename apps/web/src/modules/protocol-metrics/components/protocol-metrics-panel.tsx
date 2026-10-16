@@ -65,17 +65,21 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
   const changePrefix = isStablecoin ? 'Supply' : 'TVL'
   const historyTitle = isStablecoin ? 'Circulating supply history' : 'TVL history'
   const chainBreakdownTitle = isStablecoin ? 'Supply by chain' : 'TVL by chain'
+  const hasRevenue =
+    data.revenue24h != null ||
+    data.revenue7d != null ||
+    data.revenue30d != null ||
+    data.revenueHistory.length >= 2
   const showFinancials =
     !isStablecoin &&
     (data.fees24h != null ||
       data.fees7d != null ||
       data.fees30d != null ||
-      data.revenue24h != null ||
-      data.revenue7d != null ||
-      data.revenue30d != null ||
+      hasRevenue ||
       data.dexVolume24h != null ||
       data.dexVolume7d != null ||
       data.dexVolume30d != null)
+  const revenueLabel = isChain ? 'Network revenue' : 'Revenue'
 
   return (
     <>
@@ -155,22 +159,40 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
           <p className="mb-2 text-sm font-medium">Financial activity</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {data.dexVolume24h != null ? (
-              <StatCell label="DEX volume 24h" value={formatCompactUsd(data.dexVolume24h)} />
+              <StatCell
+                label="DEX volume 24h"
+                value={formatCompactUsd(data.dexVolume24h)}
+              />
             ) : null}
             {data.dexVolume7d != null ? (
-              <StatCell label="DEX volume 7d" value={formatCompactUsd(data.dexVolume7d)} />
+              <StatCell
+                label="DEX volume 7d"
+                value={formatCompactUsd(data.dexVolume7d)}
+              />
             ) : null}
             {data.dexVolume30d != null ? (
-              <StatCell label="DEX volume 30d" value={formatCompactUsd(data.dexVolume30d)} />
+              <StatCell
+                label="DEX volume 30d"
+                value={formatCompactUsd(data.dexVolume30d)}
+              />
             ) : null}
             <StatCell label="Fees 24h" value={formatCompactUsd(data.fees24h)} />
             <StatCell label="Fees 7d" value={formatCompactUsd(data.fees7d)} />
             <StatCell label="Fees 30d" value={formatCompactUsd(data.fees30d)} />
-            {!isChain && !isStablecoin ? (
+            {hasRevenue ? (
               <>
-                <StatCell label="Revenue 24h" value={formatCompactUsd(data.revenue24h)} />
-                <StatCell label="Revenue 7d" value={formatCompactUsd(data.revenue7d)} />
-                <StatCell label="Revenue 30d" value={formatCompactUsd(data.revenue30d)} />
+                <StatCell
+                  label={`${revenueLabel} 24h`}
+                  value={formatCompactUsd(data.revenue24h)}
+                />
+                <StatCell
+                  label={`${revenueLabel} 7d`}
+                  value={formatCompactUsd(data.revenue7d)}
+                />
+                <StatCell
+                  label={`${revenueLabel} 30d`}
+                  value={formatCompactUsd(data.revenue30d)}
+                />
               </>
             ) : null}
           </div>
@@ -198,7 +220,10 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
       ) : null}
 
       {data.revenueHistory.length >= 2 ? (
-        <MetricHistoryChart title="Daily revenue" history={data.revenueHistory} />
+        <MetricHistoryChart
+          title={isChain ? 'Daily network revenue' : 'Daily revenue'}
+          history={data.revenueHistory}
+        />
       ) : null}
 
       {isProtocol ? (

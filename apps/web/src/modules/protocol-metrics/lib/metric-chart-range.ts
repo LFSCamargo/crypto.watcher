@@ -33,7 +33,9 @@ export function filterMetricHistory(
   if (history.length === 1) return history
 
   const lastTimestamp = history.at(-1)!.timestamp
-  const durationMs = METRIC_CHART_RANGE_OPTIONS.find((option) => option.id === range)!.durationMs
+  const durationMs = METRIC_CHART_RANGE_OPTIONS.find(
+    (option) => option.id === range,
+  )!.durationMs
   const startTimestamp = lastTimestamp - durationMs
   const filtered = history.filter((point) => point.timestamp >= startTimestamp)
 
@@ -51,7 +53,9 @@ export function computeMetricPeriodChange(history: TimeSeriesPoint[]): number | 
   return ((last - first) / first) * 100
 }
 
-export function toChartPoints(history: TimeSeriesPoint[]): { timestamp: number; price: number }[] {
+export function toChartPoints(
+  history: TimeSeriesPoint[],
+): { timestamp: number; price: number }[] {
   return history.map((point) => ({ timestamp: point.timestamp, price: point.value }))
 }
 

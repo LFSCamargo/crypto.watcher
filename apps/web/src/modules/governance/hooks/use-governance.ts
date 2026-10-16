@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { ApiError } from '../../../lib/api/client'
 import { governanceApi } from '../api/governance.api'
 
 export function useGovernanceProposals() {
@@ -10,5 +11,7 @@ export function useGovernanceProposal(onchainId: string | undefined) {
     queryKey: ['governance', 'proposals', onchainId],
     queryFn: () => governanceApi.get(onchainId ?? ''),
     enabled: Boolean(onchainId),
+    retry: (failureCount, error) =>
+      !(error instanceof ApiError && error.status < 500) && failureCount < 2,
   })
 }

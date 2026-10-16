@@ -17,9 +17,13 @@ describe('BlogIndexPage', () => {
     ).toBeInTheDocument()
     expect(screen.getByText(/featured/i)).toBeInTheDocument()
     expect(screen.getByText(/moody's of crypto/i)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /launch app/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /browse projects/i })).toHaveAttribute(
       'href',
       '/app',
+    )
+    expect(screen.getByRole('link', { name: /request a review/i })).toHaveAttribute(
+      'href',
+      '/app/analysis-request',
     )
   })
 

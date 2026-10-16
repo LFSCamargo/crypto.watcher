@@ -18,18 +18,13 @@ const staticRoutes: Record<string, Omit<SeoMeta, 'path'>> = {
     jsonLd: [websiteJsonLd(), organizationJsonLd()],
   },
   '/app': {
-    title: 'Safe Projects — Expert Risk Scores',
+    title: 'Browse Projects — Council Scores & Reference Assessments',
     description:
-      'Browse crypto projects reviewed by the Crypto Watcher governor council. Official risk scores, methodology and audit trail.',
+      'Browse projects reviewed by the Crypto Watcher governor council alongside reference assessments compiled from public sources. Official scores come only from council reports.',
     jsonLd: breadcrumbJsonLd([
       { name: 'Home', path: '/' },
-      { name: 'Safe Projects', path: '/app' },
+      { name: 'Projects', path: '/app' },
     ]),
-  },
-  '/app/in-analysis': {
-    title: 'Projects In Analysis',
-    description:
-      'Track crypto projects currently under expert governor review on Crypto Watcher.',
   },
   '/app/analysis-request': {
     title: 'Request a Project Review',
@@ -78,7 +73,8 @@ const staticRoutes: Record<string, Omit<SeoMeta, 'path'>> = {
   },
   '/auth/signup': {
     title: 'Create Account',
-    description: 'Create a Crypto Watcher account to comment, submit evidence and request reviews.',
+    description:
+      'Create a Crypto Watcher account to comment, submit evidence and request reviews.',
     noIndex: true,
   },
   '/auth/verify-otp': {
@@ -160,10 +156,10 @@ function matchReferenceProject(pathname: string): SeoMeta | undefined {
   if (!project) return undefined
 
   const path = `/app/reference/${project.slug}`
-  const description = `${project.name} (${project.symbol}) risk review — score ${project.score}/100. ${project.description}`
+  const description = `${project.name} (${project.symbol}) reference assessment — index ${project.score}/100, compiled from public sources; not a governor council report. ${project.description}`
 
   return withPath(path, {
-    title: `${project.name} Risk Review — Score ${project.score}/100`,
+    title: `${project.name} Reference Assessment — Index ${project.score}/100`,
     description,
     image: `/icons/${project.slug}.png`,
     jsonLd: [
@@ -175,7 +171,7 @@ function matchReferenceProject(pathname: string): SeoMeta | undefined {
       }),
       breadcrumbJsonLd([
         { name: 'Home', path: '/' },
-        { name: 'Safe Projects', path: '/app' },
+        { name: 'Projects', path: '/app' },
         { name: project.name, path },
       ]),
     ],
@@ -210,7 +206,8 @@ function matchReputation(pathname: string): SeoMeta | undefined {
   const path = `/app/u/${match[1]!}`
   return withPath(path, {
     title: 'Governor Reputation',
-    description: 'Council governor credentials and accountability weight on Crypto Watcher.',
+    description:
+      'Council governor credentials and accountability weight on Crypto Watcher.',
     ogType: 'profile',
     noIndex: true,
   })
@@ -255,7 +252,6 @@ export function getIndexablePaths(): string[] {
   const paths = new Set<string>([
     '/',
     '/app',
-    '/app/in-analysis',
     '/app/analysis-request',
     '/app/governance',
     '/blog',

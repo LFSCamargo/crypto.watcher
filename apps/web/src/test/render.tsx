@@ -16,7 +16,10 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   route?: string
 }
 
-export function renderWithProviders(ui: ReactElement, options: RenderWithProvidersOptions = {}) {
+export function renderWithProviders(
+  ui: ReactElement,
+  options: RenderWithProvidersOptions = {},
+) {
   const { route = '/', ...renderOptions } = options
   const queryClient = createTestQueryClient()
 

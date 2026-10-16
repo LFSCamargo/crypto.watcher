@@ -26,16 +26,24 @@ export const DocsLayout = lazy(() =>
   import('../modules/docs/layouts/docs-layout').then((m) => ({ default: m.DocsLayout })),
 )
 export const DocsIntroduction = lazy(() =>
-  import('../modules/docs/content/introduction').then((m) => ({ default: m.DocsIntroduction })),
+  import('../modules/docs/content/introduction').then((m) => ({
+    default: m.DocsIntroduction,
+  })),
 )
 export const DocsWhitepaper = lazy(() =>
-  import('../modules/docs/content/whitepaper').then((m) => ({ default: m.DocsWhitepaper })),
+  import('../modules/docs/content/whitepaper').then((m) => ({
+    default: m.DocsWhitepaper,
+  })),
 )
 export const DocsTokenomics = lazy(() =>
-  import('../modules/docs/content/tokenomics').then((m) => ({ default: m.DocsTokenomics })),
+  import('../modules/docs/content/tokenomics').then((m) => ({
+    default: m.DocsTokenomics,
+  })),
 )
 export const DocsGovernance = lazy(() =>
-  import('../modules/docs/content/governance').then((m) => ({ default: m.DocsGovernance })),
+  import('../modules/docs/content/governance').then((m) => ({
+    default: m.DocsGovernance,
+  })),
 )
 export const DocsFAQ = lazy(() =>
   import('../modules/docs/content/faq').then((m) => ({ default: m.DocsFAQ })),
@@ -45,10 +53,14 @@ export const BlogLayout = lazy(() =>
   import('../modules/blog/layouts/blog-layout').then((m) => ({ default: m.BlogLayout })),
 )
 export const BlogIndexPage = lazy(() =>
-  import('../modules/blog/pages/blog-index-page').then((m) => ({ default: m.BlogIndexPage })),
+  import('../modules/blog/pages/blog-index-page').then((m) => ({
+    default: m.BlogIndexPage,
+  })),
 )
 export const BlogPostPage = lazy(() =>
-  import('../modules/blog/pages/blog-post-page').then((m) => ({ default: m.BlogPostPage })),
+  import('../modules/blog/pages/blog-post-page').then((m) => ({
+    default: m.BlogPostPage,
+  })),
 )
 
 export const GovernancePage = lazy(() =>
@@ -63,7 +75,9 @@ export const GovernanceDetailPage = lazy(() =>
 )
 
 export const ProjectsPage = lazy(() =>
-  import('../modules/projects/pages/projects-page').then((m) => ({ default: m.ProjectsPage })),
+  import('../modules/projects/pages/projects-page').then((m) => ({
+    default: m.ProjectsPage,
+  })),
 )
 export const ProjectDetailPage = lazy(() =>
   import('../modules/projects/pages/project-detail-page').then((m) => ({
@@ -87,10 +101,6 @@ export const ReputationPage = lazy(() =>
   })),
 )
 
-export const VotingPage = lazy(() =>
-  import('../modules/voting/pages/voting-page').then((m) => ({ default: m.VotingPage })),
-)
-
 export const SignInPage = lazy(() =>
   import('../modules/auth/pages/sign-in-page').then((m) => ({ default: m.SignInPage })),
 )
@@ -98,7 +108,9 @@ export const SignUpPage = lazy(() =>
   import('../modules/auth/pages/sign-up-page').then((m) => ({ default: m.SignUpPage })),
 )
 export const OnboardingPage = lazy(() =>
-  import('../modules/auth/pages/onboarding-page').then((m) => ({ default: m.OnboardingPage })),
+  import('../modules/auth/pages/onboarding-page').then((m) => ({
+    default: m.OnboardingPage,
+  })),
 )
 export const ForgotPasswordPage = lazy(() =>
   import('../modules/auth/pages/forgot-password-page').then((m) => ({
@@ -111,14 +123,11 @@ export const ResetPasswordPage = lazy(() =>
   })),
 )
 export const VerifyOtpPage = lazy(() =>
-  import('../modules/auth/pages/verify-otp-page').then((m) => ({ default: m.VerifyOtpPage })),
-)
-
-export const InAnalysisPage = lazy(() =>
-  import('../modules/analysis/pages/in-analysis-page').then((m) => ({
-    default: m.InAnalysisPage,
+  import('../modules/auth/pages/verify-otp-page').then((m) => ({
+    default: m.VerifyOtpPage,
   })),
 )
+
 export const AnalysisRequestPage = lazy(() =>
   import('../modules/analysis/pages/analysis-request-page').then((m) => ({
     default: m.AnalysisRequestPage,
@@ -126,5 +135,7 @@ export const AnalysisRequestPage = lazy(() =>
 )
 
 export const ProfilePage = lazy(() =>
-  import('../modules/profile/pages/profile-page').then((m) => ({ default: m.ProfilePage })),
+  import('../modules/profile/pages/profile-page').then((m) => ({
+    default: m.ProfilePage,
+  })),
 )

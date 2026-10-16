@@ -73,8 +73,11 @@ export function ProtocolValuationPanel({
 
       {isChain ? (
         <p className="mb-3 text-xs text-muted-foreground">
-          Network-wide DeFi fees paid on this chain — not a single protocol&apos;s revenue. Revenue
-          capture, P/S, and governance scores do not apply at the chain level.
+          Network-wide fees paid on this chain
+          {valuation.revenueAnnualizedUsd != null
+            ? " and the share captured as revenue (validators / the protocol). This is not a single dapp's P&L."
+            : " — not a single protocol's revenue."}{' '}
+          P/S and governance scores do not apply at the chain level.
         </p>
       ) : null}
 
@@ -83,27 +86,32 @@ export function ProtocolValuationPanel({
           label={isChain ? 'Network fees (annualized)' : 'Fees (annualized)'}
           value={formatCompactUsd(valuation.feesAnnualizedUsd)}
         />
-        {!isChain ? (
+        {valuation.revenueAnnualizedUsd != null ? (
           <>
             <MetricRow
-              label="Revenue (annualized)"
+              label={isChain ? 'Network revenue (annualized)' : 'Revenue (annualized)'}
               value={formatCompactUsd(valuation.revenueAnnualizedUsd)}
             />
             <MetricRow
-              label="Revenue capture"
+              label={isChain ? 'Network revenue capture' : 'Revenue capture'}
               value={formatPercent(valuation.revenueCaptureRate)}
             />
             <MetricRow
-              label="Revenue growth (30d)"
+              label={isChain ? 'Network revenue growth (30d)' : 'Revenue growth (30d)'}
               value={formatPercentChange(valuation.revenueGrowth30d)}
             />
             <MetricRow
-              label="Revenue growth (1y)"
+              label={isChain ? 'Network revenue growth (1y)' : 'Revenue growth (1y)'}
               value={formatPercentChange(valuation.revenueGrowth1y)}
             />
-            <MetricRow label="Revenue / TVL" value={formatPercent(valuation.revenueToTvlRatio)} />
-            <MetricRow label="P/S ratio" value={formatRatio(valuation.priceToSalesRatio)} />
+            <MetricRow
+              label="Revenue / TVL"
+              value={formatPercent(valuation.revenueToTvlRatio)}
+            />
           </>
+        ) : null}
+        {!isChain ? (
+          <MetricRow label="P/S ratio" value={formatRatio(valuation.priceToSalesRatio)} />
         ) : null}
         <MetricRow label="Fee / TVL" value={formatPercent(valuation.feeToTvlRatio)} />
       </div>
@@ -113,7 +121,10 @@ export function ProtocolValuationPanel({
           <ScoreBar label="Fee sustainability" score={valuation.feeSustainabilityScore} />
           {!isChain ? (
             <>
-              <ScoreBar label="Governance quality" score={valuation.governanceQualityScore} />
+              <ScoreBar
+                label="Governance quality"
+                score={valuation.governanceQualityScore}
+              />
               <ScoreBar label="Security" score={valuation.securityScore} />
             </>
           ) : null}
@@ -121,7 +132,8 @@ export function ProtocolValuationPanel({
       ) : null}
 
       <p className="mt-3 text-xs text-muted-foreground">
-        Model {valuation.methodologyVersion} · ratios use SafeMath guards (no divide-by-zero).
+        Model {valuation.methodologyVersion} · ratios use SafeMath guards (no
+        divide-by-zero).
         {!isChain
           ? ' Governance is a diversification proxy until on-chain governance signals ship.'
           : null}

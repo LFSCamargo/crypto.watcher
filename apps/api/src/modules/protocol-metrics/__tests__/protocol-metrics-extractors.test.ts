@@ -102,7 +102,10 @@ describe('buildProtocolMetricsSnapshot extended fields', () => {
       },
       {
         total24h: 100_000,
-        totalDataChart: [[Math.floor(now / 1000) - DAY_MS / 1000, 90000], [Math.floor(now / 1000), 100_000]],
+        totalDataChart: [
+          [Math.floor(now / 1000) - DAY_MS / 1000, 90000],
+          [Math.floor(now / 1000), 100_000],
+        ],
       },
       {
         total24h: 50_000,

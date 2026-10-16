@@ -58,7 +58,9 @@ describe('protocol-metrics handlers', () => {
       cachedAt: '2024-01-01T00:00:00.000Z',
       expiresAt: '2024-01-01T01:00:00.000Z',
     }
-    vi.mocked(protocolMetricsService.getProjectProtocolMetrics).mockResolvedValue(snapshot)
+    vi.mocked(protocolMetricsService.getProjectProtocolMetrics).mockResolvedValue(
+      snapshot,
+    )
 
     const req = mockRequest({ params: { slug: 'aave' } })
     const res = mockResponse()

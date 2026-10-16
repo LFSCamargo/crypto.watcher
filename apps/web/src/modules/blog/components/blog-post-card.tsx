@@ -7,16 +7,22 @@ import { cn } from '../../../lib/utils'
 type BlogPostCardProps = {
   post: BlogPost
   featured?: boolean
+  headingLevel?: 'h2' | 'h3'
 }
 
-export function BlogPostCard({ post, featured = false }: BlogPostCardProps) {
+export function BlogPostCard({
+  post,
+  featured = false,
+  headingLevel = 'h2',
+}: BlogPostCardProps) {
   const readingTime = estimateReadingTime(post.content)
+  const Heading = headingLevel
 
   return (
     <Link
       to={`/blog/${post.slug}`}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card transition-all hover:border-foreground/20 hover:shadow-lg',
+        'glass-card-flat group flex h-full flex-col overflow-hidden rounded-3xl transition-all hover:border-foreground/20 hover:shadow-lg',
         featured && 'lg:flex-row lg:items-stretch',
       )}
     >
@@ -44,21 +50,24 @@ export function BlogPostCard({ post, featured = false }: BlogPostCardProps) {
             {readingTime} min read
           </span>
           {post.tags.slice(1).map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5">
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5"
+            >
               <Tag size={12} />
               {tag}
             </span>
           ))}
         </div>
 
-        <h2
+        <Heading
           className={cn(
-            'font-bold text-foreground transition-colors group-hover:text-primary',
+            'font-bold text-foreground transition-colors group-hover:text-primary-strong',
             featured ? 'text-2xl md:text-3xl' : 'text-lg',
           )}
         >
           {post.title}
-        </h2>
+        </Heading>
 
         <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
           {post.excerpt}
@@ -69,6 +78,7 @@ export function BlogPostCard({ post, featured = false }: BlogPostCardProps) {
           <ArrowRight
             size={16}
             className="transition-transform group-hover:translate-x-1"
+            aria-hidden
           />
         </span>
       </div>

@@ -79,7 +79,8 @@ export function useLinkPublicKey() {
   const setUser = useSession((state) => state.setUser)
 
   return useMutation({
-    mutationFn: (publicKey: string) => authApi.linkPublicKey(publicKey).then((r) => r.user),
+    mutationFn: (publicKey: string) =>
+      authApi.linkPublicKey(publicKey).then((r) => r.user),
     onSuccess: (user) => setUser(user),
   })
 }

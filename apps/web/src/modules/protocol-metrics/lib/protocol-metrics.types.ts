@@ -29,6 +29,20 @@ export interface ExploitRecord {
   returnedFunds: number | null
 }
 
+export type CompositeComponent =
+  | 'fundamentals'
+  | 'security'
+  | 'governance'
+  | 'value'
+  | 'feeSustainability'
+
+export interface CompositeBreakdownEntry {
+  component: CompositeComponent
+  score: number | null
+  /** Effective share of the composite (0–1); scored entries sum to 1. */
+  share: number
+}
+
 export interface ProtocolValuation {
   feesAnnualizedUsd: number | null
   revenueAnnualizedUsd: number | null
@@ -39,6 +53,7 @@ export interface ProtocolValuation {
   governanceQualityScore: number | null
   securityScore: number | null
   compositeScore: number | null
+  compositeBreakdown: CompositeBreakdownEntry[]
   revenueToTvlRatio: number | null
   feeToTvlRatio: number | null
   priceToSalesRatio: number | null

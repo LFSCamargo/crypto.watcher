@@ -14,7 +14,11 @@ import {
 import { DAY_MS } from './protocol-metrics-changes'
 import type { ChainTvlBreakdown, TimeSeriesPoint } from './protocol-metrics.types'
 import type { ProtocolValuation } from './protocol-metrics.types'
-import { PROTOCOL_VALUATION_METHODOLOGY } from './protocol-valuation.types'
+import {
+  PROTOCOL_VALUATION_METHODOLOGY,
+  type CompositeBreakdownEntry,
+  type CompositeComponent,
+} from './protocol-valuation.types'
 
 const WINDOW_30D = 30
 const WINDOW_365D = 365
@@ -108,12 +112,18 @@ function computeFeeSustainabilityScore(
 ): number | null {
   const feeYieldScore =
     annualizedFees != null && tvl > 0
-      ? clamp(((safeDivide(annualizedFees, tvl, 0) ?? 0) / TARGET_FEE_YIELD) * 100, 0, 100)
+      ? clamp(
+          ((safeDivide(annualizedFees, tvl, 0) ?? 0) / TARGET_FEE_YIELD) * 100,
+          0,
+          100,
+        )
       : null
 
   const windowStart = referenceTimestamp - WINDOW_30D * DAY_MS
   const dailyFees = feesHistory
-    .filter((point) => point.timestamp >= windowStart && point.timestamp <= referenceTimestamp)
+    .filter(
+      (point) => point.timestamp >= windowStart && point.timestamp <= referenceTimestamp,
+    )
     .map((point) => point.value)
     .filter((value) => value >= 0)
 
@@ -183,8 +193,38 @@ function computeValueScore(
   ])
 }
 
-export function computeProtocolValuation(input: ProtocolValuationInput): ProtocolValuation | null {
-  const referenceTimestamp = resolveReferenceTimestamp(input.feesHistory, input.revenueHistory)
+interface CompositeInput {
+  component: CompositeComponent
+  score: number | null
+  weight: number
+}
+
+function buildCompositeBreakdown(
+  components: CompositeInput[],
+): CompositeBreakdownEntry[] {
+  const applicable = components.filter(({ weight }) => weight > 0)
+  const scoredWeight = applicable.reduce(
+    (sum, { score, weight }) =>
+      score != null && Number.isFinite(score) ? sum + weight : sum,
+    0,
+  )
+  return applicable.map(({ component, score, weight }) => {
+    const finiteScore = score == null ? null : finiteOrNull(score)
+    return {
+      component,
+      score: finiteScore,
+      share: finiteScore != null && scoredWeight > 0 ? weight / scoredWeight : 0,
+    }
+  })
+}
+
+export function computeProtocolValuation(
+  input: ProtocolValuationInput,
+): ProtocolValuation | null {
+  const referenceTimestamp = resolveReferenceTimestamp(
+    input.feesHistory,
+    input.revenueHistory,
+  )
   const hasFinancials =
     input.fees30d != null ||
     input.revenue30d != null ||
@@ -248,12 +288,16 @@ export function computeProtocolValuation(input: ProtocolValuationInput): Protoco
 
   const revenueToTvlRatio =
     revenueAnnualizedUsd != null && input.tvl > 0
-      ? finiteOrNull(safeMultiply(safeDivide(revenueAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0)
+      ? finiteOrNull(
+          safeMultiply(safeDivide(revenueAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0,
+        )
       : null
 
   const feeToTvlRatio =
     feesAnnualizedUsd != null && input.tvl > 0
-      ? finiteOrNull(safeMultiply(safeDivide(feesAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0)
+      ? finiteOrNull(
+          safeMultiply(safeDivide(feesAnnualizedUsd, input.tvl, 0) ?? 0, 100) ?? 0,
+        )
       : null
 
   const priceToSalesRatio =
@@ -272,13 +316,28 @@ export function computeProtocolValuation(input: ProtocolValuationInput): Protoco
     priceToSalesRatio,
   )
 
-  const compositeScore = weightedAverage([
-    { value: fundamentalsScore, weight: 0.35 },
-    { value: securityScore, weight: input.entityType === 'protocol' ? 0.3 : 0 },
-    { value: governanceQualityScore, weight: input.entityType === 'stablecoin' ? 0 : 0.15 },
-    { value: valueScore, weight: 0.2 },
-    { value: feeSustainabilityScore, weight: input.entityType === 'chain' ? 0.35 : 0 },
-  ])
+  const compositeComponents: CompositeInput[] = [
+    { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
+    {
+      component: 'security',
+      score: securityScore,
+      weight: input.entityType === 'protocol' ? 0.3 : 0,
+    },
+    {
+      component: 'governance',
+      score: governanceQualityScore,
+      weight: input.entityType === 'stablecoin' ? 0 : 0.15,
+    },
+    { component: 'value', score: valueScore, weight: 0.2 },
+    {
+      component: 'feeSustainability',
+      score: feeSustainabilityScore,
+      weight: input.entityType === 'chain' ? 0.35 : 0,
+    },
+  ]
+  const compositeScore = weightedAverage(
+    compositeComponents.map(({ score, weight }) => ({ value: score, weight })),
+  )
 
   if (
     feesAnnualizedUsd == null &&
@@ -300,6 +359,7 @@ export function computeProtocolValuation(input: ProtocolValuationInput): Protoco
     governanceQualityScore,
     securityScore,
     compositeScore,
+    compositeBreakdown: buildCompositeBreakdown(compositeComponents),
     revenueToTvlRatio,
     feeToTvlRatio,
     priceToSalesRatio,

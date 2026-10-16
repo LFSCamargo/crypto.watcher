@@ -25,7 +25,10 @@ describe('ProjectSearchResults', () => {
       />,
     )
 
-    expect(screen.getByText(/Type to search 100\+ reviewed projects/i)).toBeInTheDocument()
+    expect(
+      screen.getByText('Search council-reviewed projects and reference assessments'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/100\+/)).not.toBeInTheDocument()
   })
 
   it('shows curated matches and handles selection', async () => {
@@ -43,6 +46,7 @@ describe('ProjectSearchResults', () => {
     )
 
     expect(screen.getByText('Stellar')).toBeInTheDocument()
+    expect(screen.getByText('Reference')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Stellar/i }))
     expect(onSelect).toHaveBeenCalledWith('/app/reference/stellar')
   })

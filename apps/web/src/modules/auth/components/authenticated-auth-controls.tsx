@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IN_ANALYSIS_HREF } from '../../../components/layout/navigation'
 import { toast } from 'sonner'
 import {
+  RiAddLine,
   RiCompass3Line,
   RiLogoutBoxRLine,
   RiShieldCheckLine,
@@ -43,15 +45,22 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-1.5 transition-colors hover:bg-secondary sm:pr-3"
+          className="flex items-center gap-2 rounded-full border border-foreground/10 bg-background/60 py-1 pl-1 pr-1.5 transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:pr-3"
         >
           <Avatar className="h-8 w-8">
-            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt={displayName} /> : null}
-            <AvatarFallback className="bg-primary text-xs font-bold text-primary-foreground">
+            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
+            <AvatarFallback
+              aria-hidden
+              className="bg-primary text-xs font-bold text-primary-foreground"
+            >
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden max-w-[120px] truncate text-sm font-semibold sm:inline">
+          <span className="sr-only">Account menu for {displayName}</span>
+          <span
+            aria-hidden
+            className="hidden max-w-[120px] truncate text-sm font-semibold sm:inline"
+          >
             {displayName}
           </span>
         </button>
@@ -77,9 +86,13 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
           <RiUserLine className="h-4 w-4" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate('/app/in-analysis')}>
+        <DropdownMenuItem onSelect={() => navigate('/app/analysis-request')}>
+          <RiAddLine className="h-4 w-4" />
+          Request a review
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate(IN_ANALYSIS_HREF)}>
           <RiCompass3Line className="h-4 w-4" />
-          In Analysis
+          Review queue
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
@@ -102,7 +115,7 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
             event.preventDefault()
             void handleLogout()
           }}
-          className="text-destructive focus:bg-destructive/10"
+          className="text-destructive-strong focus:bg-destructive/10"
         >
           <RiLogoutBoxRLine className="h-4 w-4" />
           Sign out

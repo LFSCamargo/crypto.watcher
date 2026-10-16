@@ -1,5 +1,20 @@
 export const PROTOCOL_VALUATION_METHODOLOGY = 'CW-Valuation-v1'
 
+export type CompositeComponent =
+  | 'fundamentals'
+  | 'security'
+  | 'governance'
+  | 'value'
+  | 'feeSustainability'
+
+export interface CompositeBreakdownEntry {
+  component: CompositeComponent
+  /** Component score 0–100, or null when the source data is missing. */
+  score: number | null
+  /** Effective share of the composite (0–1); scored entries sum to 1. */
+  share: number
+}
+
 export interface ProtocolValuation {
   /** Sum of daily fees over the trailing window, extrapolated to 365 days. */
   feesAnnualizedUsd: number | null
@@ -19,6 +34,8 @@ export interface ProtocolValuation {
   securityScore: number | null
   /** Weighted composite 0–100 from fundamentals, security and governance. */
   compositeScore: number | null
+  /** Components that apply to this entity type, in display order. */
+  compositeBreakdown: CompositeBreakdownEntry[]
   /** Annual revenue ÷ TVL (%). */
   revenueToTvlRatio: number | null
   /** Annual fees ÷ TVL (%). */

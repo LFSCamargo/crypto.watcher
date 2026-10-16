@@ -9,7 +9,7 @@ export function DocsList({ items }: { items: ReactNode[] }) {
           <CheckCircle
             size={18}
             weight="fill"
-            className="mt-0.5 shrink-0 text-primary"
+            className="mt-0.5 shrink-0 text-primary-strong"
           />
           <span className="leading-relaxed">{item}</span>
         </li>

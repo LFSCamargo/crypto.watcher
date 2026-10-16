@@ -1,20 +1,22 @@
-import { useEffect, useState, type KeyboardEvent } from 'react'
+import { useEffect } from 'react'
+import { useCommandPaletteStore } from '../../store/command-palette'
 
 export function useCommandPalette() {
-  const [open, setOpen] = useState(false)
+  const open = useCommandPaletteStore((state) => state.open)
+  const setOpen = useCommandPaletteStore((state) => state.setOpen)
+  const toggle = useCommandPaletteStore((state) => state.toggle)
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault()
-        setOpen((value) => !value)
+        toggle()
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown as unknown as EventListener)
-    return () =>
-      document.removeEventListener('keydown', handleKeyDown as unknown as EventListener)
-  }, [])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [toggle])
 
   return { open, setOpen }
 }

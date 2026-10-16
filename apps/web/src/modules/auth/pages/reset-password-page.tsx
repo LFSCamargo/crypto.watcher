@@ -1,10 +1,19 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { authApi } from '../api/auth.api'
 import { AuthShell } from '../components/auth-shell'
-import { Button, Card, Input, Label } from '../../../components/ui'
+import { FormAlert } from '../../../components/ui/form-alert'
+import { PasswordStrengthField } from '../components/password-strength-field'
+import { authErrorMessage, isApiStatus } from '../lib/auth-error-message'
+import { passwordsMatch } from '../lib/password-strength'
+import { Button } from '../../../components/ui'
+
+const requestNewLink = (
+  <Link to="/auth/forgot-password" className="font-semibold underline underline-offset-4">
+    Request a new link
+  </Link>
+)
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -12,20 +21,33 @@ export function ResetPasswordPage() {
   const token = searchParams.get('token') ?? ''
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [error, setError] = useState<ReactNode>()
 
   const reset = useMutation({
     mutationFn: () => authApi.resetPassword({ token, password }),
-    onSuccess: () => {
-      toast.success('Password updated — sign in with your new password.')
-      navigate('/auth/signin')
-    },
-    onError: () => toast.error('This reset link is invalid or expired.'),
+    onSuccess: () => navigate('/auth/signin?reset=1', { replace: true }),
+    onError: (caught) =>
+      setError(
+        isApiStatus(caught, 400) ? (
+          <>
+            <p>This reset link is invalid or has expired.</p>
+            {requestNewLink}
+          </>
+        ) : (
+          authErrorMessage(
+            caught,
+            {},
+            'We couldn’t update your password. Please try again.',
+          )
+        ),
+      ),
   })
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (password !== confirm) {
-      toast.error('Passwords do not match')
+    setError(undefined)
+    if (!passwordsMatch(password, confirm)) {
+      setError('Passwords do not match.')
       return
     }
     reset.mutate()
@@ -34,7 +56,7 @@ export function ResetPasswordPage() {
   return (
     <AuthShell
       title="Choose a new password"
-      subtitle="Set a new password for your account."
+      subtitle="Reset links work once and expire after 30 minutes."
       footer={
         <Link to="/auth/signin" className="font-semibold text-foreground hover:underline">
           Back to sign in
@@ -42,39 +64,20 @@ export function ResetPasswordPage() {
       }
     >
       {!token ? (
-        <Card className="p-6 text-sm text-muted-foreground">
-          This reset link is missing its token. Request a new one from the{' '}
-          <Link to="/auth/forgot-password" className="font-semibold text-foreground hover:underline">
-            forgot password
-          </Link>{' '}
-          page.
-        </Card>
+        <FormAlert>
+          <p>This reset link is incomplete. Open the link from your email again, or:</p>
+          {requestNewLink}
+        </FormAlert>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="password">New password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm">Confirm password</Label>
-            <Input
-              id="confirm"
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              minLength={8}
-              required
-            />
-          </div>
+          {error ? <FormAlert>{error}</FormAlert> : null}
+          <PasswordStrengthField
+            password={password}
+            confirmPassword={confirm}
+            onPasswordChange={setPassword}
+            onConfirmPasswordChange={setConfirm}
+            passwordLabel="New password"
+          />
           <Button type="submit" className="w-full" disabled={reset.isPending}>
             {reset.isPending ? 'Updating…' : 'Update password'}
           </Button>

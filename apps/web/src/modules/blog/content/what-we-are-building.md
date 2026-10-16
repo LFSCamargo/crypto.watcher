@@ -15,7 +15,7 @@ Each project page shows **lifecycle status** (`In analysis → Under review → 
 We built the full governor pipeline:
 
 - **In Analysis** queue for projects awaiting investigation
-- **Analysis Request** flow for paid review submissions
+- **Review request** flow for submitting projects to the council (free during launch)
 - Backend workflow for review requests with role-gated governor actions
 - Conflict-of-interest disclosure fields on published reports
 
@@ -38,7 +38,7 @@ Each reviewed project can anchor published outcomes in a **per-project on-chain 
 
 ### Auth, profiles, and community
 
-Users can register with email/password, link a wallet for protocol governance votes, and maintain a public profile. Onboarding walks new users through search, expert scores, evidence submission, and optional wallet linking.
+Users can register with email/password, link a wallet for protocol governance votes, and maintain a public profile. Onboarding walks new users through search, expert scores, project discussion, and optional wallet linking.
 
 ## Platform and engineering
 
@@ -65,7 +65,7 @@ These show up constantly in crypto. We chose the harder path: **credentialed rev
 
 ## What's next
 
-The MVP launch covers catalog, expert scores, governor workflow, public comments, evidence submission, on-chain registry, and protocol governance. Phase 1 deepens reviewer accountability — reputation tracking, appeals, whistleblowing workflows, and notification center.
+The MVP launch covers catalog, expert scores, governor workflow, public comments with shared evidence, on-chain registry, and protocol governance. Phase 1 deepens reviewer accountability — reputation tracking, appeals, whistleblowing workflows, and notification center.
 
 We will share each milestone here. If you want the full phase breakdown, read [Where we're going](/blog/where-we-are-going).
 

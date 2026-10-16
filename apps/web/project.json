@@ -11,8 +11,12 @@
     },
     "test": { "command": "vitest run --coverage", "options": { "cwd": "apps/web" } },
     "test:unit": { "command": "vitest run", "options": { "cwd": "apps/web" } },
-    "lint": { "command": "eslint src", "options": { "cwd": "apps/web" } },
-    "typecheck": { "command": "tsc --noEmit", "options": { "cwd": "apps/web" } },
+    "test:e2e": { "command": "playwright test", "options": { "cwd": "apps/web" } },
+    "lint": { "command": "eslint src e2e playwright.config.ts", "options": { "cwd": "apps/web" } },
+    "typecheck": {
+      "command": "tsc --noEmit && tsc -p tsconfig.e2e.json",
+      "options": { "cwd": "apps/web" }
+    },
     "lighthouse": {
       "command": "tsx scripts/run-lighthouse.ts",
       "options": { "cwd": "apps/web" },

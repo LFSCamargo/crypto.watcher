@@ -17,6 +17,15 @@ const project = {
 }
 
 describe('ProjectCard', () => {
+  it('labels council projects and links to the project page', () => {
+    renderWithProviders(<ProjectCard project={project} />)
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      `/app/projects/${project.slug}`,
+    )
+    expect(screen.getByText('Council project')).toBeInTheDocument()
+  })
+
   it('renders project metadata and lifecycle label', () => {
     renderWithProviders(<ProjectCard project={project} />)
 
@@ -32,12 +41,21 @@ describe('ProjectCard', () => {
     expect(screen.getByText('No score yet')).toBeInTheDocument()
   })
 
+  it('points to the report when a published score is not in the list payload', () => {
+    renderWithProviders(
+      <ProjectCard project={{ ...project, state: 'analyzed', score: undefined }} />,
+    )
+
+    expect(screen.getByText('Score on the report')).toBeInTheDocument()
+    expect(screen.queryByText('No score yet')).not.toBeInTheDocument()
+  })
+
   it('maps lifecycle states to badge variants', () => {
     const states = [
-      { state: 'voting' as const, label: 'Voting' },
-      { state: 'ready' as const, label: 'Ready for voting' },
-      { state: 'closed' as const, label: 'Voting closed' },
-      { state: 'analyzed' as const, label: 'Analyzed' },
+      { state: 'ready' as const, label: 'Awaiting governor review' },
+      { state: 'voting' as const, label: 'Governor review' },
+      { state: 'closed' as const, label: 'Report pending' },
+      { state: 'analyzed' as const, label: 'Report published' },
     ]
 
     for (const { state, label } of states) {

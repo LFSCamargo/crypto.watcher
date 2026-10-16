@@ -79,7 +79,7 @@ export function projectReviewJsonLd(input: {
       },
       author: {
         '@type': 'Organization',
-        name: `${SITE_NAME} Governor Council`,
+        name: SITE_NAME,
       },
     },
   }

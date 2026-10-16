@@ -28,7 +28,7 @@ export function buildProjectSearchResults(
     (project) => ({
       key: `reference-${project.slug}`,
       title: project.name,
-      subtitle: `${project.symbol} · Safety score ${project.score}%`,
+      subtitle: `${project.symbol} · Reference index ${project.score}/100`,
       kind: 'reference',
       to: `/app/reference/${project.slug}`,
       symbol: project.symbol,
@@ -51,5 +51,5 @@ export function buildProjectSearchResults(
       slug: project.slug,
     }))
 
-  return [...referenceResults, ...projectResults].slice(0, limit)
+  return [...projectResults, ...referenceResults].slice(0, limit)
 }

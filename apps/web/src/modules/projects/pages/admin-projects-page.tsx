@@ -1,147 +1,56 @@
-import { useState, type FormEvent } from 'react'
-import { toast } from 'sonner'
-import { RiAddLine, RiRefreshLine } from '@remixicon/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import type { ProjectState } from '../../../lib/api/types'
+import { Link } from 'react-router-dom'
+import { Button } from '../../../components/ui'
 import { useSession } from '../../../store/session'
-import { projectsApi } from '../api/projects.api'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Textarea,
-} from '../../../components/ui'
+import { useAuthLinks } from '../../auth/hooks/use-auth-links'
+import { AdminCreateProjectForm } from '../components/admin-create-project-form'
+import { AdminTransitionForm } from '../components/admin-transition-form'
 
 export function AdminProjectsPage() {
   const user = useSession((state) => state.user)
-  const queryClient = useQueryClient()
-  const [name, setName] = useState('')
-  const [chainId, setChainId] = useState(84532)
-  const [description, setDescription] = useState('')
-  const [transitionId, setTransitionId] = useState('')
-  const [state, setState] = useState<ProjectState>('ready')
+  const { signInHref } = useAuthLinks()
 
-  const createProject = useMutation({
-    mutationFn: projectsApi.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  })
-  const transitionProject = useMutation({
-    mutationFn: () => projectsApi.transition(transitionId, { state }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projects'] }),
-  })
-
-  if (user?.role !== 'team' && user?.role !== 'admin') {
+  if (!user) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">Team or admin access required.</p>
-      </Card>
+      <section className="glass-card mx-auto max-w-lg space-y-3 rounded-3xl p-8 text-center">
+        <h1 className="text-xl font-semibold">Sign in to manage projects</h1>
+        <p className="text-sm text-muted-foreground">
+          Project tools are for the platform team.
+        </p>
+        <Button asChild className="rounded-full">
+          <Link to={signInHref}>Sign in</Link>
+        </Button>
+      </section>
     )
   }
 
-  const handleCreate = async (event: FormEvent) => {
-    event.preventDefault()
-    await createProject.mutateAsync({ name, chainId, description })
-    setName('')
-    setDescription('')
-    toast.success('Project created')
-  }
-
-  const handleTransition = async (event: FormEvent) => {
-    event.preventDefault()
-    await transitionProject.mutateAsync()
-    setTransitionId('')
-    toast.success('Project transitioned')
+  if (user.role !== 'team' && user.role !== 'admin') {
+    return (
+      <section className="glass-card mx-auto max-w-lg space-y-3 rounded-3xl p-8 text-center">
+        <h1 className="text-xl font-semibold">Team or admin access required</h1>
+        <p className="text-sm text-muted-foreground">
+          Your account can read reports, join discussions and request reviews. Creating
+          and moving projects is limited to the platform team.
+        </p>
+        <Button asChild variant="outline" className="rounded-full">
+          <Link to="/app">Browse projects</Link>
+        </Button>
+      </section>
+    )
   }
 
   return (
-    <motion.div
-      className="grid gap-6 lg:grid-cols-2"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RiAddLine className="h-5 w-5" />
-            Create Project
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleCreate}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Project Name</label>
-              <Input
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Enter project name"
-                value={name}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Chain ID</label>
-              <Input
-                onChange={(event) => setChainId(Number(event.target.value))}
-                placeholder="Chain ID"
-                type="number"
-                value={chainId}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Project description"
-                value={description}
-              />
-            </div>
-            <Button type="submit" className="w-full gap-2 rounded-full">
-              <RiAddLine className="h-4 w-4" />
-              Create
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RiRefreshLine className="h-5 w-5" />
-            Transition Project
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleTransition}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Project UUID</label>
-              <Input
-                onChange={(event) => setTransitionId(event.target.value)}
-                placeholder="Enter project UUID"
-                value={transitionId}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">New State</label>
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-secondary px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                onChange={(event) => setState(event.target.value as ProjectState)}
-                value={state}
-              >
-                <option value="ready">Ready</option>
-                <option value="voting">Voting</option>
-                <option value="closed">Closed</option>
-                <option value="analyzed">Analyzed</option>
-              </select>
-            </div>
-            <Button type="submit" className="w-full gap-2 rounded-full" variant="secondary">
-              <RiRefreshLine className="h-4 w-4" />
-              Transition
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <header className="space-y-2">
+        <h1 className="heading-2">Manage projects</h1>
+        <p className="body-large max-w-2xl">
+          Add council projects and move them through the review lifecycle. Scores are
+          published by the governor council, not from this page.
+        </p>
+      </header>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AdminCreateProjectForm />
+        <AdminTransitionForm />
+      </div>
+    </div>
   )
 }

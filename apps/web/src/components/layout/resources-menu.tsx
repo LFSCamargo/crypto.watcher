@@ -1,78 +1,31 @@
 import { Link } from 'react-router-dom'
 import {
-  RiBookOpenLine,
-  RiCoinsLine,
-  RiFileTextLine,
-  RiGovernmentLine,
-  RiNewsLine,
-  RiQuestionLine,
-} from '@remixicon/react'
-import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '../ui/navigation-menu'
-
-const resources = [
-  {
-    to: '/blog',
-    icon: RiNewsLine,
-    title: 'Blog',
-    description: 'Launch story, updates and roadmap news.',
-  },
-  {
-    to: '/docs',
-    icon: RiBookOpenLine,
-    title: 'Introduction',
-    description: 'What Crypto Watcher is and how reviews work.',
-  },
-  {
-    to: '/docs/whitepaper',
-    icon: RiFileTextLine,
-    title: 'Whitepaper',
-    description: 'The thesis behind our risk-review model.',
-  },
-  {
-    to: '/docs/tokenomics',
-    icon: RiCoinsLine,
-    title: 'Tokenomics',
-    description: 'Protocol governance and reviewer council policy.',
-  },
-  {
-    to: '/docs/governance',
-    icon: RiGovernmentLine,
-    title: 'Governance',
-    description: 'Expert council reviews and protocol governance.',
-  },
-  {
-    to: '/docs/faq',
-    icon: RiQuestionLine,
-    title: 'FAQ',
-    description: 'Common questions, fees and safety scores.',
-  },
-]
+import { ToneIcon } from '../ui/tone-icon'
+import { resourceNavItems } from './navigation'
 
 export function ResourcesMenu() {
   return (
-    <NavigationMenu>
+    <NavigationMenu aria-label="Resources">
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[420px] gap-1 p-2 sm:grid-cols-2">
-              {resources.map((item) => (
-                <li key={item.to}>
+            <ul className="grid w-[440px] gap-1 p-2 sm:grid-cols-2">
+              {resourceNavItems.map((item) => (
+                <li key={item.href}>
                   <Link
-                    to={item.to}
-                    className="flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-secondary"
+                    to={item.href}
+                    className="flex items-start gap-3 rounded-2xl p-3 transition-colors hover:bg-foreground/5 focus-visible:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-foreground">
-                      <item.icon className="h-5 w-5" />
-                    </span>
+                    <ToneIcon icon={item.icon} tone={item.tone} />
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold">{item.title}</span>
+                      <span className="block text-sm font-semibold">{item.label}</span>
                       <span className="block text-xs text-muted-foreground">
                         {item.description}
                       </span>

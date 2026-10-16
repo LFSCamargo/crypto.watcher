@@ -20,7 +20,7 @@ export function ProjectSearchResults({
   onSelect,
   onHover,
   className,
-  emptyQueryMessage = 'Type to search 100+ reviewed projects',
+  emptyQueryMessage = 'Search council-reviewed projects and reference assessments',
 }: ProjectSearchResultsProps) {
   const trimmedQuery = query.trim()
 
@@ -62,7 +62,13 @@ export function ProjectSearchResults({
                 {result.subtitle}
               </span>
             </span>
-            <RiArrowRightUpLine className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              {result.kind === 'project' ? 'Council' : 'Reference'}
+            </span>
+            <RiArrowRightUpLine
+              aria-hidden
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+            />
           </button>
         </li>
       ))}

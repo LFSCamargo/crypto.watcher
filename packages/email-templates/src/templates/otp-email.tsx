@@ -27,7 +27,8 @@ export function OtpEmail({ code, purpose, expiresMinutes, logoUrl }: OtpEmailPro
         </Text>
       </Section>
       <Text className="m-0 mb-3 text-sm leading-5 text-muted-foreground">
-        This code expires in {expiresMinutes} minutes.
+        This code expires in {expiresMinutes} minutes. Requesting a new code makes earlier codes
+        stop working.
       </Text>
       <Text className="m-0 text-sm leading-5 text-muted-foreground">
         If you did not request this code, you can safely ignore this email.

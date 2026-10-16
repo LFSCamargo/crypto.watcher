@@ -11,7 +11,7 @@ export function DocsSteps({
       {steps.map((step, index) => (
         <li key={index}>
           <Card className="flex gap-4 p-4">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary-strong">
               {index + 1}
             </span>
             <div className="space-y-1">

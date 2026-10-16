@@ -1,0 +1,209 @@
+import { useEffect, useRef, useState } from 'react'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { RiPauseLine, RiPlayLine } from '@remixicon/react'
+import { Button, type Tone } from '../../../components/ui'
+import { cn } from '../../../lib/utils'
+import { lifecycleSteps } from '../lib/lifecycle-steps'
+import { SectionGlow } from './section-glow'
+import { SectionHeading } from './section-heading'
+
+const STEP_MS = 4000
+const LAST = lifecycleSteps.length - 1
+
+const nodeTone: Record<Tone, string> = {
+  amber: 'bg-tone-amber text-foreground ring-tone-amber/30',
+  coral: 'bg-tone-coral text-white ring-tone-coral/30',
+  violet: 'bg-tone-violet text-white ring-tone-violet/30',
+  sky: 'bg-tone-sky text-white ring-tone-sky/30',
+  teal: 'bg-tone-teal text-white ring-tone-teal/30',
+  pink: 'bg-tone-pink text-white ring-tone-pink/30',
+}
+
+const panelTone: Record<Tone, string> = {
+  amber: 'text-tone-amber-strong',
+  coral: 'text-tone-coral-strong',
+  violet: 'text-tone-violet-strong',
+  sky: 'text-tone-sky-strong',
+  teal: 'text-tone-teal-strong',
+  pink: 'text-tone-pink-strong',
+}
+
+export function LifecycleSection() {
+  const reducedMotion = useReducedMotion()
+  const [active, setActive] = useState(0)
+  const [playing, setPlaying] = useState(!reducedMotion)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(trackRef, { amount: 0.4 })
+  const touring = playing && inView
+
+  useEffect(() => {
+    if (!touring) return
+    const timer = window.setTimeout(
+      () => setActive((step) => (step === LAST ? 0 : step + 1)),
+      STEP_MS,
+    )
+    return () => window.clearTimeout(timer)
+  }, [touring, active])
+
+  const step = lifecycleSteps[active] ?? lifecycleSteps[0]!
+  const progress = `${(active / LAST) * 80}%`
+
+  return (
+    <section
+      aria-labelledby="lifecycle-title"
+      className="relative overflow-hidden border-t border-border bg-card/40"
+    >
+      <SectionGlow
+        spots={[
+          { tone: 'coral', at: '15% 80%' },
+          { tone: 'sky', at: '85% 20%' },
+        ]}
+      />
+      <div className="container-wide section-padding relative">
+        <SectionHeading
+          id="lifecycle-title"
+          eyebrow="How a review works"
+          tone="sky"
+          title="From request to published score"
+          description="Follow a project through the five stages — or pick one to see who does what."
+        />
+
+        <div ref={trackRef} className="relative">
+          <div className="mb-6 flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="gap-1.5 rounded-full"
+              onClick={() => setPlaying((value) => !value)}
+            >
+              {playing ? (
+                <RiPauseLine aria-hidden className="h-4 w-4" />
+              ) : (
+                <RiPlayLine aria-hidden className="h-4 w-4" />
+              )}
+              {playing ? 'Pause tour' : 'Play tour'}
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute left-[10%] right-[10%] top-6 hidden h-1 rounded-full bg-border md:block"
+            />
+            <div
+              aria-hidden
+              className="absolute left-[10%] top-6 hidden h-1 rounded-full bg-gradient-to-r from-tone-amber via-tone-violet to-tone-teal transition-[width] duration-700 ease-glass md:block"
+              style={{ width: progress }}
+            />
+            <span
+              aria-hidden
+              className="absolute top-[0.85rem] z-10 hidden h-[2.3rem] w-[2.3rem] -translate-x-1/2 rounded-full bg-tone-amber/25 blur-md transition-[left] duration-700 ease-glass md:block"
+              style={{ left: `calc(10% + ${active * 20}%)` }}
+            />
+
+            <ol
+              aria-label="Review lifecycle"
+              className="relative grid gap-3 md:grid-cols-5"
+            >
+              {lifecycleSteps.map((item, index) => {
+                const reached = index <= active
+                const current = index === active
+                return (
+                  <li
+                    key={item.title}
+                    className={cn(
+                      'relative flex items-center gap-4 rounded-2xl p-3 transition-colors md:flex-col md:gap-3 md:text-center',
+                      current
+                        ? 'bg-background shadow-sm ring-1 ring-border'
+                        : 'hover:bg-background/60',
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-500 ease-glass',
+                        reached
+                          ? nodeTone[item.tone]
+                          : 'bg-background text-muted-foreground ring-border',
+                        current && 'scale-110',
+                      )}
+                    >
+                      {index + 1}
+                    </span>
+                    <h3 className="font-bold">
+                      <button
+                        type="button"
+                        aria-current={current ? 'step' : undefined}
+                        onClick={() => {
+                          setActive(index)
+                          setPlaying(false)
+                        }}
+                        className="rounded after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                      >
+                        {item.title}
+                      </button>
+                    </h3>
+                    {current && touring && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-x-4 bottom-1.5 h-0.5 overflow-hidden rounded-full bg-border"
+                      >
+                        <span
+                          key={active}
+                          className="block h-full origin-left animate-step-progress bg-foreground/40"
+                          style={{ ['--step-duration' as string]: `${STEP_MS}ms` }}
+                        />
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+
+          <div
+            role="region"
+            aria-label={`Step ${active + 1} of ${lifecycleSteps.length}: ${step.title}`}
+            className="mt-6 overflow-hidden rounded-3xl border border-border bg-background p-6 md:p-8"
+          >
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center"
+            >
+              <div className="space-y-2">
+                <p
+                  className={cn(
+                    'text-sm font-bold uppercase tracking-widest',
+                    panelTone[step.tone],
+                  )}
+                >
+                  Step {active + 1}
+                </p>
+                <p className="text-2xl font-bold md:text-3xl">{step.title}</p>
+                <p className="text-muted-foreground">{step.description}</p>
+              </div>
+              <dl className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Who acts', step.actor],
+                  ['What you see', step.youSee],
+                  ['Result', step.result],
+                ].map(([term, value]) => (
+                  <div key={term} className="rounded-2xl bg-muted/50 p-4">
+                    <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {term}
+                    </dt>
+                    <dd className="text-sm font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

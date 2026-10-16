@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { ApiError } from '../../../lib/api/client'
 import type { ProjectState } from '../../../lib/api/types'
 import { projectsApi } from '../api/projects.api'
 
@@ -16,5 +17,7 @@ export function useProject(slug: string | undefined) {
     queryKey: ['projects', slug],
     queryFn: () => projectsApi.getBySlug(slug ?? ''),
     enabled: Boolean(slug),
+    retry: (failureCount, error) =>
+      !(error instanceof ApiError && error.status < 500) && failureCount < 2,
   })
 }

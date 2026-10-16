@@ -14,22 +14,22 @@ const levelStyles: Record<
   weak: {
     bar: 'bg-destructive',
     label: 'Weak',
-    text: 'text-destructive',
+    text: 'text-destructive-strong',
   },
   fair: {
     bar: 'bg-warning',
     label: 'Fair',
-    text: 'text-warning',
+    text: 'text-warning-strong',
   },
   good: {
     bar: 'bg-primary',
     label: 'Good',
-    text: 'text-primary',
+    text: 'text-primary-strong',
   },
   strong: {
     bar: 'bg-success',
     label: 'Strong',
-    text: 'text-success',
+    text: 'text-success-strong',
   },
 }
 
@@ -40,6 +40,7 @@ interface PasswordStrengthFieldProps {
   onConfirmPasswordChange: (value: string) => void
   passwordId?: string
   confirmId?: string
+  passwordLabel?: string
 }
 
 export function PasswordStrengthField({
@@ -49,16 +50,16 @@ export function PasswordStrengthField({
   onConfirmPasswordChange,
   passwordId = 'password',
   confirmId = 'confirm-password',
+  passwordLabel = 'Password',
 }: PasswordStrengthFieldProps) {
   const strength = analyzePasswordStrength(password)
   const matched = passwordsMatch(password, confirmPassword)
-  const activeStyle =
-    strength.level === 'empty' ? null : levelStyles[strength.level]
+  const activeStyle = strength.level === 'empty' ? null : levelStyles[strength.level]
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor={passwordId}>Password</Label>
+        <Label htmlFor={passwordId}>{passwordLabel}</Label>
         <Input
           id={passwordId}
           type="password"
@@ -124,17 +125,17 @@ export function PasswordStrengthField({
           <p
             className={cn(
               'flex items-center gap-1.5 text-xs font-medium',
-              matched ? 'text-success' : 'text-destructive',
+              matched ? 'text-success-strong' : 'text-destructive-strong',
             )}
           >
             {matched ? (
               <>
-                <RiCheckLine className="h-3.5 w-3.5" />
+                <RiCheckLine className="h-3.5 w-3.5" aria-hidden />
                 Passwords match
               </>
             ) : (
               <>
-                <RiCloseLine className="h-3.5 w-3.5" />
+                <RiCloseLine className="h-3.5 w-3.5" aria-hidden />
                 Passwords do not match
               </>
             )}

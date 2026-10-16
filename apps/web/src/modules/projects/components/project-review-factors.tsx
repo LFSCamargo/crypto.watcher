@@ -8,7 +8,7 @@ export function ProjectReviewFactors({ profile }: { profile: ProjectReviewProfil
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <RiCheckboxCircleLine className="h-4 w-4 text-emerald-500" />
+            <RiCheckboxCircleLine className="h-4 w-4 text-success-strong" />
             Why it&apos;s rated well
           </CardTitle>
         </CardHeader>
@@ -16,7 +16,7 @@ export function ProjectReviewFactors({ profile }: { profile: ProjectReviewProfil
           <ul className="space-y-2.5 text-sm text-muted-foreground">
             {profile.strengths.map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
                 <span>{item}</span>
               </li>
             ))}
@@ -27,7 +27,7 @@ export function ProjectReviewFactors({ profile }: { profile: ProjectReviewProfil
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <RiAlertLine className="h-4 w-4 text-amber-500" />
+            <RiAlertLine className="h-4 w-4 text-warning-strong" />
             Risks to understand
           </CardTitle>
         </CardHeader>
@@ -35,7 +35,7 @@ export function ProjectReviewFactors({ profile }: { profile: ProjectReviewProfil
           <ul className="space-y-2.5 text-sm text-muted-foreground">
             {profile.risks.map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-warning" />
                 <span>{item}</span>
               </li>
             ))}

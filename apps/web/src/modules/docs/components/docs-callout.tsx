@@ -26,7 +26,7 @@ export function DocsCallout({
         weight="fill"
         className={cn(
           'mt-0.5 shrink-0',
-          variant === 'warning' ? 'text-destructive' : 'text-primary',
+          variant === 'warning' ? 'text-destructive-strong' : 'text-primary-strong',
         )}
       />
       <div className="space-y-1 text-sm leading-relaxed text-muted-foreground">

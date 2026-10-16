@@ -6,9 +6,15 @@ interface BlueprintGridProps {
   accent?: boolean
 }
 
-export function BlueprintGrid({ className, variant = 'default', accent = false }: BlueprintGridProps) {
+export function BlueprintGrid({
+  className,
+  variant = 'default',
+  accent = false,
+}: BlueprintGridProps) {
   return (
-    <div className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
+    <div
+      className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}
+    >
       {variant === 'default' && (
         <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -42,7 +48,12 @@ export function BlueprintGrid({ className, variant = 'default', accent = false }
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#blueprint-grid-large)" opacity="0.4" />
+          <rect
+            width="100%"
+            height="100%"
+            fill="url(#blueprint-grid-large)"
+            opacity="0.4"
+          />
         </svg>
       )}
 

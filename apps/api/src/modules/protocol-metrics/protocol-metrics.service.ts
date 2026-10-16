@@ -4,11 +4,7 @@ import {
   resolveMetricsTargets,
   type MetricsTarget,
 } from './metrics-target'
-import {
-  computePercentChange,
-  DAY_MS,
-  findClosestTvl,
-} from './protocol-metrics-changes'
+import { computePercentChange, DAY_MS, findClosestTvl } from './protocol-metrics-changes'
 import {
   aggregateTvlHistoryFromChains,
   extractChainBreakdown,
@@ -21,7 +17,10 @@ import {
   sumChainTvls,
   toMs,
 } from './protocol-metrics-extractors'
-import { PROTOCOL_METRICS_CACHE_TTL_MS, ProtocolMetricsCache } from './protocol-metrics.cache'
+import {
+  PROTOCOL_METRICS_CACHE_TTL_MS,
+  ProtocolMetricsCache,
+} from './protocol-metrics.cache'
 import {
   protocolMetricsRepository,
   type ProtocolMetricsRepository,
@@ -186,7 +185,10 @@ function emptyFinancials() {
   }
 }
 
-function buildTvlTrends(tvlHistory: { timestamp: number; tvl: number }[], cachedAt: Date) {
+function buildTvlTrends(
+  tvlHistory: { timestamp: number; tvl: number }[],
+  cachedAt: Date,
+) {
   const currentTvl = tvlHistory.at(-1)?.tvl ?? 0
   const lastTimestamp = tvlHistory.at(-1)?.timestamp ?? cachedAt.getTime()
 
@@ -246,6 +248,7 @@ export function buildChainMetricsSnapshot(
   history: DefiLlamaChainTvlPoint[],
   dex: DefiLlamaDexSummary | null = null,
   fees: DefiLlamaFeesSummary | null = null,
+  revenue: DefiLlamaFeesSummary | null = null,
   cachedAt = new Date(),
 ): ProtocolMetricsSnapshot | null {
   const tvlHistory = normalizeChainTvlHistory(history)
@@ -271,6 +274,10 @@ export function buildChainMetricsSnapshot(
     fees30d: fees?.total30d ?? null,
     feesChange1d: fees?.change_1d ?? null,
     feesHistory: normalizeChartHistory(fees?.totalDataChart),
+    revenue24h: revenue?.total24h ?? null,
+    revenue7d: revenue?.total7d ?? null,
+    revenue30d: revenue?.total30d ?? null,
+    revenueHistory: normalizeChartHistory(revenue?.totalDataChart),
     snapshotVersion: PROTOCOL_METRICS_SNAPSHOT_VERSION,
     cachedAt: cachedAt.toISOString(),
     expiresAt: expiresAt.toISOString(),
@@ -326,7 +333,20 @@ export function buildProtocolMetricsSnapshot(
 }
 
 function memoryCacheKey(slug: string): string {
-  return `protocol-metrics:v6:${slug}`
+  return `protocol-metrics:v7:${slug}`
+}
+
+function overviewUrl(
+  kind: 'fees' | 'dexs',
+  id: string,
+  dataType: 'dailyFees' | 'dailyRevenue' | 'dailyVolume',
+): string {
+  const params = new URLSearchParams({
+    excludeTotalDataChart: 'false',
+    excludeTotalDataChartBreakdown: 'true',
+    dataType,
+  })
+  return `${DEFILLAMA_BASE_URL}/overview/${kind}/${encodeURIComponent(id)}?${params}`
 }
 
 async function fetchJsonSafe<T>(fetchImpl: typeof fetch, url: string): Promise<T | null> {
@@ -356,16 +376,21 @@ async function fetchChainDexOverview(
   fetchImpl: typeof fetch,
   chainId: string,
 ): Promise<DefiLlamaDexSummary | null> {
-  const url = `${DEFILLAMA_BASE_URL}/overview/dexs/${encodeURIComponent(chainId)}?dataType=dailyVolume`
-  return fetchJsonSafe<DefiLlamaDexSummary>(fetchImpl, url)
+  return fetchJsonSafe<DefiLlamaDexSummary>(
+    fetchImpl,
+    overviewUrl('dexs', chainId, 'dailyVolume'),
+  )
 }
 
 async function fetchChainFeesOverview(
   fetchImpl: typeof fetch,
   chainId: string,
+  dataType: 'dailyFees' | 'dailyRevenue',
 ): Promise<DefiLlamaFeesSummary | null> {
-  const url = `${DEFILLAMA_BASE_URL}/overview/fees/${encodeURIComponent(chainId)}?dataType=dailyFees`
-  return fetchJsonSafe<DefiLlamaFeesSummary>(fetchImpl, url)
+  return fetchJsonSafe<DefiLlamaFeesSummary>(
+    fetchImpl,
+    overviewUrl('fees', chainId, dataType),
+  )
 }
 
 async function fetchProtocolDexSummary(
@@ -409,7 +434,10 @@ export class ProtocolMetricsService {
     return attachValuation(rest)
   }
 
-  private remember(slug: string, snapshot: ProtocolMetricsSnapshot): ProtocolMetricsSnapshot {
+  private remember(
+    slug: string,
+    snapshot: ProtocolMetricsSnapshot,
+  ): ProtocolMetricsSnapshot {
     const enriched = this.enrichSnapshot(snapshot)
     this.memory.set(memoryCacheKey(slug), enriched)
     return enriched
@@ -426,13 +454,14 @@ export class ProtocolMetricsService {
     }
 
     if (target.type === 'chain') {
-      const [history, dex, fees] = await Promise.all([
+      const [history, dex, fees, revenue] = await Promise.all([
         fetchChainHistory(this.fetchImpl, target.id),
         fetchChainDexOverview(this.fetchImpl, target.id),
-        fetchChainFeesOverview(this.fetchImpl, target.id),
+        fetchChainFeesOverview(this.fetchImpl, target.id, 'dailyFees'),
+        fetchChainFeesOverview(this.fetchImpl, target.id, 'dailyRevenue'),
       ])
       if (!history || history.length === 0) return null
-      return buildChainMetricsSnapshot(slug, target.id, history, dex, fees)
+      return buildChainMetricsSnapshot(slug, target.id, history, dex, fees, revenue)
     }
 
     const feesUrl = `${DEFILLAMA_BASE_URL}/summary/fees/${encodeURIComponent(target.id)}?dataType=dailyFees`

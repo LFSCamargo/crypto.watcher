@@ -77,19 +77,6 @@ export interface Comment {
   createdAt: string
 }
 
-export interface VoteTally {
-  projectId: string
-  round: number
-  weightFor: string
-  weightAgainst: string
-}
-
-export interface VoteEligibility {
-  address: string
-  eligible: boolean
-  weight: string
-}
-
 export interface Score {
   projectId: string
   round: number

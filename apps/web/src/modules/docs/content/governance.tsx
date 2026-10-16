@@ -8,6 +8,7 @@ import {
   UsersThree,
 } from '@phosphor-icons/react'
 import {
+  DocsCallout,
   DocsCardGrid,
   DocsHero,
   DocsList,
@@ -28,13 +29,22 @@ export function DocsGovernance() {
         title="Governance"
         description="How the Crypto Watcher protocol is governed — reviewer council policy, methodology and accountability. Not vote-to-rate on projects."
       />
+      <DocsCallout variant="warning" title="Pre-launch: CWT isn't minted yet">
+        <p>
+          The governance contracts are built and tested, but they aren&apos;t deployed and
+          no mint date is set. This guide describes how governance will work once they
+          are. Until then, the governor council and core team make protocol decisions in
+          the open.
+        </p>
+      </DocsCallout>
 
       <DocsSection icon={Scales} title="Overview">
         <DocsP>
-          Crypto Watcher uses on-chain governance for <strong className="text-foreground">protocol</strong>{' '}
-          decisions. CWT holders propose and vote on how the platform operates: who reviews,
-          how reviews are conducted and how reviewers are held accountable. Individual project
-          risk scores are published by the governor council — not by token-weighted public votes.
+          Crypto Watcher uses on-chain governance for{' '}
+          <strong className="text-foreground">protocol</strong> decisions. CWT holders
+          propose and vote on how the platform operates: who reviews, how reviews are
+          conducted and how reviewers are held accountable. Individual project risk scores
+          are published by the governor council — not by token-weighted public votes.
         </DocsP>
       </DocsSection>
 
@@ -53,8 +63,8 @@ export function DocsGovernance() {
         />
         <DocsSubheading>Timelock Controller</DocsSubheading>
         <DocsP>
-          All governance actions are executed through a timelock, providing a delay
-          period for users to review and react to passed proposals.
+          All governance actions are executed through a timelock, providing a delay period
+          for users to review and react to passed proposals.
         </DocsP>
       </DocsSection>
 
@@ -74,7 +84,7 @@ export function DocsGovernance() {
             {
               title: 'Voting',
               description:
-                'CWT holders vote For, Against or Abstain on protocol proposals only.',
+                'CWT holders vote For, Against or Abstain on protocol proposals only. Open a proposal in the app and connect the wallet that holds your voting power, or call castVote on the Governor contract directly.',
             },
             {
               title: 'Execution',
@@ -102,7 +112,7 @@ export function DocsGovernance() {
             <DocsList
               items={[
                 'Review methodology version approval',
-                'Evidence submission requirements',
+                'Evidence and sourcing requirements',
                 'Appeals and re-review policy',
               ]}
             />
@@ -123,24 +133,26 @@ export function DocsGovernance() {
       <DocsSection icon={HandsClapping} title="Vote Delegation">
         <DocsP>
           If you hold CWT but don't want to actively vote on protocol proposals, you can
-          delegate your voting power to another address. The delegate votes on your behalf;
-          your tokens remain in your wallet.
+          delegate your voting power to another address. The delegate votes on your
+          behalf; your tokens remain in your wallet.
         </DocsP>
         <DocsSubheading>How to Delegate</DocsSubheading>
         <DocsSteps
           steps={[
             {
-              title: 'Open Governance',
-              description: 'Go to the Governance page in the app.',
+              title: 'Choose a delegate',
+              description:
+                'Pick the address that will vote for you. Delegate to yourself to vote directly.',
             },
             {
-              title: 'Choose a delegate',
-              description: 'Click "Delegate" and enter the delegate address.',
+              title: 'Call delegate on the CWT token',
+              description:
+                "In-app delegation isn't available yet. Use your wallet to call delegate on the CWT token contract before a proposal opens — voting power is fixed at that moment.",
             },
             {
               title: 'Confirm',
               description:
-                'Confirm the transaction. You can change your delegate at any time, or delegate to yourself to vote directly.',
+                'Confirm the transaction. You can change your delegate at any time.',
             },
           ]}
         />
@@ -148,9 +160,9 @@ export function DocsGovernance() {
 
       <DocsSection icon={GitBranch} title="Progressive Decentralization">
         <DocsP>
-          Protocol governance decentralizes over time. Review authority always remains with
-          the expert council — decentralization applies to protocol policy, not public
-          score voting.
+          Protocol governance decentralizes over time. Review authority always remains
+          with the expert council — decentralization applies to protocol policy, not
+          public score voting.
         </DocsP>
         <DocsCardGrid columns={3}>
           <DocsPhaseCard
@@ -187,8 +199,8 @@ export function DocsGovernance() {
       <DocsSection icon={UsersThree} title="Get Involved">
         <DocsList
           items={[
-            'Read expert reports and submit evidence to help governors investigate',
-            'Report incidents and whistleblow on suspicious projects',
+            'Read expert reports and share evidence in project comments',
+            'Request a review of a project (free during launch)',
             'Participate in protocol governance if you hold CWT',
             'Delegate protocol votes to active community members',
           ]}

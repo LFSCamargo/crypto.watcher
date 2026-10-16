@@ -13,7 +13,7 @@ export function DocsHero({
 }) {
   return (
     <div className="mb-12 border-b border-border/50 pb-8">
-      <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+      <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary-strong">
         <HeroIcon size={14} weight="fill" />
         {eyebrow}
       </div>
