@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
-import { curatedProjectIconUrl } from '../../modules/projects/lib/project-icon-url'
+import {
+  curatedProjectIconUrl,
+  iconBackdropClass,
+} from '../../modules/projects/lib/project-icon-url'
 
 interface ProjectIconProps {
   symbol: string
@@ -55,7 +58,7 @@ export function ProjectIcon({
       loading="lazy"
       draggable={false}
       onError={() => setErrored(true)}
-      className={cn('rounded-full object-cover', className)}
+      className={cn('rounded-full object-cover', iconBackdropClass(candidate), className)}
     />
   )
 }

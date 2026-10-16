@@ -2,6 +2,7 @@ import { RiAlertLine, RiCheckboxCircleLine, RiShieldCheckLine } from '@remixicon
 import { Badge, Skeleton } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
 import { getCuratedProject, projectCategories } from '../../projects/lib/curated-projects'
+import { iconBackdropClass } from '../../projects/lib/project-icon-url'
 import {
   getProjectReviewProfile,
   getVerdictLabel,
@@ -138,7 +139,10 @@ export function RadarAssetPreview({ slug }: { slug: string }) {
           alt=""
           width={36}
           height={36}
-          className="h-9 w-9 rounded-full"
+          className={cn(
+            'h-9 w-9 rounded-full',
+            iconBackdropClass(`/icons/${project.slug}.png`),
+          )}
         />
         <div className="min-w-0 flex-1">
           <h3 className="font-bold leading-tight">{project.name}</h3>
