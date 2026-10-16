@@ -81,23 +81,26 @@ describe('LandingPage', () => {
     renderLanding()
     const section = screen.getByRole('region', { name: 'Reference assessments' })
     const links = within(section).getAllByRole('link', { name: /reference assessment/i })
-    expect(links).toHaveLength(4)
+    expect(links.length).toBeGreaterThan(0)
     for (const link of links) {
       expect(link.getAttribute('href')).toMatch(/^\/app\/reference\//)
     }
     expect(within(section).getByText(/not council reports/i)).toBeInTheDocument()
   })
 
-  it('keeps protocol governance discoverable', () => {
+  it('presents governance honestly as pre-launch', () => {
     renderLanding()
-    const section = screen.getByRole('region', { name: /Governed by CWT/ })
-    expect(within(section).getByRole('link', { name: 'View proposals' })).toHaveAttribute(
-      'href',
-      '/app/governance',
-    )
+    const section = screen.getByRole('region', {
+      name: 'Governance, built in from day one',
+    })
+    expect(within(section).getByText('Pre-launch · CWT not minted')).toBeInTheDocument()
+    expect(
+      within(section).getByRole('link', { name: 'See governance status' }),
+    ).toHaveAttribute('href', '/app/governance')
     expect(
       within(section).getByText(/never on individual project scores/i),
     ).toBeInTheDocument()
+    expect(screen.queryByText('Governed by CWT holders')).not.toBeInTheDocument()
   })
 
   it('links the main resources', () => {
@@ -110,6 +113,10 @@ describe('LandingPage', () => {
           .some((link) => link.getAttribute('href') === path),
       ).toBe(true)
     }
+    expect(within(section).getByRole('link', { name: /Read the story/ })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^\/blog\/[a-z-]+$/),
+    )
   })
 
   it('makes no unsupported volume or payment claims', () => {

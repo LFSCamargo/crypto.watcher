@@ -80,6 +80,11 @@ apps/
     │   │   │   ├── components/hero-radar.tsx # Radar sweep; asset chips ping as it passes and link to reference pages
     │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, composite breakdown
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
+    │   │   │   ├── components/asset-ticker.tsx # Mouse-only marquee of reference grades (aria-hidden)
+    │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
+    │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA) with category filter and per-grade asset list
+    │   │   │   ├── components/reveal.tsx, spotlight-card.tsx # Scroll reveal; pointer-following card glow
+    │   │   │   ├── lib/             # lifecycle-steps.ts (tour copy), grade-ladder.ts (grade buckets)
     │   │   │   └── hooks/use-count-up.ts # Eased score count-up (instant under reduced motion)
     │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── blog/                # News & launch articles (MD)     [MVP]

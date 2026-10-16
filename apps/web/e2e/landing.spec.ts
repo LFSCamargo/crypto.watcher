@@ -19,8 +19,8 @@ test.describe('landing page', () => {
       url: /\/auth\/signup$/,
     },
     {
-      region: 'Governed by CWT holders',
-      link: 'View proposals',
+      region: 'Governance, built in from day one',
+      link: 'See governance status',
       url: /\/app\/governance$/,
     },
     { region: 'Learn how it works', link: /Whitepaper/, url: /\/docs\/whitepaper$/ },

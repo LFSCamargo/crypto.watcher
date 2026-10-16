@@ -177,6 +177,32 @@ export default {
           '60%': { transform: 'scale(0.92) rotate(2deg)', opacity: '1' },
           '100%': { transform: 'scale(1) rotate(0)', opacity: '1' },
         },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '20%, 60%': { transform: 'translateX(-6px) rotate(-2deg)' },
+          '40%, 80%': { transform: 'translateX(6px) rotate(2deg)' },
+        },
+        'coin-drop': {
+          '0%': { transform: 'translateY(-48px) scale(0.6)', opacity: '0' },
+          '25%': { opacity: '1' },
+          '65%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(0) scale(0.2)', opacity: '0' },
+        },
+        'step-progress': {
+          from: { transform: 'scaleX(0)' },
+          to: { transform: 'scaleX(1)' },
+        },
+        'border-spin': {
+          to: { transform: 'translate(-50%, -50%) rotate(360deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.3s var(--ease-glass)',
@@ -194,6 +220,12 @@ export default {
         'bar-fill-y': 'bar-fill-y 1.2s var(--ease-glass) 0.2s both',
         'highlight-draw': 'highlight-draw 0.7s var(--ease-glass) 0.35s both',
         stamp: 'stamp 0.5s var(--ease-glass) 1.8s both',
+        marquee: 'marquee 60s linear infinite',
+        float: 'float 6s ease-in-out infinite',
+        shake: 'shake 0.5s var(--ease-glass)',
+        'coin-drop': 'coin-drop 0.9s var(--ease-glass) both',
+        'step-progress': 'step-progress var(--step-duration, 4s) linear both',
+        'border-spin': 'border-spin 8s linear infinite',
       },
     },
   },

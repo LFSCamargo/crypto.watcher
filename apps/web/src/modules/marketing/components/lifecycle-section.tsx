@@ -1,46 +1,53 @@
-import type { Tone } from '../../../components/ui'
+import { useEffect, useRef, useState } from 'react'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { RiPauseLine, RiPlayLine } from '@remixicon/react'
+import { Button, type Tone } from '../../../components/ui'
+import { cn } from '../../../lib/utils'
+import { lifecycleSteps } from '../lib/lifecycle-steps'
 import { SectionGlow } from './section-glow'
 import { SectionHeading } from './section-heading'
 
-const stepTones: Record<Tone, string> = {
-  amber: 'from-tone-amber/25 to-tone-amber/5 ring-tone-amber/40 text-tone-amber-strong',
-  coral: 'from-tone-coral/25 to-tone-coral/5 ring-tone-coral/40 text-tone-coral-strong',
-  violet:
-    'from-tone-violet/25 to-tone-violet/5 ring-tone-violet/40 text-tone-violet-strong',
-  sky: 'from-tone-sky/25 to-tone-sky/5 ring-tone-sky/40 text-tone-sky-strong',
-  teal: 'from-tone-teal/25 to-tone-teal/5 ring-tone-teal/40 text-tone-teal-strong',
-  pink: 'from-tone-pink/25 to-tone-pink/5 ring-tone-pink/40 text-tone-pink-strong',
+const STEP_MS = 4000
+const LAST = lifecycleSteps.length - 1
+
+const nodeTone: Record<Tone, string> = {
+  amber: 'bg-tone-amber text-foreground ring-tone-amber/30',
+  coral: 'bg-tone-coral text-white ring-tone-coral/30',
+  violet: 'bg-tone-violet text-white ring-tone-violet/30',
+  sky: 'bg-tone-sky text-white ring-tone-sky/30',
+  teal: 'bg-tone-teal text-white ring-tone-teal/30',
+  pink: 'bg-tone-pink text-white ring-tone-pink/30',
 }
 
-const steps: { title: string; description: string; tone: Tone }[] = [
-  {
-    title: 'Review requested',
-    tone: 'amber',
-    description: 'Anyone signed in can ask the council to review a project.',
-  },
-  {
-    title: 'In analysis',
-    tone: 'coral',
-    description: 'The request is accepted and appears in the public analysis queue.',
-  },
-  {
-    title: 'Governor review',
-    tone: 'violet',
-    description: 'Council members assess security, design, tokenomics and more.',
-  },
-  {
-    title: 'Report published',
-    tone: 'sky',
-    description: 'Findings and the outcome are published and can be anchored on-chain.',
-  },
-  {
-    title: 'Score shown',
-    tone: 'teal',
-    description: 'The safety score appears on the project page for everyone.',
-  },
-]
+const panelTone: Record<Tone, string> = {
+  amber: 'text-tone-amber-strong',
+  coral: 'text-tone-coral-strong',
+  violet: 'text-tone-violet-strong',
+  sky: 'text-tone-sky-strong',
+  teal: 'text-tone-teal-strong',
+  pink: 'text-tone-pink-strong',
+}
 
 export function LifecycleSection() {
+  const reducedMotion = useReducedMotion()
+  const [active, setActive] = useState(0)
+  const [playing, setPlaying] = useState(!reducedMotion)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(trackRef, { amount: 0.4 })
+  const touring = playing && inView
+
+  useEffect(() => {
+    if (!touring) return
+    const timer = window.setTimeout(
+      () => setActive((step) => (step === LAST ? 0 : step + 1)),
+      STEP_MS,
+    )
+    return () => window.clearTimeout(timer)
+  }, [touring, active])
+
+  const step = lifecycleSteps[active] ?? lifecycleSteps[0]!
+  const progress = `${(active / LAST) * 80}%`
+
   return (
     <section
       aria-labelledby="lifecycle-title"
@@ -58,32 +65,143 @@ export function LifecycleSection() {
           eyebrow="How a review works"
           tone="sky"
           title="From request to published score"
+          description="Follow a project through the five stages — or pick one to see who does what."
         />
-        <div className="relative">
+
+        <div ref={trackRef} className="relative">
+          <div className="mb-6 flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="gap-1.5 rounded-full"
+              onClick={() => setPlaying((value) => !value)}
+            >
+              {playing ? (
+                <RiPauseLine aria-hidden className="h-4 w-4" />
+              ) : (
+                <RiPlayLine aria-hidden className="h-4 w-4" />
+              )}
+              {playing ? 'Pause tour' : 'Play tour'}
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute left-[10%] right-[10%] top-6 hidden h-1 rounded-full bg-border md:block"
+            />
+            <div
+              aria-hidden
+              className="absolute left-[10%] top-6 hidden h-1 rounded-full bg-gradient-to-r from-tone-amber via-tone-violet to-tone-teal transition-[width] duration-700 ease-glass md:block"
+              style={{ width: progress }}
+            />
+            <span
+              aria-hidden
+              className="absolute top-[0.85rem] z-10 hidden h-[2.3rem] w-[2.3rem] -translate-x-1/2 rounded-full bg-tone-amber/25 blur-md transition-[left] duration-700 ease-glass md:block"
+              style={{ left: `calc(10% + ${active * 20}%)` }}
+            />
+
+            <ol
+              aria-label="Review lifecycle"
+              className="relative grid gap-3 md:grid-cols-5"
+            >
+              {lifecycleSteps.map((item, index) => {
+                const reached = index <= active
+                const current = index === active
+                return (
+                  <li
+                    key={item.title}
+                    className={cn(
+                      'relative flex items-center gap-4 rounded-2xl p-3 transition-colors md:flex-col md:gap-3 md:text-center',
+                      current
+                        ? 'bg-background shadow-sm ring-1 ring-border'
+                        : 'hover:bg-background/60',
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-500 ease-glass',
+                        reached
+                          ? nodeTone[item.tone]
+                          : 'bg-background text-muted-foreground ring-border',
+                        current && 'scale-110',
+                      )}
+                    >
+                      {index + 1}
+                    </span>
+                    <h3 className="font-bold">
+                      <button
+                        type="button"
+                        aria-current={current ? 'step' : undefined}
+                        onClick={() => {
+                          setActive(index)
+                          setPlaying(false)
+                        }}
+                        className="rounded after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                      >
+                        {item.title}
+                      </button>
+                    </h3>
+                    {current && touring && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-x-4 bottom-1.5 h-0.5 overflow-hidden rounded-full bg-border"
+                      >
+                        <span
+                          key={active}
+                          className="block h-full origin-left animate-step-progress bg-foreground/40"
+                          style={{ ['--step-duration' as string]: `${STEP_MS}ms` }}
+                        />
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+
           <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-8 top-9 hidden h-0.5 rounded-full bg-gradient-to-r from-tone-amber via-tone-violet to-tone-teal opacity-60 md:block"
-          />
-          <ol
-            aria-label="Review lifecycle"
-            className="relative grid gap-4 md:grid-cols-5"
+            role="region"
+            aria-label={`Step ${active + 1} of ${lifecycleSteps.length}: ${step.title}`}
+            className="mt-6 overflow-hidden rounded-3xl border border-border bg-background p-6 md:p-8"
           >
-            {steps.map((step, index) => (
-              <li
-                key={step.title}
-                className="relative rounded-2xl border border-border bg-background p-5 transition-transform duration-300 ease-glass hover:-translate-y-1 motion-reduce:transition-none"
-              >
-                <span
-                  aria-hidden
-                  className={`mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold ring-1 ring-inset ${stepTones[step.tone]}`}
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center"
+            >
+              <div className="space-y-2">
+                <p
+                  className={cn(
+                    'text-sm font-bold uppercase tracking-widest',
+                    panelTone[step.tone],
+                  )}
                 >
-                  {index + 1}
-                </span>
-                <h3 className="mb-1 font-bold">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
-              </li>
-            ))}
-          </ol>
+                  Step {active + 1}
+                </p>
+                <p className="text-2xl font-bold md:text-3xl">{step.title}</p>
+                <p className="text-muted-foreground">{step.description}</p>
+              </div>
+              <dl className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Who acts', step.actor],
+                  ['What you see', step.youSee],
+                  ['Result', step.result],
+                ].map(([term, value]) => (
+                  <div key={term} className="rounded-2xl bg-muted/50 p-4">
+                    <dt className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {term}
+                    </dt>
+                    <dd className="text-sm font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>
