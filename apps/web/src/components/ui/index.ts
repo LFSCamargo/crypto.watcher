@@ -31,3 +31,5 @@ export {
 export { FormAlert } from './form-alert'
 export { FormField } from './form-field'
 export { ToneIcon, type Tone } from './tone-icon'
+export { Disclosure } from './disclosure'
+export { SegmentedTabs, tabIds } from './segmented-tabs'

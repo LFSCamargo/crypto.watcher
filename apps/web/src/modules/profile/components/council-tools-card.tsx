@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { IN_ANALYSIS_HREF } from '../../../components/layout/navigation'
 import { Button } from '../../../components/ui'
 
 export function CouncilToolsCard() {
@@ -15,7 +16,7 @@ export function CouncilToolsCard() {
       </p>
       <div className="flex flex-wrap gap-2">
         <Button asChild size="sm" className="rounded-full">
-          <Link to="/app/in-analysis">Open review queue</Link>
+          <Link to={IN_ANALYSIS_HREF}>Open review queue</Link>
         </Button>
         <Button asChild size="sm" variant="outline" className="rounded-full">
           <Link to="/app/admin">Manage projects</Link>

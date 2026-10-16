@@ -28,6 +28,17 @@ const councilProjects = [
   },
 ]
 
+const queuedRequest = {
+  userId: 'u1',
+  projectUrl: 'https://example.com',
+  description: 'A project to review.',
+  paymentTxHash: null,
+  feeAmount: '0',
+  reviewNotes: null,
+  createdAt: '2026-10-01T12:00:00.000Z',
+  updatedAt: null,
+}
+
 const renderCatalog = (entry = '/app') =>
   renderRoutes([{ path: '/app', element: <ProjectsPage /> }], entry)
 
@@ -55,6 +66,70 @@ describe('ProjectsPage', () => {
       within(references).getByText(`${curatedProjects.length} reference assessments`),
     ).toBeInTheDocument()
     expect(screen.queryByText(/safe projects/i)).not.toBeInTheDocument()
+  })
+
+  it('introduces the page with a hero and catalog stats', async () => {
+    mockApi({ 'GET /projects': [200, councilProjects] })
+    renderCatalog()
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Projects' }),
+    ).toBeInTheDocument()
+    const stats = screen.getByRole('list', { name: 'Projects at a glance' })
+    expect(
+      await within(stats).findByText('Council projects', { exact: true }),
+    ).toBeInTheDocument()
+    expect(within(stats).getByText(String(curatedProjects.length))).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Request a review' })).toHaveAttribute(
+      'href',
+      '/app/analysis-request',
+    )
+  })
+
+  it('switches to the review queue tab and keeps it in the URL', async () => {
+    mockApi({
+      'GET /projects': [200, councilProjects],
+      'GET /analysis-requests': [200, { items: [] }],
+    })
+    const user = userEvent.setup()
+    renderCatalog('/app?search=nova')
+
+    const catalogTab = screen.getByRole('tab', { name: 'Catalog' })
+    expect(catalogTab).toHaveAttribute('aria-selected', 'true')
+    await user.click(screen.getByRole('tab', { name: /In analysis/ }))
+
+    expect(currentLocation()).toBe('/app?search=nova&view=in-analysis')
+    const panel = screen.getByRole('tabpanel', { name: /In analysis/ })
+    expect(
+      within(panel).getByRole('region', { name: 'Review requests' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('searchbox', { name: 'Search projects' }),
+    ).not.toBeInTheDocument()
+
+    await user.click(catalogTab)
+    expect(currentLocation()).toBe('/app?search=nova')
+    expect(screen.getByRole('searchbox', { name: 'Search projects' })).toHaveValue('nova')
+  })
+
+  it('opens the queue from a link and counts open work on the tab', async () => {
+    mockApi({
+      'GET /projects': [200, [councilProjects[1]]],
+      'GET /analysis-requests': [
+        200,
+        {
+          items: [
+            { ...queuedRequest, id: 'r1', projectName: 'Orbit', status: 'pending' },
+            { ...queuedRequest, id: 'r2', projectName: 'Lumen', status: 'rejected' },
+          ],
+        },
+      ],
+    })
+    renderCatalog('/app?view=in-analysis')
+
+    const queueTab = screen.getByRole('tab', { name: /In analysis/ })
+    expect(queueTab).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => expect(queueTab).toHaveTextContent('2'))
   })
 
   it('pages reference assessments with a show-more control', async () => {
@@ -187,6 +262,8 @@ describe('ProjectsPage', () => {
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Try again' }))
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    const catalogCalls = () =>
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/projects')).length
+    await waitFor(() => expect(catalogCalls()).toBe(2))
   })
 })

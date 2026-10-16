@@ -1,7 +1,6 @@
 import {
   RiBookOpenLine,
   RiCoinsLine,
-  RiCompass3Line,
   RiFileTextLine,
   RiGovernmentLine,
   RiNewsLine,
@@ -30,9 +29,11 @@ export interface FooterLinkGroupData {
   links: { to: string; label: string }[]
 }
 
+/** The review queue lives as a tab on the Projects page. */
+export const IN_ANALYSIS_HREF = '/app?view=in-analysis'
+
 export const primaryNavItems: NavItem[] = [
   { href: '/app', label: 'Projects', icon: RiStackLine, end: true },
-  { href: '/app/in-analysis', label: 'In Analysis', icon: RiCompass3Line },
   { href: '/app/governance', label: 'Governance', icon: RiScales3Line },
 ]
 
@@ -87,7 +88,7 @@ export const footerLinkGroups: FooterLinkGroupData[] = [
     title: 'Product',
     links: [
       { to: '/app', label: 'Projects' },
-      { to: '/app/in-analysis', label: 'In Analysis' },
+      { to: IN_ANALYSIS_HREF, label: 'In analysis' },
       { to: '/app/governance', label: 'Governance' },
       { to: '/app/analysis-request', label: 'Request a review' },
     ],

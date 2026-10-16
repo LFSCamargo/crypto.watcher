@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IN_ANALYSIS_HREF } from '../../../components/layout/navigation'
 import { toast } from 'sonner'
 import {
   RiAddLine,
@@ -89,9 +90,9 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
           <RiAddLine className="h-4 w-4" />
           Request a review
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate('/app/in-analysis')}>
+        <DropdownMenuItem onSelect={() => navigate(IN_ANALYSIS_HREF)}>
           <RiCompass3Line className="h-4 w-4" />
-          In Analysis
+          Review queue
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

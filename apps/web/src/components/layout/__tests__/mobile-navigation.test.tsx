@@ -38,7 +38,7 @@ describe('MobileNavigation', () => {
   it('keeps projects, analysis and governance one tap away', () => {
     renderNav()
     const bar = screen.getByRole('navigation', { name: 'Mobile' })
-    for (const label of ['Projects', 'In Analysis', 'Governance']) {
+    for (const label of ['Projects', 'Governance']) {
       expect(within(bar).getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(within(bar).getByRole('link', { name: 'Projects' })).toHaveAttribute(

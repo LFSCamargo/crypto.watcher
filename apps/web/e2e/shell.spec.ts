@@ -37,6 +37,7 @@ test.describe('application shell', () => {
   test('resources menu is keyboard operable on desktop', async ({ page }) => {
     test.skip(isMobile(page), 'Desktop navigation only')
     await page.goto('/app')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     const trigger = page.getByRole('button', { name: 'Resources' })
     await trigger.focus()
     await page.keyboard.press('Enter')

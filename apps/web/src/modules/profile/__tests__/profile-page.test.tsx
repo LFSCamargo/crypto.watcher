@@ -192,7 +192,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Governor council')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open review queue' })).toHaveAttribute(
       'href',
-      '/app/in-analysis',
+      '/app?view=in-analysis',
     )
     expect(screen.getByRole('link', { name: 'Manage projects' })).toHaveAttribute(
       'href',

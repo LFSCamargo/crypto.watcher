@@ -63,7 +63,7 @@ test.describe('review queue', () => {
     api,
   }) => {
     api.signIn()
-    await page.goto('/app/in-analysis')
+    await page.goto('/app?view=in-analysis')
     await expect(
       page.getByRole('region', { name: 'What request statuses mean' }),
     ).toBeVisible()
@@ -72,9 +72,25 @@ test.describe('review queue', () => {
     await expect(card.getByRole('button')).toHaveCount(0)
   })
 
+  test('the queue is a tab on the projects page, reachable by keyboard', async ({
+    page,
+  }) => {
+    await page.goto('/app')
+    const catalogTab = page.getByRole('tab', { name: 'Catalog' })
+    await expect(catalogTab).toHaveAttribute('aria-selected', 'true')
+    await catalogTab.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(page).toHaveURL(/\/app\?view=in-analysis$/)
+    await expect(
+      page.getByRole('tabpanel').getByRole('article', { name: 'Orbit Bridge' }),
+    ).toBeVisible()
+    await page.goBack()
+    await expect(catalogTab).toHaveAttribute('aria-selected', 'true')
+  })
+
   test('team members move a request through triage', async ({ page, api }) => {
     api.signIn({ role: 'team' })
-    await page.goto('/app/in-analysis')
+    await page.goto('/app?view=in-analysis')
     const card = page.getByRole('article', { name: 'Orbit Bridge' })
     await card.getByRole('button', { name: 'Accept' }).click()
     await expect(card.getByText('Accepted', { exact: true })).toBeVisible()

@@ -25,7 +25,7 @@ const inventory: InventoryRoute[] = [
   { path: '/app/projects/aave' },
   { path: '/app/projects/missing-project' },
   { path: '/app/reference/bitcoin' },
-  { path: '/app/in-analysis' },
+  { path: '/app?view=in-analysis' },
   { path: '/app/analysis-request' },
   { path: '/app/analysis-request', role: 'user' },
   { path: '/docs' },

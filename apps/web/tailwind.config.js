@@ -164,6 +164,10 @@ export default {
           from: { transform: 'scaleX(0)' },
           to: { transform: 'scaleX(1)' },
         },
+        'bar-fill-y': {
+          from: { transform: 'scaleY(0)' },
+          to: { transform: 'scaleY(1)' },
+        },
         'highlight-draw': {
           from: { transform: 'scaleX(0)' },
           to: { transform: 'scaleX(1)' },
@@ -175,8 +179,8 @@ export default {
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'accordion-down': 'accordion-down 0.3s var(--ease-glass)',
+        'accordion-up': 'accordion-up 0.25s var(--ease-glass)',
         'fade-in': 'fade-in 0.3s ease-out',
         'fade-out': 'fade-out 0.3s ease-out',
         'slide-in-from-top': 'slide-in-from-top 0.3s ease-out',
@@ -187,6 +191,7 @@ export default {
         'radar-ping': 'radar-ping 6s ease-out infinite',
         'hero-scan': 'hero-scan 4.5s var(--ease-glass) 0.2s infinite both',
         'bar-fill': 'bar-fill 0.9s var(--ease-glass) both',
+        'bar-fill-y': 'bar-fill-y 1.2s var(--ease-glass) 0.2s both',
         'highlight-draw': 'highlight-draw 0.7s var(--ease-glass) 0.35s both',
         stamp: 'stamp 0.5s var(--ease-glass) 1.8s both',
       },

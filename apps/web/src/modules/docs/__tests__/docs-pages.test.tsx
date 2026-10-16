@@ -1,4 +1,5 @@
 import { cleanup, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   DocsFAQ,
@@ -59,6 +60,27 @@ describe('Documentation', () => {
     expect(
       screen.getAllByText(/Share evidence and sources in project comments/).length,
     ).toBeGreaterThan(0)
+  })
+
+  it('collapses FAQ answers behind animated disclosures', async () => {
+    const user = userEvent.setup()
+    renderPage(<DocsFAQ />)
+
+    const question = screen.getByRole('button', { name: 'Where can I buy CWT tokens?' })
+    expect(question).toHaveAttribute('aria-expanded', 'false')
+    await user.click(question)
+    expect(question).toHaveAttribute('aria-expanded', 'true')
+    const answer = screen.getByRole('region', { name: 'Where can I buy CWT tokens?' })
+    expect(answer).toHaveTextContent(/hasn't been minted, there is no sale/)
+    expect(screen.queryByText(/testnet phase/i)).not.toBeInTheDocument()
+  })
+
+  it('flags governance and tokenomics as pre-launch designs', () => {
+    renderPage(<DocsGovernance />)
+    expect(screen.getByText("Pre-launch: CWT isn't minted yet")).toBeInTheDocument()
+    cleanup()
+    renderPage(<DocsTokenomics />)
+    expect(screen.getByText(/Planned design/)).toBeInTheDocument()
   })
 
   it('explains where votes and delegation happen', () => {

@@ -24,7 +24,7 @@ const routes: {
   { name: 'signup', path: '/auth/signup' },
   { name: 'onboarding', path: '/auth/onboarding', signedIn: true },
   { name: 'request', path: '/app/analysis-request', signedIn: true },
-  { name: 'queue', path: '/app/in-analysis' },
+  { name: 'queue', path: '/app?view=in-analysis' },
   { name: 'docs', path: '/docs' },
   { name: 'blog', path: '/blog' },
   { name: 'governance', path: '/app/governance' },

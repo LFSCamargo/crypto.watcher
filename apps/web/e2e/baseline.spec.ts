@@ -5,7 +5,8 @@ test.describe('compatibility redirects', () => {
     ['/projects', /\/app$/],
     ['/projects/bitcoin', /\/app\/reference\/bitcoin$/],
     ['/profile', /\/app\/profile$/],
-    ['/analysis', /\/app\/in-analysis$/],
+    ['/analysis', /\/app\?view=in-analysis$/],
+    ['/app/in-analysis', /\/app\?view=in-analysis$/],
     ['/app/projects/aave/vote', /\/app\/projects\/aave$/],
   ]
 
@@ -99,7 +100,7 @@ test.describe('analysis requests', () => {
   })
 
   test('the queue lists existing requests', async ({ page }) => {
-    await page.goto('/app/in-analysis')
+    await page.goto('/app?view=in-analysis')
     await expect(page.getByRole('article', { name: 'Orbit Bridge' })).toBeVisible()
   })
 })

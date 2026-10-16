@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { createBrowserRouter, Navigate, useParams } from 'react-router-dom'
 import { AppLayout } from './layout/app-layout'
+import { IN_ANALYSIS_HREF } from '../components/layout/navigation'
 import { GuestRoute } from '../modules/auth/components/guest-route'
 import { LandingPage } from '../modules/marketing/routes'
 import {
@@ -18,7 +19,6 @@ import {
   ForgotPasswordPage,
   GovernanceDetailPage,
   GovernancePage,
-  InAnalysisPage,
   LazyRoute,
   NotFoundPage,
   OnboardingPage,
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
       { path: 'projects', element: <Navigate to="/app" replace /> },
       { path: 'projects/:slug', element: <LegacyProjectRedirect /> },
       { path: 'profile', element: <Navigate to="/app/profile" replace /> },
-      { path: 'analysis', element: <Navigate to="/app/in-analysis" replace /> },
+      { path: 'analysis', element: <Navigate to={IN_ANALYSIS_HREF} replace /> },
       {
         element: <GuestRoute />,
         children: [
@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
           { path: 'projects/:slug', element: withLazy(<ProjectDetailPage />) },
           { path: 'reference/:slug', element: withLazy(<ReferenceProjectDetailPage />) },
           { path: 'projects/:slug/vote', element: <RetiredVoteRedirect /> },
-          { path: 'in-analysis', element: withLazy(<InAnalysisPage />) },
+          { path: 'in-analysis', element: <Navigate to={IN_ANALYSIS_HREF} replace /> },
           { path: 'analysis-request', element: withLazy(<AnalysisRequestPage />) },
           { path: 'profile', element: withLazy(<ProfilePage />) },
           { path: 'governance', element: withLazy(<GovernancePage />) },

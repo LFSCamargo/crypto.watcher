@@ -9,6 +9,7 @@ import {
   UsersThree,
 } from '@phosphor-icons/react'
 import {
+  DocsCallout,
   DocsCardGrid,
   DocsFeatureCard,
   DocsHero,
@@ -29,6 +30,12 @@ export function DocsTokenomics() {
         title="Tokenomics"
         description="The CWT token powers protocol governance — reviewer council policy, methodology and accountability. It does not buy influence over project risk scores."
       />
+      <DocsCallout variant="warning" title="Planned design — CWT isn't minted yet">
+        <p>
+          The figures below are the planned token design. CWT has not been minted, there
+          is no sale and no mint date is set.
+        </p>
+      </DocsCallout>
 
       <DocsSection icon={Coins} title="Token Overview">
         <DocsParams

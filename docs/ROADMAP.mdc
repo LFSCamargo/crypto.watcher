@@ -86,6 +86,10 @@ evidence, and protocol governance manages the reviewer council.
   submitter rotation, emergency pause.
 - Admin/team multisig as timelock owner for safety during launch.
 - CWT does **not** grant the right to vote on individual project risk scores.
+- **Status (Oct 2026):** governance contracts are written and tested and the proposal
+  UI is built; deployment and the CWT mint/distribution are not scheduled yet. Until then
+  the governor council and core team make protocol decisions in the open, and the app's
+  Governance page and docs say so.
 
 ### Platform
 - Auth, accounts, basic profile.

@@ -8,6 +8,7 @@ import {
   UsersThree,
 } from '@phosphor-icons/react'
 import {
+  DocsCallout,
   DocsCardGrid,
   DocsHero,
   DocsList,
@@ -28,6 +29,14 @@ export function DocsGovernance() {
         title="Governance"
         description="How the Crypto Watcher protocol is governed — reviewer council policy, methodology and accountability. Not vote-to-rate on projects."
       />
+      <DocsCallout variant="warning" title="Pre-launch: CWT isn't minted yet">
+        <p>
+          The governance contracts are built and tested, but they aren&apos;t deployed and
+          no mint date is set. This guide describes how governance will work once they
+          are. Until then, the governor council and core team make protocol decisions in
+          the open.
+        </p>
+      </DocsCallout>
 
       <DocsSection icon={Scales} title="Overview">
         <DocsP>

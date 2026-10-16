@@ -1,15 +1,18 @@
 import { RiSearchLine } from '@remixicon/react'
 import { Input } from '../../../components/ui'
+import { cn } from '../../../lib/utils'
 
 export function CatalogSearchField({
   value,
   onChange,
+  className,
 }: {
   value: string
   onChange: (value: string) => void
+  className?: string
 }) {
   return (
-    <div role="search" className="relative">
+    <div role="search" className={cn('relative', className)}>
       <label htmlFor="catalog-search" className="sr-only">
         Search projects
       </label>

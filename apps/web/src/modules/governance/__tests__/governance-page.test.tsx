@@ -58,15 +58,52 @@ describe('GovernancePage', () => {
     expect(
       await screen.findByText(/Project scores are published by the governor council/),
     ).toBeInTheDocument()
-    expect(screen.getByText('What proposal states mean')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'What proposal states mean' }),
+    ).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('states plainly that CWT is not minted and no mint date is set', async () => {
+    mockApi({ 'GET /governance/proposals': [200, []] })
+    renderGovernance()
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Governance' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Pre-launch · CWT not minted')).toBeInTheDocument()
+    const stats = screen.getByRole('list', { name: 'Governance at a glance' })
+    expect(within(stats).getByText('Not scheduled')).toBeInTheDocument()
+
+    const tracker = screen.getByRole('list', { name: 'Governance milestones' })
+    const steps = within(tracker).getAllByRole('listitem')
+    expect(steps[0]).toHaveTextContent('Built')
+    expect(
+      steps.find((step) => step.getAttribute('aria-current') === 'step'),
+    ).toHaveTextContent(/Deploy the governance contracts/)
+    expect(within(tracker).getByText(/CWT minted and distributed/)).toBeInTheDocument()
+  })
+
+  it('explains who decides today and answers token questions in expandables', async () => {
+    mockApi({ 'GET /governance/proposals': [200, []] })
+    const user = userEvent.setup()
+    renderGovernance()
+
+    expect(screen.getByRole('region', { name: 'Who decides today' })).toBeInTheDocument()
+    const question = screen.getByRole('button', { name: 'Can I buy CWT today?' })
+    await user.click(question)
+    expect(question).toHaveAttribute('aria-expanded', 'true')
+    expect(
+      screen.getByRole('region', { name: 'Can I buy CWT today?' }),
+    ).toHaveTextContent(/not been minted/)
   })
 
   it('shows an honest empty state', async () => {
     mockApi({ 'GET /governance/proposals': [200, []] })
     renderGovernance()
 
+    expect(await screen.findByText('No proposals yet.')).toBeInTheDocument()
     expect(
-      await screen.findByText('No proposals have been indexed yet.'),
+      screen.getByText(/open once CWT is minted and the Governor contract is deployed/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/Be the first/)).not.toBeInTheDocument()
   })

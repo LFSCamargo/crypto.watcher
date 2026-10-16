@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { IN_ANALYSIS_HREF } from '../../../components/layout/navigation'
 import { RiCheckboxCircleLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
 import type { AnalysisRequest } from '../api/analysis-requests.api'
@@ -34,7 +35,7 @@ export function RequestSuccessPanel({
       </p>
       <div className="flex flex-col justify-center gap-2 sm:flex-row">
         <Button asChild className="rounded-full">
-          <Link to="/app/in-analysis">Open the review queue</Link>
+          <Link to={IN_ANALYSIS_HREF}>Open the review queue</Link>
         </Button>
         <Button
           type="button"

@@ -59,7 +59,8 @@ apps/
     │   │   │   ├── use-page-headings.ts # Section h2 ids for "On this page"
     │   │   │   ├── use-hash-scroll.ts # Scroll to #anchor once lazy content renders
     │   │   │   └── __tests__/
-    │   │   └── ui/                  # Shadcn/UI primitives (shared); Card glass variants, Sheet
+    │   │   └── ui/                  # Shadcn/UI primitives (shared); Card glass variants, Sheet,
+    │   │                            # Disclosure (animated expandable), SegmentedTabs (URL-driven tabs)
     │   ├── lib/                     # api client, wagmi/viem config, utils
     │   │   ├── api/                 # typed API client (maps to BACKEND)
     │   │   ├── seo/                 # PageMeta, route resolver, JSON-LD [MVP]
@@ -91,7 +92,9 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── comments/            # Public commenting               [MVP]
     │   │   ├── auth/                # Email/password + wallet onboarding  [MVP]
-    │   │   ├── analysis/            # In Analysis queue + review requests [MVP]
+    │   │   ├── analysis/            # Review queue (tab on /app) + review requests [MVP]
+    │   │   │   ├── components/in-analysis-panel.tsx # Queue panel rendered by the Projects page
+    │   │   │   ├── hooks/           # use-review-requests.ts, use-in-analysis-count.ts (tab badge)
     │   │   ├── profile/             # Unified user profile page           [MVP]
     │   │   │   ├── components/      # header, settings form, wallet status, council tools, avatar upload
     │   │   │   ├── hooks/           # use-compress-avatar.ts, use-update-profile.ts
@@ -103,9 +106,10 @@ apps/
     │   │   ├── market/              # Price chart + change badges      [MVP]
     │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
-    │   │   │   ├── components/     # proposal card/badge/legend/lifecycle, vote section + lazy vote controls
+    │   │   │   ├── components/     # proposal card/badge/legend/lifecycle, vote section + lazy vote controls,
+    │   │   │   │                   # governance-milestones, governance-today, governance-faq (pre-launch status)
     │   │   │   ├── hooks/          # use-governance.ts, use-proposal-vote.ts (wagmi castVote)
-    │   │   │   ├── lib/            # proposal-state.ts, vote-error.ts, proposal-id.ts
+    │   │   │   ├── lib/            # proposal-state.ts, vote-error.ts, proposal-id.ts, governance-milestones.ts
     │   │   │   ├── pages/
     │   │   │   └── __tests__/
     │   │   ├── reputation/         # Reviewer credentials profile       [MVP→Phase 1]
@@ -171,7 +175,7 @@ apps/
 - `/docs`, `/docs/whitepaper`, `/docs/tokenomics`, `/docs/governance`, `/docs/faq` inside `ResourceLayout`: sticky glass sidebar ("Documentation" landmark, `aria-current`) on desktop, a "Documentation menu" sheet below `lg`, opaque reading column, previous/next pager and an "On this page" list on `xl`.
 - `DocsSection` derives a stable anchor id from its title (`lib/section-id.ts`) with a "Link to …" anchor; deep links such as `/docs/faq#reviews-scores` scroll after lazy content loads.
 - `DocsTable` renders a labelled, keyboard-focusable scroll region so wide tables never overflow the page.
-- Governance docs state that in-app voting and delegation are not available yet (votes and `delegate` are wallet transactions); tokenomics marks review fees as planned. `[MVP]`
+- Governance and tokenomics docs open with a pre-launch callout (CWT not minted, no mint date; figures are the planned design), and the FAQ says CWT cannot be bought. Governance docs state that in-app voting and delegation are not available yet (votes and `delegate` are wallet transactions); tokenomics marks review fees as planned. `[MVP]`
 
 ### comments `[MVP]`
 - Public comment thread (read by all, post when authenticated). Guests get a "Sign in to comment" link that returns to the project; a failed post keeps the draft and shows an inline alert. Comments inform the council but never change the score.
@@ -187,7 +191,7 @@ apps/
 - Wallet connect via RainbowKit lives inside the logged-in profile dropdown (not the top nav).
 
 ### analysis `[MVP]`
-- **In Analysis** page (`/app/in-analysis`): status legend that separates request status from published reviews ("A request is not a review"); request cards (`article`) with readable status (`lib/request-status.ts`: `pending`/`paid` → Received, `in_review` → Under review, `approved` → Accepted, `rejected` → Declined), next step, submitted date and council notes; load error with retry; council projects in analysis. Team/admin see triage buttons (Start review, Accept, Decline) that PATCH only the status — no generated verdict notes.
+- **In analysis** tab on the Projects page (`/app?view=in-analysis`; `/app/in-analysis` and `/analysis` redirect there). The tab badge counts open requests plus council projects in analysis. Panel: status legend that separates request status from published reviews ("A request is not a review"); request cards (`article`) with readable status (`lib/request-status.ts`: `pending`/`paid` → Received, `in_review` → Under review, `approved` → Accepted, `rejected` → Declined), next step, submitted date and council notes; load error with retry; council projects in analysis. Team/admin see triage buttons (Start review, Accept, Decline) that PATCH only the status — no generated verdict notes.
 - **Analysis Request** page (`/app/analysis-request`): free during launch (API `feeAmount` is always `0`; no payment flow). Guests get sign-in / sign-up links that return to the form. Grouped form with inline validation mirroring the API schema (name 1–200, http(s) URL, description 10–5000), focus on the first invalid field, single submission while pending, data kept on failure with error-specific messages (session expired → sign in again, 429, 5xx, network). Success shows a persistent, focused "Request received" panel with a queue link; "Your requests" lists `GET /analysis-requests/me`.
 
 ### profile `[MVP]`
@@ -200,6 +204,7 @@ apps/
 
 ### governance — launch requirement
 - View **protocol** proposals, cast CWT governance votes, see results (Governor + token). `[MVP]`
+- Pre-launch status (current): hero states "CWT not minted" with no mint date, a milestone tracker (contracts built and tested → proposal UI built → deployment, mint and distribution not scheduled → voting after mint → delegation `[Phase 2]`), who decides today (council, core team, community), what CWT will govern, an honest empty proposals state and a token FAQ ("Can I buy CWT today?"). Update `governance/lib/governance-milestones.ts` when a milestone ships. `[MVP]`
   - List: readable states (Not open yet, Voting open, Passed, Not passed, Executed) with a state legend, retry on error and an honest empty state.
   - Detail: lifecycle steps, description, proposer, voting window and a "Your vote" panel. Voting calls `castVote(proposalId, support)` on the Governor via wagmi when `VITE_GOVERNOR_ADDRESS` is set; otherwise the panel explains that in-app voting isn't enabled. Panel states: disconnected (connect wallet), wrong network (switch chain), checking, read failure, ineligible (no voting power at `proposalSnapshot`), already voted, ready, awaiting wallet confirmation, pending, confirmed (explorer link), cancelled by the user and failed (with the contract's reason). Wallet code is lazy-loaded with the panel.
 - Community proposal creation UI. `[Phase 1]`
@@ -218,7 +223,7 @@ apps/
 
 ### Platform & UX
 - Uber-inspired light theme (cream/yellow/black), Raleway font, fully rounded Shadcn components; blueprint grid background on all pages. `[MVP]`
-- Global shell: skip link → glass header (Projects, In Analysis, Governance, Resources menu | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a fixed glass bottom bar keeps Projects, In Analysis and Governance one tap away and opens a "Menu" sheet with resources, account actions and theme. All links come from `components/layout/navigation.ts`. `[MVP]`
+- Global shell: skip link → glass header (Projects, Governance, Resources menu — the review queue is a tab inside Projects | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a fixed glass bottom bar keeps Projects and Governance one tap away and opens a "Menu" sheet with resources, account actions and theme. All links come from `components/layout/navigation.ts`. `[MVP]`
 - Liquid-glass design language (see `docs/redesign/DESIGN.md`): `--glass-*` tokens with `.glass-nav`, `.glass-card`, `.glass-card-flat` and `.glass-panel` surfaces; alpha tuned for WCAG AA text contrast; opaque fallback under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; at most three blurred layers on screen. Semantic `info`, `chart-1..5` and `*-strong` status text tokens. Landing palette `--tone-{amber,coral,violet,sky,teal,pink}` (+ `-strong` AA text variants) used via `ToneIcon` (`components/ui/tone-icon.tsx`) for resource/menu/methodology tiles and section eyebrows. Framer Motion honors `prefers-reduced-motion` via `MotionConfig`. `[MVP]`
 - Command palette search (debounced, race-conditioned) over council projects (listed first, tagged "Council") and reference assessments (tagged "Reference"). `[MVP]`
 - Toasts via Sonner, icons via Remix Icon, forms via React Hook Form. `[MVP]`
@@ -263,7 +268,7 @@ apps/
 | `/app` | projects (catalog: council projects + reference assessments) | public | `MVP` |
 | `/app/reference/:slug` | projects (reference assessment) | public | `MVP` |
 | `/app/projects/:slug` | projects (council project report) | public | `MVP` |
-| `/app/in-analysis` | analysis (POA review queue) | public | `MVP` |
+| `/app?view=in-analysis` | projects page → analysis queue tab (`/app/in-analysis` redirects) | public | `MVP` |
 | `/app/analysis-request` | analysis (free review request + your requests) | public (form requires sign-in) | `MVP` |
 | `/app/profile` | profile (own profile) | 🔒 | `MVP` |
 | `/app/projects/:slug/vote` | redirect → `/app/projects/:slug` (legacy vote UI removed) | public | `MVP` |

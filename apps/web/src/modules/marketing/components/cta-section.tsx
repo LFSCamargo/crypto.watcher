@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { IN_ANALYSIS_HREF } from '../../../components/layout/navigation'
 import { RiArrowRightLine } from '@remixicon/react'
 import { Button } from '../../../components/ui'
 import { SectionGlow } from './section-glow'
@@ -34,7 +35,7 @@ export function CTASection() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/app/in-analysis">See what’s in analysis</Link>
+              <Link to={IN_ANALYSIS_HREF}>See what’s in analysis</Link>
             </Button>
           </div>
         </div>

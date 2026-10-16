@@ -44,10 +44,14 @@ describe('AppHeader', () => {
   it('exposes the primary destinations including governance', () => {
     renderHeader()
     const nav = screen.getByRole('navigation', { name: 'Primary' })
-    for (const label of ['Projects', 'In Analysis', 'Governance']) {
+    for (const label of ['Projects', 'Governance']) {
       expect(within(nav).getByRole('link', { name: label })).toBeInTheDocument()
     }
     expect(within(nav).getByRole('button', { name: /Resources/ })).toBeInTheDocument()
+    expect(within(nav).getAllByRole('link')).toHaveLength(2)
+    expect(
+      within(nav).queryByRole('link', { name: /In analysis/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('marks the active route with aria-current', () => {

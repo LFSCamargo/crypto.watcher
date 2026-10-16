@@ -62,6 +62,22 @@ test.describe('Reviewer credentials', () => {
 })
 
 test.describe('Protocol governance', () => {
+  test('states the pre-launch status and answers token questions', async ({ page }) => {
+    await page.goto('/app/governance')
+    await expect(page.getByText('Pre-launch · CWT not minted')).toBeVisible()
+    await expect(
+      page
+        .getByRole('list', { name: 'Governance milestones' })
+        .locator('[aria-current="step"]'),
+    ).toContainText('Deploy the governance contracts')
+
+    const question = page.getByRole('button', { name: 'Can I buy CWT today?' })
+    await question.click()
+    await expect(
+      page.getByRole('region', { name: 'Can I buy CWT today?' }),
+    ).toContainText('not been minted')
+  })
+
   test('lists proposals and opens one with its vote panel', async ({ page }) => {
     await page.goto('/app/governance')
 

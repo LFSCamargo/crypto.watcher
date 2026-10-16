@@ -209,7 +209,7 @@ describe('AnalysisRequestPage', () => {
       ).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Open the review queue' })).toHaveAttribute(
         'href',
-        '/app/in-analysis',
+        '/app?view=in-analysis',
       )
 
       const history = screen.getByRole('region', { name: 'Your requests' })

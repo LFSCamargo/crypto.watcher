@@ -128,11 +128,6 @@ export const VerifyOtpPage = lazy(() =>
   })),
 )
 
-export const InAnalysisPage = lazy(() =>
-  import('../modules/analysis/pages/in-analysis-page').then((m) => ({
-    default: m.InAnalysisPage,
-  })),
-)
 export const AnalysisRequestPage = lazy(() =>
   import('../modules/analysis/pages/analysis-request-page').then((m) => ({
     default: m.AnalysisRequestPage,

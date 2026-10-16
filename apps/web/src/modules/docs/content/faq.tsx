@@ -110,8 +110,9 @@ export function DocsFAQ() {
         </DocsFaqItem>
         <DocsFaqItem question="Where can I buy CWT tokens?">
           <DocsP>
-            During the testnet phase, tokens are not tradeable. Once the mainnet launches,
-            token availability will be announced.
+            Nowhere yet. CWT hasn&apos;t been minted, there is no sale and no mint date is
+            set. Any launch will be announced on the Crypto Watcher blog first — anyone
+            selling CWT today isn&apos;t connected to us.
           </DocsP>
         </DocsFaqItem>
       </DocsSection>

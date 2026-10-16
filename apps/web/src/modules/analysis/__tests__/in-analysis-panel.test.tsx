@@ -1,7 +1,7 @@
 import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
-import { InAnalysisPage } from '../pages/in-analysis-page'
+import { InAnalysisPanel } from '../components/in-analysis-panel'
 import { mockApi } from '../../../test/mock-api'
 import { renderRoutes } from '../../../test/render-routes'
 import { useSession } from '../../../store/session'
@@ -44,14 +44,11 @@ const inAnalysisProject = {
 }
 
 const renderQueue = () =>
-  renderRoutes(
-    [{ path: '/app/in-analysis', element: <InAnalysisPage /> }],
-    '/app/in-analysis',
-  )
+  renderRoutes([{ path: '/app', element: <InAnalysisPanel /> }], '/app')
 
 const cardFor = (name: string) => screen.getByRole('article', { name })
 
-describe('InAnalysisPage', () => {
+describe('InAnalysisPanel', () => {
   afterEach(() => {
     cleanup()
     useSession.setState({ user: undefined })
@@ -64,9 +61,6 @@ describe('InAnalysisPage', () => {
     })
     renderQueue()
 
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'In analysis' }),
-    ).toBeInTheDocument()
     const legend = screen.getByRole('region', { name: 'What request statuses mean' })
     for (const label of ['Received', 'Under review', 'Accepted', 'Declined']) {
       expect(within(legend).getByText(label)).toBeInTheDocument()

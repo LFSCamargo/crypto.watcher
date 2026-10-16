@@ -26,11 +26,6 @@ const staticRoutes: Record<string, Omit<SeoMeta, 'path'>> = {
       { name: 'Projects', path: '/app' },
     ]),
   },
-  '/app/in-analysis': {
-    title: 'Projects In Analysis',
-    description:
-      'Track crypto projects currently under expert governor review on Crypto Watcher.',
-  },
   '/app/analysis-request': {
     title: 'Request a Project Review',
     description:
@@ -257,7 +252,6 @@ export function getIndexablePaths(): string[] {
   const paths = new Set<string>([
     '/',
     '/app',
-    '/app/in-analysis',
     '/app/analysis-request',
     '/app/governance',
     '/blog',
