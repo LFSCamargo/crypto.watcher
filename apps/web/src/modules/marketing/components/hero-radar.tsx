@@ -59,10 +59,11 @@ export function HeroRadar() {
               <AssetPreviewHover slug={asset.slug}>
                 <Link
                   to={`/app/reference/${asset.slug}`}
-                  className="group pointer-events-auto relative block rounded-full transition-transform duration-300 ease-glass hover:scale-125 focus-visible:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+                  className="group pointer-events-auto relative block rounded-full transition-transform duration-[240ms] ease-glass hover:scale-125 focus-visible:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                 >
                   <span
                     data-orbit-asset
+                    aria-hidden
                     className="flex h-11 w-11 animate-radar-ping items-center justify-center rounded-full border border-foreground/10 bg-background shadow-sm transition-shadow group-hover:shadow-[0_0_0_6px_hsl(var(--primary)/0.3)] motion-reduce:animate-none"
                     style={ping}
                   >

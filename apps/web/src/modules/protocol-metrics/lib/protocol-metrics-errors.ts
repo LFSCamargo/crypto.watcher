@@ -8,6 +8,7 @@ export class ProtocolMetricsUnavailableError extends Error {
 export function isApiUnavailable(error: unknown): boolean {
   if (!(error instanceof Error)) return false
   return (
+    error.message.startsWith('API 500') ||
     error.message.startsWith('API 502') ||
     error.message.startsWith('API 503') ||
     error.message.startsWith('Failed to fetch') ||

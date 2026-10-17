@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MobileNavigation } from '../mobile-navigation'
@@ -22,6 +22,11 @@ function renderNav(route = '/app') {
   )
 }
 
+function scrollTo(y: number) {
+  Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
+  fireEvent.scroll(window)
+}
+
 async function openMenu() {
   const user = userEvent.setup()
   const trigger = screen.getByRole('button', { name: 'Open menu' })
@@ -33,6 +38,44 @@ describe('MobileNavigation', () => {
   afterEach(() => {
     useSession.setState({ user: undefined })
     vi.unstubAllGlobals()
+    Object.defineProperty(window, 'scrollY', { value: 0, configurable: true })
+  })
+
+  it('floats a centered glass pill instead of a full-width bar', () => {
+    renderNav()
+    const bar = screen.getByRole('navigation', { name: 'Mobile' })
+    expect(bar).toHaveClass('glass-pill', 'rounded-full', '-translate-x-1/2')
+    expect(bar.className).not.toMatch(/inset-x-0|grid-cols-4/)
+    expect(within(bar).getAllByRole('link')).toHaveLength(2)
+    expect(within(bar).getByRole('button', { name: 'Open menu' })).toBeInTheDocument()
+    expect(within(bar).getByRole('link', { name: 'Projects' })).toHaveClass(
+      'flex-row',
+      'items-center',
+    )
+  })
+
+  it('compacts to icons on scroll, then expands on the first tap so the next tap navigates', () => {
+    renderNav()
+    const bar = screen.getByRole('navigation', { name: 'Mobile' })
+    expect(bar).toHaveAttribute('data-size', 'expanded')
+    expect(bar).toHaveClass('overflow-hidden', 'items-center')
+
+    scrollTo(400)
+    expect(bar).toHaveAttribute('data-size', 'compact')
+    expect(within(bar).getByText('Governance')).toHaveClass('opacity-0')
+
+    fireEvent.click(within(bar).getByRole('link', { name: 'Governance' }))
+    expect(bar).toHaveAttribute('data-size', 'expanded')
+    expect(within(bar).getByRole('link', { name: 'Governance' })).not.toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+
+    fireEvent.click(within(bar).getByRole('link', { name: 'Governance' }))
+    expect(within(bar).getByRole('link', { name: 'Governance' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
   })
 
   it('keeps projects, analysis and governance one tap away', () => {

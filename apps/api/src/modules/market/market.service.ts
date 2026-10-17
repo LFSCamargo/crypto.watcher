@@ -1,6 +1,6 @@
 import { HttpError } from '../../core/http/validation'
 import { resolveCoingeckoId } from './coingecko-ids'
-import { MARKET_CACHE_TTL_MS, MarketCache } from './market.cache'
+import { isWithinMarketRetention, MARKET_CACHE_TTL_MS, MarketCache } from './market.cache'
 import { computePercentChange, DAY_MS } from './market-changes'
 import { marketRepository, type MarketRepository } from './market.repository'
 import type { MarketSnapshot } from './market.types'
@@ -125,7 +125,9 @@ export class MarketService {
       return snapshot
     } catch (error) {
       const staleInDb = await this.repository.getAny(slug)
-      if (staleInDb) return { ...staleInDb, stale: true }
+      if (staleInDb && isWithinMarketRetention(staleInDb.cachedAt)) {
+        return { ...staleInDb, stale: true }
+      }
 
       if (error instanceof HttpError) throw error
       throw new HttpError(502, 'Unable to fetch market data right now')

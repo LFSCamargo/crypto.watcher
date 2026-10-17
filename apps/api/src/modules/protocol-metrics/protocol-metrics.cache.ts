@@ -1,4 +1,13 @@
-export const PROTOCOL_METRICS_CACHE_TTL_MS = 3 * 60 * 60 * 1000
+/** Refresh interval. A passed expiry means "fetch again", not "delete the snapshot". */
+export const PROTOCOL_METRICS_CACHE_TTL_MS = 12 * 60 * 60 * 1000
+
+/** Keep the last successful snapshot this long so an outage can still render it. */
+export const PROTOCOL_METRICS_RETENTION_MS = 7 * 24 * 60 * 60 * 1000
+
+export function isWithinProtocolMetricsRetention(cachedAt: string, now = Date.now()): boolean {
+  const fetchedAt = Date.parse(cachedAt)
+  return Number.isFinite(fetchedAt) && now - fetchedAt <= PROTOCOL_METRICS_RETENTION_MS
+}
 
 interface CacheEntry<T> {
   data: T

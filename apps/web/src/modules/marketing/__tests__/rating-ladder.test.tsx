@@ -16,6 +16,15 @@ const countFor = (grade: string, category?: string) =>
 describe('RatingLadder', () => {
   afterEach(cleanup)
 
+  it('keeps grade targets usable in a contained mobile scrollport', () => {
+    renderWithProviders(<RatingLadder />)
+    const chart = screen.getByRole('group', { name: 'Reference assets by grade' })
+    expect(chart.parentElement).toHaveClass('overflow-x-auto')
+    for (const button of within(chart).getAllByRole('button')) {
+      expect(button).toHaveClass('min-w-11')
+    }
+  })
+
   it('charts how many reference assets sit at each grade', () => {
     renderWithProviders(<RatingLadder />)
     const chart = screen.getByRole('group', { name: 'Reference assets by grade' })

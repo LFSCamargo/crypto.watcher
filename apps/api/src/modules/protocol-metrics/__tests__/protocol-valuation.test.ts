@@ -156,7 +156,43 @@ describe('computeProtocolValuation', () => {
     expect(recomposed).toBeCloseTo(valuation!.compositeScore!, 6)
   })
 
-  it('gives unscored components no share and drops security for chains', () => {
+  it('computes one-year revenue growth and price-to-sales when the inputs exist', () => {
+    const now = Date.now()
+    const history = Array.from({ length: 800 }, (_, index) => {
+      const age = 799 - index
+      return {
+        timestamp: now - age * DAY_MS,
+        value: age > 365 ? 100 : 150,
+      }
+    })
+
+    const valuation = computeProtocolValuation({
+      entityType: 'chain',
+      tvl: 4_000_000_000,
+      mcap: 1_600_000_000_000,
+      fees30d: 900_000,
+      revenue30d: 280_000,
+      feesHistory: history,
+      revenueHistory: history,
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    expect(valuation!.revenueGrowth1y).toBeGreaterThan(0)
+    expect(valuation!.priceToSalesRatio).toBeGreaterThan(0)
+    expect(valuation!.securityScore).toBeNull()
+    expect(valuation!.governanceQualityScore).toBeNull()
+    expect(valuation!.compositeBreakdown.some((entry) => entry.component === 'governance')).toBe(
+      false,
+    )
+    expect(valuation!.compositeBreakdown.some((entry) => entry.component === 'security')).toBe(
+      false,
+    )
+  })
+
+  it('gives unscored components no share and omits protocol-only governance for chains', () => {
     const valuation = computeProtocolValuation({
       entityType: 'chain',
       tvl: 40_000_000_000,
@@ -172,11 +208,105 @@ describe('computeProtocolValuation', () => {
     })
 
     const breakdown = valuation!.compositeBreakdown
+    expect(breakdown.some((entry) => entry.component === 'governance')).toBe(false)
     expect(breakdown.some((entry) => entry.component === 'security')).toBe(false)
     const fee = breakdown.find((entry) => entry.component === 'feeSustainability')
     expect(fee?.score).toBe(valuation!.feeSustainabilityScore)
     for (const entry of breakdown.filter((item) => item.score == null)) {
       expect(entry.share).toBe(0)
     }
+  })
+
+  it('keeps Ethereum on the fee and revenue model', () => {
+    const valuation = computeProtocolValuation({
+      slug: 'ethereum',
+      entityType: 'chain',
+      tvl: 40_000_000_000,
+      mcap: 400_000_000_000,
+      priceUsd: 3_000,
+      settlementVolume1yUsd: null,
+      fees30d: 240_000_000,
+      revenue30d: 80_000_000,
+      feesHistory: buildDailyHistory(30, 8_000_000),
+      revenueHistory: buildDailyHistory(30, 2_600_000),
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    expect(valuation!.methodologyVersion).toBe('CW-Valuation-v1')
+    expect(valuation!.compositeBreakdown.map((entry) => entry.component)).toEqual([
+      'fundamentals',
+      'value',
+      'feeSustainability',
+    ])
+    expect(valuation!.feeSustainabilityScore).toBeGreaterThan(0)
+  })
+
+  it('scores Bitcoin as a reserve from security budget, dilution, and settlement', () => {
+    const asOf = Date.parse('2026-10-17T00:00:00.000Z')
+    const mcap = 1_000_000_000_000
+    const priceUsd = 50_000
+    const settlementVolume1yUsd = 20_000_000_000
+    const feesHistory = buildDailyHistory(365, 10_000, asOf)
+
+    const valuation = computeProtocolValuation({
+      slug: 'bitcoin',
+      entityType: 'chain',
+      tvl: 8_000_000_000,
+      mcap,
+      priceUsd,
+      settlementVolume1yUsd,
+      asOf,
+      fees30d: 300_000,
+      revenue30d: 70_000,
+      feesHistory,
+      revenueHistory: buildDailyHistory(365, 2_000, asOf),
+      chainBreakdown: [],
+      chainCount: 1,
+      exploitCount: 0,
+      totalExploitLossUsd: null,
+    })
+
+    expect(valuation).not.toBeNull()
+    expect(valuation!.methodologyVersion).toBe('CW-Reserve-v1')
+    expect(valuation!.feeToTvlRatio).toBeGreaterThan(0)
+    expect(valuation!.revenueToTvlRatio).toBeGreaterThan(0)
+    expect(valuation!.priceToSalesRatio).toBeGreaterThan(0)
+
+    const breakdown = valuation!.compositeBreakdown
+    expect(breakdown.map((entry) => entry.component)).toEqual([
+      'securityBudget',
+      'dilution',
+      'settlement',
+    ])
+    expect(breakdown.some((entry) => entry.component === 'feeSustainability')).toBe(false)
+    expect(breakdown.reduce((sum, entry) => sum + entry.share, 0)).toBeCloseTo(1, 6)
+    for (const entry of breakdown) {
+      expect(entry.score).not.toBeNull()
+      expect(entry.share).toBeCloseTo(1 / 3, 6)
+    }
+
+    const annualFees = 10_000 * 365
+    const securityBudgetScore = Math.min((annualFees / mcap / 0.0005) * 100, 100)
+    const issuanceBtc = 3.125 * ((365 * 24 * 60) / 10)
+    const dilution = issuanceBtc / (mcap / priceUsd)
+    const dilutionScore = Math.max(0, 100 - (dilution / 0.02) * 100)
+    const nvt = mcap / settlementVolume1yUsd
+    const settlementScore = Math.max(0, Math.min(100, 100 - ((nvt - 30) / 90) * 100))
+
+    const security = breakdown.find((entry) => entry.component === 'securityBudget')
+    const dilutionEntry = breakdown.find((entry) => entry.component === 'dilution')
+    const settlement = breakdown.find((entry) => entry.component === 'settlement')
+    expect(security!.score).toBeCloseTo(securityBudgetScore, 5)
+    expect(dilutionEntry!.score).toBeCloseTo(dilutionScore, 5)
+    expect(settlement!.score).toBeCloseTo(settlementScore, 5)
+
+    const recomposed = breakdown.reduce(
+      (sum, entry) => sum + (entry.score ?? 0) * entry.share,
+      0,
+    )
+    expect(recomposed).toBeCloseTo(valuation!.compositeScore!, 6)
   })
 })

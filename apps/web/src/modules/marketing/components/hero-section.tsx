@@ -27,8 +27,8 @@ export function HeroSection() {
           { tone: 'pink', at: '45% 5%', size: '26rem 16rem', strength: 0.1 },
         ]}
       />
-      <div className="container-wide relative z-10 grid items-center gap-12 pb-16 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24">
-        <div className="flex flex-col items-center text-center animate-in fade-in duration-500 lg:items-start lg:text-left">
+      <div className="container-wide relative z-10 grid items-center gap-12 pb-28 pt-14 md:pb-16 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:pb-24">
+        <div className="flex flex-col items-center text-center landing-enter lg:items-start lg:text-left">
           <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/70 px-4 py-1.5 text-sm font-semibold">
             <span aria-hidden className="flex h-2 w-2 rounded-full bg-success" />
             Expert-governed crypto risk reviews
@@ -55,7 +55,7 @@ export function HeroSection() {
             type="button"
             onClick={() => openSearch(true)}
             aria-keyshortcuts="Meta+K Control+K"
-            className="flex h-14 w-full max-w-xl items-center gap-3 rounded-full border border-foreground/10 bg-background/80 px-5 text-left text-muted-foreground shadow-sm transition-[border-color,box-shadow] duration-300 ease-glass hover:border-tone-amber/60 hover:shadow-[0_0_0_4px_hsl(var(--tone-amber)/0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
+            className="flex h-14 w-full max-w-xl items-center gap-3 rounded-full border border-foreground/10 bg-background/80 px-5 text-left text-muted-foreground shadow-sm transition-[border-color,box-shadow] duration-[240ms] ease-glass hover:border-tone-amber/60 hover:shadow-[0_0_0_4px_hsl(var(--tone-amber)/0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
           >
             <RiSearchLine className="h-5 w-5 shrink-0 text-foreground" aria-hidden />
             <span className="flex-1 truncate">
@@ -103,7 +103,10 @@ export function HeroSection() {
           </ul>
         </div>
 
-        <div className="relative flex justify-center lg:justify-end">
+        <div
+          data-hero-stage
+          className="relative hidden justify-center lg:flex lg:justify-end"
+        >
           <div className="relative w-full max-w-md">
             <HeroRadar />
             <ReportPreviewCard />

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { RiShieldCheckLine } from '@remixicon/react'
 import { cn } from '../../../lib/utils'
 import { SpotlightCard } from './spotlight-card'
@@ -39,13 +38,10 @@ export function DiscussionCard({ className }: { className?: string }) {
       </div>
       <ul aria-label="Example discussion" className="space-y-2.5">
         {messages.map((message, index) => (
-          <motion.li
+          <li
             key={message.author}
-            initial={{ opacity: 0, y: 12, scale: 0.96 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 + index * 0.45, duration: 0.4 }}
-            className={cn('flex', message.council && 'justify-end')}
+            style={{ animationDelay: `${index * 80}ms` }}
+            className={cn('landing-enter flex', message.council && 'justify-end')}
           >
             <div
               className={cn(
@@ -66,7 +62,7 @@ export function DiscussionCard({ className }: { className?: string }) {
               </p>
               {message.text}
             </div>
-          </motion.li>
+          </li>
         ))}
         <li aria-hidden className="flex gap-1 pl-2 pt-1">
           {[0, 1, 2].map((dot) => (

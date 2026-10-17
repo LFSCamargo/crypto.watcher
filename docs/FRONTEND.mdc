@@ -49,7 +49,7 @@ apps/
     │   │   │   ├── navigation.ts    # Primary/resource/footer link registry (single source)
     │   │   │   ├── app-header.tsx   # Floating glass pill: Primary nav, Resources menu, search, auth
     │   │   │   ├── use-compact-header.ts # Pill state: compact on scroll, expands on hover/click/top
-    │   │   │   ├── mobile-navigation.tsx # Fixed bottom bar + "Menu" sheet (resources, account)
+    │   │   │   ├── mobile-navigation.tsx # Centered glass pill; compacts to icons on scroll, tap pins it open + sheet
     │   │   │   ├── app-footer.tsx   # Link groups + request CTA + disclaimer
     │   │   │   ├── footer-link-group.tsx
     │   │   │   ├── resources-menu.tsx
@@ -81,7 +81,8 @@ apps/
     │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, revenue/fee sparklines, composite breakdown
     │   │   │   ├── components/asset-preview-hover.tsx # Shared hover card used by the radar, ticker, and rating ladder
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
-    │   │   │   ├── components/asset-ticker.tsx # Mouse-only marquee; hovering a coin opens the radar preview (aria-hidden)
+    │   │   │   ├── components/asset-ticker.tsx # md+ passing tape (wheel-scrubs on hover); small screens use a snap banner carousel
+    │   │   │   ├── hooks/use-auto-scroll-tape.ts # Tokens keep passing; hover maps the wheel onto the row
     │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
     │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA); listed coins open the radar preview
     │   │   │   ├── components/lifecycle-track.tsx # SVG review timeline: cubic route, stations, traveling marker
@@ -111,7 +112,12 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
+    │   │   │   ├── components/     # market-cache-warmup.tsx (schedules the background worker)
+    │   │   │   ├── hooks/          # use-market-price.ts, use-market-cache-worker.ts
+    │   │   │   ├── lib/            # local cache + progressive loader
+    │   │   │   └── workers/        # market-cache.worker.ts
     │   │   ├── protocol-metrics/    # TVL, fees, revenue, exploits     [MVP]
+    │   │   │   ├── lib/            # compute-protocol-valuation.ts, bitcoin-reserve-valuation.ts
     │   │   ├── governance/         # Proposals, vote, results          [MVP]
     │   │   │   ├── components/     # proposal card/badge/legend/lifecycle, vote section + lazy vote controls,
     │   │   │   │                   # governance-milestones, governance-today, governance-faq (pre-launch status)
@@ -153,7 +159,7 @@ apps/
 - Curated market-reference assets inspired by widely tracked CoinMarketCap listings.
 - Local coin logos in `public/icons/{slug}.png` (synced from CoinGecko via `pnpm --filter web icons:sync`); `ProjectIcon` loads by slug with initials fallback.
 - Lifecycle status badges (`lib/format.ts`): `in_analysis` → "In analysis", `ready` → "Awaiting governor review", `voting` → "Governor review", `closed` → "Report pending", `analyzed` → "Report published". Legacy API state names stay internal.
-- Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query stale time matches 3h API cache).
+- Price movement panel on reference project detail (7-day chart, 24h/7d change; React Query refreshes on the same 12-hour interval as the API cache). A manual refresh stays disabled until that window ends. While a saved snapshot is refreshing, the panel keeps the price on screen and shows “Refreshing saved prices” instead of the first-load skeleton.
 - Protocol fundamentals panel on project detail (TVL trend, fees/revenue, exploit history; hidden when unavailable e.g. pure L1 networks).
 - Community submission form. `[Phase 2]`
 
@@ -161,13 +167,14 @@ apps/
 - `ProjectPricePanel` on curated reference detail pages (24h, 7d, 1m, 1y change badges).
 - `TopRatedProjectCard` on the landing hero (description, tags, price, 24h/7d/1m/1y changes, compact sparkline).
 - SVG sparkline chart (`PriceChart`) with 1D/1W/1M/1Y range filters, hover crosshair, and green/red tone from period direction.
-- `useMarketPrice` hook calling `GET /market/projects/:slug`, with a CoinGecko client fallback (3h `localStorage` cache) when the API is unreachable in dev.
+- `useMarketPrice` calls `GET /market/projects/:slug` and paints immediately from that slug’s compact `localStorage` snapshot (price, changes, 48 chart points, one entry per reference asset). Catalog cards show the saved price on reload before the card is fetched again. A fresh snapshot is not requested again until 12 hours have passed, and the Refresh control stays disabled until `expiresAt`. A refresh in flight keeps the saved price and shows “Refreshing saved price” instead of the loading skeleton. A failed refresh keeps showing the saved snapshot for 7 days (`stale: true`). The error state appears only when there is no snapshot from that week. CoinGecko is a direct fallback when the API itself cannot be reached.
+- `MarketCacheWarmup` starts `market-cache.worker` on the first shell render. The worker fetches the reference catalog a few assets at a time and the page writes each snapshot into that slug’s local cache and into the open price query, so cards fill in as each asset arrives. A progress bar lists how many are saved and which assets are still loading, and hides once every tradable asset is saved. In dev, a toast appears at that point.
 
 ### protocol-metrics `[MVP]`
-- `ProtocolMetricsPanel` on reference and live project detail pages below the price panel.
+- `ProtocolMetricsPanel` on reference and live project detail pages below the price panel. TVL, fees, and revenue charts paint from a compact `localStorage` snapshot (one entry per slug, up to 48 assets) and refresh every 12 hours. Fee and revenue history keep two years so the valuation can score one-year growth; charts still offer 1W/1M/3M/1Y ranges. Network market cap feeds price-to-sales. Governance diversification and the security score are shown for protocols. Refresh stays disabled until the 12-hour window ends; a refresh in flight keeps the saved charts and shows “Refreshing saved data” instead of the first-load skeleton. A failed refresh keeps that snapshot for 7 days; the error appears only when nothing from that week is saved. The same snapshot feeds the landing and catalog hover summaries.
 - Dev server proxies `GET /protocol-metrics/*` to the API (`vite.config.ts`); without this, the browser receives SPA HTML and metrics fail silently.
 - **Protocol** projects: full panel (TVL, fees/revenue/DEX volume charts with **1W/1M/3M/1Y** ranges, chain + token bar breakdowns, **on-chain valuation model**, security incidents).
-- **On-chain valuation:** always surfaced via `ProtocolValuationSection` — shows computed metrics when DeFi Llama fee/revenue data exists, or an explanatory empty state (stablecoin, missing fees, missing revenue).
+- **On-chain valuation:** always surfaced via `ProtocolValuationSection` — shows computed metrics when DeFi Llama fee/revenue data exists, or an explanatory empty state (stablecoin, missing fees, missing revenue). Bitcoin uses a reserve composite (`CW-Reserve-v1`) titled **Reserve valuation** (security budget, dilution, settlement). Fee/TVL and revenue/TVL remain visible and are labelled as not part of that score. Other chains keep **Network fee valuation**.
 - **Stablecoin** projects (USDC, USDT): circulating supply, supply history, and supply-by-chain bar chart.
 - **Chain** projects (L1/L2): TVL plus network-wide DEX volume, fees paid, and revenue captured (validator/protocol share of fees — not a dapp P&L). Charts use **1W/1M/3M/1Y** ranges when DeFi Llama indexes the series.
 - Resolver tries protocol first for DeFi/infrastructure; L1/L2 slugs use chain TVL first, then protocol fallback.
@@ -230,8 +237,11 @@ apps/
 
 ### Platform & UX
 - Uber-inspired light theme (cream/yellow/black), Raleway font, fully rounded Shadcn components; blueprint grid background on all pages. `[MVP]`
-- Global shell: skip link → glass header (Projects, Governance, Resources menu — the review queue is a tab inside Projects | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a fixed glass bottom bar keeps Projects and Governance one tap away and opens a "Menu" sheet with resources, account actions and theme. All links come from `components/layout/navigation.ts`. `[MVP]`
+- Global shell: skip link → glass header (Projects, Governance, Resources menu — the review queue is a tab inside Projects | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a centered floating glass pill keeps Projects and Governance in a row with Menu. Scrolling compacts it to icons; a tap pins it open so the next tap navigates or opens the sheet (resources, account actions and theme). All links come from `components/layout/navigation.ts`. `[MVP]`
+- Scrollbars stay hidden in every browser (`scrollbar-width: none`, zero-size `::-webkit-scrollbar`). The bar is not `display: none`, so Logitech and Rapoo wheel drivers still scroll the page and nested regions. `[MVP]`
 - Liquid-glass design language (see `docs/redesign/DESIGN.md`): `--glass-*` tokens with `.glass-nav`, `.glass-card`, `.glass-card-flat` and `.glass-panel` surfaces; alpha tuned for WCAG AA text contrast; opaque fallback under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; at most three blurred layers on screen. Semantic `info`, `chart-1..5` and `*-strong` status text tokens. Landing palette `--tone-{amber,coral,violet,sky,teal,pink}` (+ `-strong` AA text variants) used via `ToneIcon` (`components/ui/tone-icon.tsx`) for resource/menu/methodology tiles and section eyebrows. Framer Motion honors `prefers-reduced-motion` via `MotionConfig`. `[MVP]`
+- Landing motion uses glass easing and 160/240/320 ms chrome transitions, with short staggered reveals and a single report scan. Reduced motion shows final content immediately, stops decorative loops and count-up, and keeps lifecycle selection manual (the 4-second tour runs only while visible). Mobile reference banners use manual snap scrolling; grade bars use a contained horizontal scrollport with 44px targets. `[MVP]`
+- All shell routes and the footer reserve bottom-pill clearance plus the device safe area below `lg`. Page hero actions stack on phones; docs/blog sheets remain within the available width. `[MVP]`
 - Command palette search (debounced, race-conditioned) over council projects (listed first, tagged "Council") and reference assessments (tagged "Reference"). `[MVP]`
 - Toasts via Sonner, icons via Remix Icon, forms via React Hook Form. `[MVP]`
 - Error reporting via Sentry. `[MVP]`

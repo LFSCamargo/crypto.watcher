@@ -1,4 +1,9 @@
-import { RiAlertLine, RiCheckboxCircleLine, RiShieldCheckLine } from '@remixicon/react'
+import {
+  RiAlertLine,
+  RiCheckboxCircleLine,
+  RiRefreshLine,
+  RiShieldCheckLine,
+} from '@remixicon/react'
 import { Badge, Skeleton } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
 import { getCuratedProject, projectCategories } from '../../projects/lib/curated-projects'
@@ -24,6 +29,9 @@ const componentLabels: Record<CompositeComponent, string> = {
   governance: 'Governance (chain spread)',
   value: 'Value (revenue vs TVL)',
   feeSustainability: 'Fee sustainability',
+  securityBudget: 'Security budget (fees vs market cap)',
+  dilution: 'Dilution (new coins vs supply)',
+  settlement: 'Settlement (market cap vs transfers)',
 }
 
 function LiveMetrics({ metrics }: { metrics: ProtocolMetricsSnapshot }) {
@@ -183,21 +191,27 @@ export function RadarAssetPreview({ slug }: { slug: string }) {
         </Badge>
       </div>
 
-      {metrics.isPending ? (
+      {metrics.isPending && !metrics.data ? (
         <div className="space-y-2" aria-label="Loading live protocol data">
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-1/2" />
           <Skeleton className="h-4 w-2/3" />
         </div>
-      ) : metrics.isError ? (
-        <p className="text-xs text-muted-foreground">
-          Live protocol data is unavailable right now.
-        </p>
-      ) : (
+      ) : metrics.data ? (
         <>
+          {metrics.isFetching ? (
+            <p role="status" className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <RiRefreshLine className="h-3 w-3 animate-spin" aria-hidden />
+              Refreshing saved data
+            </p>
+          ) : null}
           <LiveMetrics metrics={metrics.data} />
           <CompositeBreakdown metrics={metrics.data} />
         </>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Live protocol data is unavailable right now.
+        </p>
       )}
 
       <ul className="space-y-1.5 border-t border-foreground/10 pt-3 text-[11px]">

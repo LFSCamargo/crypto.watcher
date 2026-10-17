@@ -1,3 +1,6 @@
+/** Keep aligned with the API `PROTOCOL_METRICS_SNAPSHOT_VERSION`. */
+export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 10
+
 export interface TvlPoint {
   timestamp: number
   tvl: number
@@ -35,6 +38,9 @@ export type CompositeComponent =
   | 'governance'
   | 'value'
   | 'feeSustainability'
+  | 'securityBudget'
+  | 'dilution'
+  | 'settlement'
 
 export interface CompositeBreakdownEntry {
   component: CompositeComponent
@@ -69,6 +75,8 @@ export interface ProtocolMetricsSnapshot {
   website: string | null
   chains: string[]
   mcap: number | null
+  priceUsd?: number | null
+  settlementVolume1yUsd?: number | null
   tvl: number
   tvlChange24h: number | null
   tvlChange7d: number | null
@@ -94,12 +102,19 @@ export interface ProtocolMetricsSnapshot {
   exploitCount: number
   totalExploitLossUsd: number | null
   valuation: ProtocolValuation | null
+  snapshotVersion?: number
   cachedAt: string
   expiresAt: string
   stale?: boolean
 }
 
-export const PROTOCOL_METRICS_STALE_TIME_MS = 3 * 60 * 60 * 1000
+/** When to fetch again and replace the snapshot. Passing this time does not delete it. */
+export const PROTOCOL_METRICS_REFRESH_MS = 12 * 60 * 60 * 1000
+
+/** Show the last saved snapshot through an outage, then allow an error after this. */
+export const PROTOCOL_METRICS_RETENTION_MS = 7 * 24 * 60 * 60 * 1000
+
+export const PROTOCOL_METRICS_STALE_TIME_MS = PROTOCOL_METRICS_REFRESH_MS
 
 export const EMPTY_PROTOCOL_METRICS: Pick<
   ProtocolMetricsSnapshot,

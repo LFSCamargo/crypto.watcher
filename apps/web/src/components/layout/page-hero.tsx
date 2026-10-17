@@ -131,7 +131,7 @@ export function PageHero({
           )}
         </div>
         <div className="space-y-3">
-          <h1 className="text-balance text-3xl font-bold tracking-tight md:text-5xl">
+          <h1 className="break-words text-balance text-3xl font-bold tracking-tight md:text-5xl">
             {title}
           </h1>
           {description && (
@@ -140,7 +140,9 @@ export function PageHero({
             </div>
           )}
         </div>
-        {actions && <div className="flex flex-wrap gap-3">{actions}</div>}
+        {actions && (
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">{actions}</div>
+        )}
         {stats && stats.length > 0 && (
           <ul aria-label={`${title} at a glance`} className="flex flex-wrap gap-3 pt-1">
             {stats.map((stat) => (

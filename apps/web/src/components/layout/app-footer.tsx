@@ -9,7 +9,7 @@ export function AppFooter() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="relative z-10 mt-auto border-t border-border bg-card/60 pb-28 lg:pb-0">
+    <footer className="relative z-10 mt-auto border-t border-border bg-card/60 pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-0">
       <div className="container-wide pt-14 md:pt-16">
         <div className="grid gap-12 lg:grid-cols-[1.35fr_1fr_1fr_1fr]">
           <div className="space-y-5 lg:max-w-sm">

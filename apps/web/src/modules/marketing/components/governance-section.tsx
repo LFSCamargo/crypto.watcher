@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { RiCheckLine, RiCoinLine, RiForbidLine, RiLock2Line } from '@remixicon/react'
 import { Button } from '../../../components/ui'
 import { governanceMilestones } from '../../governance/lib/governance-milestones'
@@ -71,20 +70,17 @@ export function GovernanceSection() {
                 </div>
                 <ul className="space-y-2.5">
                   {voted.map((item, index) => (
-                    <motion.li
+                    <li
                       key={item}
-                      initial={{ opacity: 0, x: -16 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.2 + index * 0.1 }}
-                      className="flex items-start gap-2 text-sm"
+                      className="landing-enter flex items-start gap-2 text-sm"
+                      style={{ animationDelay: `${index * 60}ms` }}
                     >
                       <RiCheckLine
                         aria-hidden
                         className="mt-0.5 h-4 w-4 shrink-0 text-success-strong"
                       />
                       {item}
-                    </motion.li>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -97,20 +93,17 @@ export function GovernanceSection() {
                 </div>
                 <ul className="space-y-2.5">
                   {neverVoted.map((item, index) => (
-                    <motion.li
+                    <li
                       key={item}
-                      initial={{ opacity: 0, x: 16 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.5 + index * 0.1 }}
-                      className="flex items-start gap-2 text-sm"
+                      className="landing-enter flex items-start gap-2 text-sm"
+                      style={{ animationDelay: `${index * 60}ms` }}
                     >
                       <RiForbidLine
                         aria-hidden
                         className="mt-0.5 h-4 w-4 shrink-0 text-destructive-strong"
                       />
                       {item}
-                    </motion.li>
+                    </li>
                   ))}
                 </ul>
                 <p className="text-xs text-muted-foreground">
@@ -127,19 +120,16 @@ export function GovernanceSection() {
               </div>
               <div className="flex gap-1.5" aria-hidden>
                 {governanceMilestones.map((milestone, index) => (
-                  <motion.span
+                  <span
                     key={milestone.title}
+                    style={{ animationDelay: `${index * 60}ms` }}
                     className={
                       milestone.status === 'done'
-                        ? 'h-2 flex-1 origin-left rounded-full bg-tone-teal'
+                        ? 'h-2 flex-1 origin-left animate-bar-fill rounded-full bg-tone-teal'
                         : milestone.status === 'next'
-                          ? 'h-2 flex-1 origin-left rounded-full bg-tone-amber/60'
-                          : 'h-2 flex-1 origin-left rounded-full bg-muted'
+                          ? 'h-2 flex-1 origin-left animate-bar-fill rounded-full bg-tone-amber/60'
+                          : 'h-2 flex-1 origin-left animate-bar-fill rounded-full bg-muted'
                     }
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 + index * 0.08, duration: 0.5 }}
                   />
                 ))}
               </div>

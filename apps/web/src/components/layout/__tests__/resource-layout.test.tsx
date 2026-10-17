@@ -96,6 +96,11 @@ describe('ResourceLayout', () => {
     await user.click(trigger)
 
     const sheet = await screen.findByRole('dialog', { name: 'Guide' })
+    expect(sheet).toHaveClass('w-[min(20rem,calc(100%-1rem))]')
+    expect(within(sheet).getByRole('button', { name: 'Close' })).toHaveClass(
+      'min-h-11',
+      'min-w-11',
+    )
     await user.click(within(sheet).getByRole('link', { name: 'FAQ' }))
 
     expect(currentLocation()).toBe('/guide/faq')

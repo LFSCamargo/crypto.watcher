@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { RiArrowRightUpLine, RiBookOpenLine } from '@remixicon/react'
+import { RiArrowRightUpLine, RiBookOpenLine, RiRefreshLine } from '@remixicon/react'
 import { motion } from 'framer-motion'
 import type { CuratedProject } from '../lib/curated-projects'
 import { projectCategories } from '../lib/curated-projects'
@@ -108,8 +108,9 @@ export function CuratedProjectCard({
     return () => observer.disconnect()
   }, [fetchImmediately])
 
-  const { data, isLoading } = useMarketPrice(isVisible ? project.slug : undefined)
-  const marketPending = !isVisible || isLoading
+  const { data, isLoading, isFetching } = useMarketPrice(project.slug, { fetch: isVisible })
+  const marketPending = !data && (!isVisible || isLoading)
+  const refreshing = Boolean(data && isFetching)
   const tone = scoreTone(project.score)
   const creditRating = resolveCreditRatingFromSafetyScore(project.score, {
     forceDefault: project.status === 'watch',
@@ -201,6 +202,15 @@ export function CuratedProjectCard({
                   <p className="text-lg font-bold tabular-nums">
                     {formatUsd(data.price)}
                   </p>
+                  {refreshing ? (
+                    <p
+                      role="status"
+                      className="mt-1 flex items-center gap-1 text-[10px] font-medium text-primary"
+                    >
+                      <RiRefreshLine className="h-3 w-3 animate-spin" aria-hidden />
+                      Refreshing saved price
+                    </p>
+                  ) : null}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   <MarketChangeChip label="24h" value={data.change24h} />

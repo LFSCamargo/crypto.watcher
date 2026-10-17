@@ -1,4 +1,5 @@
-import { RiLineChartLine, RiRefreshLine } from '@remixicon/react'
+import { RiLineChartLine } from '@remixicon/react'
+import { CacheRefreshStatus } from '../../../components/cache-refresh-status'
 import { Badge, Card, CardContent, CardHeader, CardTitle, Skeleton } from '../../../components/ui'
 import { useMarketPrice } from '../hooks/use-market-price'
 import { MarketUnavailableError } from '../lib/market-errors'
@@ -21,7 +22,8 @@ function ChangeBadge({ label, value }: { label: string; value: number | null }) 
 }
 
 export function ProjectPricePanel({ slug }: { slug: string }) {
-  const { data, isLoading, isError, error } = useMarketPrice(slug)
+  const { data, isLoading, isFetching, error, refetch } = useMarketPrice(slug)
+  const refreshing = Boolean(data && isFetching)
   const unavailable = error instanceof MarketUnavailableError
 
   return (
@@ -33,7 +35,7 @@ export function ProjectPricePanel({ slug }: { slug: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pb-4">
-        {isLoading ? (
+        {isLoading && !data ? (
           <div className="space-y-3">
             <Skeleton className="h-10 w-40 rounded-xl" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -44,25 +46,22 @@ export function ProjectPricePanel({ slug }: { slug: string }) {
             </div>
             <Skeleton className="h-64 rounded-xl" />
           </div>
-        ) : unavailable ? (
-          <p className="text-sm text-muted-foreground">
-            {error.message} Safety reviews for network layers without a native token are still
-            available above.
-          </p>
-        ) : isError || !data ? (
-          <p className="text-sm text-muted-foreground">
-            Unable to load price data right now. Try again in a few minutes — history is cached for
-            3 hours once fetched.
-          </p>
-        ) : (
+        ) : data ? (
           <>
             <div>
               <p className="text-3xl font-bold">{formatUsd(data.price)}</p>
-              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                <RiRefreshLine className="h-3.5 w-3.5" />
-                Updated {new Date(data.cachedAt).toLocaleString()} · refreshes every 3 hours
-                {data.stale ? ' · showing last saved prices' : ''}
-              </p>
+              <div className="mt-1">
+                <CacheRefreshStatus
+                  cachedAt={data.cachedAt}
+                  expiresAt={data.expiresAt}
+                  refreshing={refreshing}
+                  savedLabel="showing last saved prices"
+                  refreshingLabel="Refreshing saved prices"
+                  onRefresh={() => {
+                    void refetch()
+                  }}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -72,10 +71,20 @@ export function ProjectPricePanel({ slug }: { slug: string }) {
               <ChangeBadge label="1y" value={data.change1y} />
             </div>
           </>
+        ) : unavailable ? (
+          <p className="text-sm text-muted-foreground">
+            {error.message} Safety reviews for network layers without a native token are still
+            available above.
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Unable to load price data right now. A saved snapshot from the last week is shown when
+            one exists; otherwise try again later.
+          </p>
         )}
       </CardContent>
 
-      {!isLoading && data ? (
+      {data ? (
         <PriceChart history={data.history} layout="panel" defaultRange="1y" />
       ) : null}
     </Card>

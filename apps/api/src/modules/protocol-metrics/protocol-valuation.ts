@@ -15,6 +15,13 @@ import { DAY_MS } from './protocol-metrics-changes'
 import type { ChainTvlBreakdown, TimeSeriesPoint } from './protocol-metrics.types'
 import type { ProtocolValuation } from './protocol-metrics.types'
 import {
+  BITCOIN_RESERVE_METHODOLOGY,
+  isBitcoinReserveSlug,
+  scoreDilution,
+  scoreSecurityBudget,
+  scoreSettlement,
+} from './bitcoin-reserve-valuation'
+import {
   PROTOCOL_VALUATION_METHODOLOGY,
   type CompositeBreakdownEntry,
   type CompositeComponent,
@@ -26,9 +33,13 @@ const TARGET_FEE_YIELD = 0.15
 const TARGET_REVENUE_TO_TVL = 0.08
 
 export interface ProtocolValuationInput {
+  slug?: string
   entityType: 'protocol' | 'chain' | 'stablecoin'
   tvl: number
   mcap: number | null
+  priceUsd?: number | null
+  settlementVolume1yUsd?: number | null
+  asOf?: number
   fees30d: number | null
   revenue30d: number | null
   feesHistory: TimeSeriesPoint[]
@@ -316,25 +327,43 @@ export function computeProtocolValuation(
     priceToSalesRatio,
   )
 
-  const compositeComponents: CompositeInput[] = [
-    { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
-    {
-      component: 'security',
-      score: securityScore,
-      weight: input.entityType === 'protocol' ? 0.3 : 0,
-    },
-    {
-      component: 'governance',
-      score: governanceQualityScore,
-      weight: input.entityType === 'stablecoin' ? 0 : 0.15,
-    },
-    { component: 'value', score: valueScore, weight: 0.2 },
-    {
-      component: 'feeSustainability',
-      score: feeSustainabilityScore,
-      weight: input.entityType === 'chain' ? 0.35 : 0,
-    },
-  ]
+  const reserveModel = isBitcoinReserveSlug(input.slug)
+  const asOf = input.asOf ?? Date.now()
+  const securityBudgetScore = reserveModel
+    ? scoreSecurityBudget(feesAnnualizedUsd, input.mcap)
+    : null
+  const dilutionScore = reserveModel
+    ? scoreDilution(input.mcap, input.priceUsd ?? null, asOf)
+    : null
+  const settlementScore = reserveModel
+    ? scoreSettlement(input.mcap, input.settlementVolume1yUsd ?? null)
+    : null
+
+  const compositeComponents: CompositeInput[] = reserveModel
+    ? [
+        { component: 'securityBudget', score: securityBudgetScore, weight: 1 },
+        { component: 'dilution', score: dilutionScore, weight: 1 },
+        { component: 'settlement', score: settlementScore, weight: 1 },
+      ]
+    : [
+        { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
+        {
+          component: 'security',
+          score: securityScore,
+          weight: input.entityType === 'protocol' ? 0.3 : 0,
+        },
+        {
+          component: 'governance',
+          score: governanceQualityScore,
+          weight: input.entityType === 'protocol' ? 0.15 : 0,
+        },
+        { component: 'value', score: valueScore, weight: 0.2 },
+        {
+          component: 'feeSustainability',
+          score: feeSustainabilityScore,
+          weight: input.entityType === 'chain' ? 0.35 : 0,
+        },
+      ]
   const compositeScore = weightedAverage(
     compositeComponents.map(({ score, weight }) => ({ value: score, weight })),
   )
@@ -363,6 +392,8 @@ export function computeProtocolValuation(
     revenueToTvlRatio,
     feeToTvlRatio,
     priceToSalesRatio,
-    methodologyVersion: PROTOCOL_VALUATION_METHODOLOGY,
+    methodologyVersion: reserveModel
+      ? BITCOIN_RESERVE_METHODOLOGY
+      : PROTOCOL_VALUATION_METHODOLOGY,
   }
 }

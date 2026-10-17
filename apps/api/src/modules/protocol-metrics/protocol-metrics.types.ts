@@ -1,6 +1,6 @@
 import type { ProtocolValuation } from './protocol-valuation.types'
 
-export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 7
+export const PROTOCOL_METRICS_SNAPSHOT_VERSION = 10
 
 export type MetricsEntityType = 'protocol' | 'chain' | 'stablecoin'
 
@@ -46,6 +46,8 @@ export interface ProtocolMetricsSnapshot {
   website: string | null
   chains: string[]
   mcap: number | null
+  priceUsd: number | null
+  settlementVolume1yUsd: number | null
   tvl: number
   tvlChange24h: number | null
   tvlChange7d: number | null

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { DAY_MS } from '../market-changes'
 import { resolveCoingeckoId } from '../coingecko-ids'
-import { MARKET_CACHE_TTL_MS, MarketCache } from '../market.cache'
+import { MARKET_CACHE_TTL_MS, MARKET_RETENTION_MS, MarketCache } from '../market.cache'
 import type { MarketRepository } from '../market.repository'
 import { MarketService, buildMarketSnapshot, findClosestPrice } from '../market.service'
 
@@ -185,5 +185,27 @@ describe('MarketService.getProjectMarket', () => {
     expect(snapshot.price).toBe(100)
     expect(snapshot.stale).toBe(true)
     expect(repository.getAny).toHaveBeenCalledWith('bitcoin')
+  })
+
+  it('rejects a database snapshot older than a week when CoinGecko fails', async () => {
+    const now = Date.now()
+    const ancient = buildMarketSnapshot(
+      'bitcoin',
+      'bitcoin',
+      [
+        [now - DAY_MS, 95],
+        [now, 100],
+      ],
+      new Date(now - MARKET_RETENTION_MS - DAY_MS),
+    )
+    const repository = createRepositoryMock({
+      getAny: vi.fn().mockResolvedValue(ancient),
+    })
+    const service = new MarketService(
+      vi.fn().mockResolvedValue({ ok: false, status: 502, json: async () => ({}) }),
+      repository,
+    )
+
+    await expect(service.getProjectMarket('bitcoin')).rejects.toMatchObject({ statusCode: 502 })
   })
 })

@@ -15,7 +15,7 @@ const sheetVariants = cva(
       side: {
         bottom:
           'inset-x-2 bottom-2 max-h-[85dvh] rounded-3xl pb-[max(1.25rem,env(safe-area-inset-bottom))] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        left: 'inset-y-2 left-2 w-[min(20rem,calc(100vw-1rem))] rounded-3xl data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+        left: 'inset-y-2 left-2 w-[min(20rem,calc(100%-1rem))] rounded-3xl data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
       },
     },
     defaultVariants: { side: 'bottom' },
@@ -39,7 +39,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-2 opacity-80 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DialogPrimitive.Close className="absolute right-4 top-4 min-h-11 min-w-11 rounded-full p-2 opacity-80 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <RiCloseLine className="h-5 w-5" aria-hidden />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

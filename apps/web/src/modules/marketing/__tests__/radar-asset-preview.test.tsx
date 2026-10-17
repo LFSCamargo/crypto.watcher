@@ -66,7 +66,10 @@ function snapshot(overrides: Record<string, unknown> = {}) {
 }
 
 describe('RadarAssetPreview', () => {
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    localStorage.clear()
+  })
 
   it('summarises the reference grade and live protocol data', async () => {
     mockApi({ 'GET /protocol-metrics/projects/uniswap': [200, snapshot()] })

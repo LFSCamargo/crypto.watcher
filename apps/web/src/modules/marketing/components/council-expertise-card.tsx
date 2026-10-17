@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { RiShieldStarLine } from '@remixicon/react'
 import type { Tone } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
@@ -72,27 +71,20 @@ export function CouncilExpertiseCard({ className }: { className?: string }) {
                   ['--orbit-y' as string]: `${50 + Math.sin(angle) * 40}%`,
                 }}
               >
-                <motion.span
-                  className="inline-block"
-                  initial={{ opacity: 0, scale: 0.4 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: 0.15 + index * 0.08,
-                    type: 'spring',
-                    stiffness: 260,
-                  }}
+                <span
+                  className="landing-enter inline-block"
+                  style={{ animationDelay: `${index * 60}ms` }}
                 >
                   <span
                     className={cn(
-                      'inline-block animate-float whitespace-nowrap rounded-full border bg-background px-3 py-1 text-xs font-semibold shadow-sm',
+                      'inline-block md:animate-float whitespace-nowrap rounded-full border bg-background px-3 py-1 text-xs font-semibold shadow-sm',
                       chipTone[area.tone],
                     )}
                     style={{ animationDelay: `${index * -0.9}s` }}
                   >
                     {area.label}
                   </span>
-                </motion.span>
+                </span>
               </li>
             )
           })}

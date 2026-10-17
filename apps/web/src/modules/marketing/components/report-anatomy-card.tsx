@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { RiErrorWarningLine } from '@remixicon/react'
 import { cn } from '../../../lib/utils'
 import { SpotlightCard } from './spotlight-card'
@@ -41,17 +40,13 @@ export function ReportAnatomyCard({ className }: { className?: string }) {
                 <span className="font-semibold tabular-nums">{factor.value}</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <motion.span
-                  className={cn('block h-full origin-left rounded-full', factor.bar)}
-                  style={{ width: `${factor.value}%` }}
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 0.9,
-                    delay: 0.2 + index * 0.12,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
+                <span
+                  className={cn(
+                    'block h-full origin-left animate-bar-fill rounded-full',
+                    factor.bar,
+                  )}
+                  aria-hidden
+                  style={{ width: `${factor.value}%`, animationDelay: `${index * 80}ms` }}
                 />
               </div>
             </li>

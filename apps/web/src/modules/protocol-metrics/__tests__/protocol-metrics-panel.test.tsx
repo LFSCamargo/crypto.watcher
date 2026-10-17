@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../../test/render'
 import { ProtocolMetricsPanel } from '../components/protocol-metrics-panel'
 
@@ -155,5 +156,68 @@ describe('ProtocolMetricsPanel', () => {
     expect(screen.getByText('$5.10M')).toBeInTheDocument()
     expect(screen.getByText('Daily network revenue')).toBeInTheDocument()
     expect(screen.getByText('Network revenue (annualized)')).toBeInTheDocument()
+  })
+
+  it('keeps refresh locked until the saved snapshot is due', () => {
+    vi.mocked(useProtocolMetrics).mockReturnValue({
+      data: {
+        ...mockSnapshot,
+        cachedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: vi.fn(),
+      isError: false,
+      error: null,
+    } as never)
+
+    renderWithProviders(<ProtocolMetricsPanel slug="aave" />)
+
+    expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled()
+    expect(screen.getByText(/refresh available/i)).toBeInTheDocument()
+  })
+
+  it('shows a refresh indicator without replacing the saved metrics', () => {
+    vi.mocked(useProtocolMetrics).mockReturnValue({
+      data: {
+        ...mockSnapshot,
+        expiresAt: new Date(Date.now() - 1000).toISOString(),
+        stale: true,
+      },
+      isLoading: false,
+      isFetching: true,
+      refetch: vi.fn(),
+      isError: false,
+      error: null,
+    } as never)
+
+    renderWithProviders(<ProtocolMetricsPanel slug="aave" />)
+
+    expect(screen.getByText('$12.60B')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Refreshing saved data')
+    expect(document.querySelector('.animate-pulse')).toBeNull()
+  })
+
+  it('lets the user refresh once the cache window has passed', async () => {
+    const user = userEvent.setup()
+    const refetch = vi.fn()
+    vi.mocked(useProtocolMetrics).mockReturnValue({
+      data: {
+        ...mockSnapshot,
+        expiresAt: new Date(Date.now() - 1000).toISOString(),
+        stale: true,
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch,
+      isError: false,
+      error: null,
+    } as never)
+
+    renderWithProviders(<ProtocolMetricsPanel slug="aave" />)
+
+    await user.click(screen.getByRole('button', { name: 'Refresh' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 })

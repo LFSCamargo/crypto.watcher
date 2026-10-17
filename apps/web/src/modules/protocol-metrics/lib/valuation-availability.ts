@@ -53,6 +53,6 @@ export function getValuationAvailability(
     status: 'unavailable',
     title: 'On-chain valuation unavailable',
     description:
-      'Not enough indexed on-chain activity to run the valuation model yet. Metrics refresh from DeFi Llama every 3 hours.',
+      'Not enough indexed on-chain activity to run the valuation model yet. Metrics refresh from DeFi Llama every 12 hours.',
   }
 }

@@ -1,9 +1,5 @@
-import {
-  RiAlertLine,
-  RiBarChartGroupedLine,
-  RiRefreshLine,
-  RiShieldCheckLine,
-} from '@remixicon/react'
+import { RiAlertLine, RiBarChartGroupedLine, RiShieldCheckLine } from '@remixicon/react'
+import { CacheRefreshStatus } from '../../../components/cache-refresh-status'
 import {
   Badge,
   Card,
@@ -51,7 +47,15 @@ function StatCell({ label, value }: { label: string; value: string }) {
   )
 }
 
-function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
+function ProtocolMetricsContent({
+  data,
+  refreshing,
+  onRefresh,
+}: {
+  data: ProtocolMetricsSnapshot
+  refreshing: boolean
+  onRefresh: () => void
+}) {
   const isChain = data.entityType === 'chain'
   const isStablecoin = data.entityType === 'stablecoin'
   const isProtocol = data.entityType === 'protocol'
@@ -87,9 +91,9 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
         <div>
           <p className="text-3xl font-bold">{formatCompactUsd(data.tvl)}</p>
           <p className="text-sm text-muted-foreground">{metricLabel}</p>
-          {isProtocol && data.mcap != null ? (
+          {data.mcap != null ? (
             <p className="mt-1 text-xs text-muted-foreground">
-              Protocol mcap {formatCompactUsd(data.mcap)}
+              {isChain ? 'Network mcap' : 'Market cap'} {formatCompactUsd(data.mcap)}
             </p>
           ) : null}
         </div>
@@ -266,17 +270,21 @@ function ProtocolMetricsContent({ data }: { data: ProtocolMetricsSnapshot }) {
         </div>
       ) : null}
 
-      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-        <RiRefreshLine className="h-3.5 w-3.5" />
-        Updated {new Date(data.cachedAt).toLocaleString()} · refreshes every 3 hours
-        {data.stale ? ' · showing last saved data' : ''}
-      </p>
+      <CacheRefreshStatus
+        cachedAt={data.cachedAt}
+        expiresAt={data.expiresAt}
+        refreshing={refreshing}
+        savedLabel="showing last saved data"
+        refreshingLabel="Refreshing saved data"
+        onRefresh={onRefresh}
+      />
     </>
   )
 }
 
 export function ProtocolMetricsPanel({ slug }: { slug: string }) {
-  const { data, isLoading, isError, error } = useProtocolMetrics(slug)
+  const { data, isLoading, isFetching, error, refetch } = useProtocolMetrics(slug)
+  const refreshing = Boolean(data && isFetching)
   const unavailable = error instanceof ProtocolMetricsUnavailableError
   const panelTitle =
     data?.entityType === 'chain'
@@ -285,7 +293,7 @@ export function ProtocolMetricsPanel({ slug }: { slug: string }) {
         ? 'Stablecoin fundamentals'
         : 'Protocol fundamentals'
 
-  if (unavailable) {
+  if (!data && unavailable) {
     return null
   }
 
@@ -294,11 +302,11 @@ export function ProtocolMetricsPanel({ slug }: { slug: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <RiBarChartGroupedLine className="h-4 w-4 text-primary" />
-          {isLoading ? 'Protocol fundamentals' : panelTitle}
+          {isLoading && !data ? 'Protocol fundamentals' : panelTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pb-4">
-        {isLoading ? (
+        {isLoading && !data ? (
           <div className="space-y-3">
             <Skeleton className="h-10 w-48 rounded-xl" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -308,13 +316,19 @@ export function ProtocolMetricsPanel({ slug }: { slug: string }) {
             </div>
             <Skeleton className="h-48 rounded-xl" />
           </div>
-        ) : isError || !data ? (
-          <p className="text-sm text-muted-foreground">
-            Unable to load protocol metrics right now. Try again in a few minutes — data
-            is cached for 3 hours once fetched.
-          </p>
+        ) : data ? (
+          <ProtocolMetricsContent
+            data={data}
+            refreshing={refreshing}
+            onRefresh={() => {
+              void refetch()
+            }}
+          />
         ) : (
-          <ProtocolMetricsContent data={data} />
+          <p className="text-sm text-muted-foreground">
+            Unable to load protocol metrics right now. A saved snapshot from the last week
+            is shown when one exists; otherwise try again later.
+          </p>
         )}
       </CardContent>
     </Card>

@@ -1,4 +1,5 @@
 export const PROTOCOL_VALUATION_METHODOLOGY = 'CW-Valuation-v1'
+export { BITCOIN_RESERVE_METHODOLOGY } from './bitcoin-reserve-valuation'
 
 export type CompositeComponent =
   | 'fundamentals'
@@ -6,6 +7,9 @@ export type CompositeComponent =
   | 'governance'
   | 'value'
   | 'feeSustainability'
+  | 'securityBudget'
+  | 'dilution'
+  | 'settlement'
 
 export interface CompositeBreakdownEntry {
   component: CompositeComponent

@@ -3,21 +3,21 @@ import { METRIC_HISTORY_DAYS, TVL_HISTORY_DAYS } from '../protocol-metrics-chang
 import { normalizeChartHistory } from '../protocol-metrics-extractors'
 
 describe('protocol-metrics history windows', () => {
-  it('retains up to one year of daily chart points', () => {
+  it('retains one year of TVL and two years of fee history', () => {
     expect(TVL_HISTORY_DAYS).toBe(365)
-    expect(METRIC_HISTORY_DAYS).toBe(365)
+    expect(METRIC_HISTORY_DAYS).toBe(730)
   })
 
-  it('keeps 1y of fee history when DeFi Llama provides enough data', () => {
+  it('keeps two years of fee history when DeFi Llama provides enough data', () => {
     const dayStart = Math.floor(Date.now() / 1000)
     const raw: [number, number][] = []
 
-    for (let day = 0; day < 400; day += 1) {
+    for (let day = 0; day < 800; day += 1) {
       raw.push([dayStart + day * 86_400, 1_000 + day])
     }
 
     const history = normalizeChartHistory(raw)
-    expect(history.length).toBeGreaterThanOrEqual(360)
-    expect(history.length).toBeLessThanOrEqual(366)
+    expect(history.length).toBeGreaterThanOrEqual(720)
+    expect(history.length).toBeLessThanOrEqual(731)
   })
 })

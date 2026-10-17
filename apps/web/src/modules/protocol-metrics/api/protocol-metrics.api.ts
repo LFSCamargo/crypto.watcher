@@ -4,7 +4,14 @@ import {
   isApiUnavailable,
 } from '../lib/protocol-metrics-errors'
 import { normalizeProtocolMetricsSnapshot } from '../lib/normalize-protocol-metrics-snapshot'
-import type { ProtocolMetricsSnapshot } from '../lib/protocol-metrics.types'
+import {
+  readProtocolMetricsCache,
+  writeProtocolMetricsCache,
+} from '../lib/protocol-metrics-local-cache'
+import {
+  PROTOCOL_METRICS_SNAPSHOT_VERSION,
+  type ProtocolMetricsSnapshot,
+} from '../lib/protocol-metrics.types'
 
 function parseProtocolMetricsResponse(raw: unknown): ProtocolMetricsSnapshot {
   if (typeof raw === 'string' && raw.trimStart().startsWith('<!')) {
@@ -23,12 +30,19 @@ function parseProtocolMetricsResponse(raw: unknown): ProtocolMetricsSnapshot {
 export async function fetchProjectProtocolMetrics(
   slug: string,
 ): Promise<ProtocolMetricsSnapshot> {
+  const cached = readProtocolMetricsCache(slug)
+  if (cached && !cached.stale) return cached
+
   try {
     const response = await apiFetch<ProtocolMetricsSnapshot>(
-      `/protocol-metrics/projects/${slug}`,
+      `/protocol-metrics/projects/${slug}?v=${PROTOCOL_METRICS_SNAPSHOT_VERSION}`,
     )
-    return parseProtocolMetricsResponse(response)
+    const snapshot = parseProtocolMetricsResponse(response)
+    writeProtocolMetricsCache(slug, snapshot)
+    return snapshot
   } catch (error) {
+    if (cached) return { ...cached, stale: true }
+
     if (error instanceof Error && error.message.startsWith('API 404')) {
       throw new ProtocolMetricsUnavailableError()
     }
@@ -37,9 +51,7 @@ export async function fetchProjectProtocolMetrics(
       throw error
     }
 
-    throw new ProtocolMetricsUnavailableError(
-      'Unable to load protocol metrics right now.',
-    )
+    throw new ProtocolMetricsUnavailableError('Unable to load protocol metrics right now.')
   }
 }
 

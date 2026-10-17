@@ -167,4 +167,36 @@ describe('CuratedProjectCard', () => {
 
     expect(screen.getByRole('img', { name: /Price chart/i })).toBeInTheDocument()
   })
+
+  it('keeps the saved price visible while a refresh is in flight', () => {
+    mockedUseMarketPrice.mockReturnValue({
+      data: {
+        slug: 'bitcoin',
+        coingeckoId: 'bitcoin',
+        currency: 'usd',
+        price: 50000,
+        change24h: 1.2,
+        change7d: 3.4,
+        change1m: 8.1,
+        change1y: 45.2,
+        history: [
+          { timestamp: 1, price: 48000 },
+          { timestamp: 2, price: 50000 },
+        ],
+        cachedAt: '2024-01-01T00:00:00.000Z',
+        expiresAt: '2024-01-01T03:00:00.000Z',
+      },
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+      error: null,
+    } as never)
+
+    const project = getCuratedProject('bitcoin')
+    renderWithProviders(<CuratedProjectCard index={0} project={project!} />)
+
+    expect(screen.getByText('$50,000.00')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Refreshing saved price')
+    expect(screen.queryByLabelText('Loading market data')).not.toBeInTheDocument()
+  })
 })

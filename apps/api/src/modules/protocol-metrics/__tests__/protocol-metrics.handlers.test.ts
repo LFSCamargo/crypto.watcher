@@ -29,6 +29,8 @@ describe('protocol-metrics handlers', () => {
       website: 'https://aave.com',
       chains: ['Ethereum'],
       mcap: 1_500_000_000,
+      priceUsd: null,
+      settlementVolume1yUsd: null,
       tvl: 12_600_000_000,
       tvlChange24h: 5,
       tvlChange7d: 10,

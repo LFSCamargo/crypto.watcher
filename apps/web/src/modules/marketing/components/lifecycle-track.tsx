@@ -92,9 +92,7 @@ export function LifecycleTrack({ active }: { active: number }) {
   const last = STATIONS.length - 1
   const fraction = active / last
   const offset = Number((routeLength * (1 - fraction)).toFixed(2))
-  const ease = reducedMotion
-    ? undefined
-    : 'stroke-dashoffset 700ms cubic-bezier(0.2, 0.8, 0.2, 1)'
+  const ease = reducedMotion ? undefined : 'stroke-dashoffset 320ms var(--ease-glass)'
 
   return (
     <svg

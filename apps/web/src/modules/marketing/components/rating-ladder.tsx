@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useInView } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import { RiArrowRightLine } from '@remixicon/react'
 import { ProjectIcon } from '../../../components/brand/project-icon'
 import {
@@ -41,8 +41,10 @@ export function RatingLadder() {
   const [category, setCategory] = useState<Category | 'all'>('all')
   const [selected, setSelected] = useState<SpCreditRating>('AAA')
   const chartRef = useRef<HTMLDivElement>(null)
-  const grown = useInView(chartRef, { once: true, amount: 0.3 })
+  const reducedMotion = useReducedMotion()
+  const inView = useInView(chartRef, { once: true, amount: 0.3 })
 
+  const grown = reducedMotion || inView
   const ladder = useMemo(() => {
     const visible =
       category === 'all'
@@ -72,7 +74,7 @@ export function RatingLadder() {
               aria-pressed={category === key}
               onClick={() => setCategory(key)}
               className={cn(
-                'flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+                'flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
                 category === key
                   ? 'border-foreground bg-foreground text-background'
                   : 'border-border bg-background hover:border-foreground/40',
@@ -88,12 +90,12 @@ export function RatingLadder() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div
           ref={chartRef}
-          className="rounded-3xl border border-border bg-card p-5 md:p-6"
+          className="min-w-0 overflow-x-auto rounded-3xl border border-border bg-card p-5 md:p-6"
         >
           <div
             role="group"
             aria-label="Reference assets by grade"
-            className="flex h-72 items-end gap-2 md:gap-4"
+            className="flex h-72 min-w-max items-end gap-2 md:gap-4"
           >
             {ladder.map((item) => {
               const count = item.projects.length
@@ -109,7 +111,7 @@ export function RatingLadder() {
                   aria-pressed={isSelected}
                   disabled={count === 0}
                   onClick={() => setSelected(item.grade)}
-                  className="group flex h-full flex-1 flex-col items-center justify-end gap-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed"
+                  className="group flex h-full min-w-11 flex-1 flex-col items-center justify-end gap-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed"
                 >
                   <span aria-hidden className="flex -space-x-2">
                     {item.projects.slice(0, 3).map((project) => (
@@ -125,7 +127,7 @@ export function RatingLadder() {
                   <span
                     aria-hidden
                     className={cn(
-                      'relative flex w-full max-w-16 items-start justify-center rounded-t-xl bg-gradient-to-t pt-1.5 text-xs font-bold transition-[height,filter,box-shadow] duration-700 ease-glass',
+                      'relative flex w-full max-w-16 items-start justify-center rounded-t-xl bg-gradient-to-t pt-1.5 text-xs font-bold transition-[height,filter,box-shadow] duration-[320ms] ease-glass',
                       investment
                         ? 'from-tone-teal to-tone-sky'
                         : 'from-tone-coral to-tone-amber',
@@ -157,15 +159,9 @@ export function RatingLadder() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border bg-card p-5 md:p-6">
+        <div className="min-w-0 overflow-x-auto rounded-3xl border border-border bg-card p-5 md:p-6">
           {rung && (
-            <motion.div
-              key={`${category}-${rung.grade}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-4"
-            >
+            <div key={`${category}-${rung.grade}`} className="landing-enter space-y-4">
               <div>
                 <p className="text-3xl font-bold">{rung.grade}</p>
                 <p className="text-sm text-muted-foreground">
@@ -218,7 +214,7 @@ export function RatingLadder() {
                   : 'Browse the catalog'}
                 <RiArrowRightLine aria-hidden className="h-4 w-4" />
               </Link>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { db } from '../../core/db'
+import { MARKET_RETENTION_MS } from './market.cache'
 import type { MarketSnapshot } from './market.types'
 
 function parseSnapshot(raw: unknown): MarketSnapshot | null {
@@ -26,6 +27,7 @@ export const marketRepository = {
       .selectFrom('market_cache')
       .select(['snapshot'])
       .where('slug', '=', slug)
+      .where('fetched_at', '>=', new Date(Date.now() - MARKET_RETENTION_MS))
       .executeTakeFirst()
 
     return row ? parseSnapshot(row.snapshot) : null

@@ -83,6 +83,7 @@ apps/
     │   │   │   ├── protocol-metrics.service.ts
     │   │   │   ├── protocol-metrics.repository.ts
     │   │   │   ├── protocol-valuation.ts      # On-chain valuation model [MVP]
+    │   │   │   ├── bitcoin-reserve-valuation.ts # Bitcoin CW-Reserve-v1 [MVP]
     │   │   │   └── protocol-metrics-changes.ts
     │   │   │   ├── metrics-target.ts
     │   │   │   ├── handlers/
@@ -138,17 +139,17 @@ apps/
 
 ### market `[MVP]`
 - `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
-- Data sourced from CoinGecko (free public API); responses cached in PostgreSQL (`market_cache`) for 3 hours, with in-memory L1 cache and stale DB fallback when CoinGecko is unavailable.
+- Data sourced from CoinGecko (free public API). A successful snapshot is stored in PostgreSQL (`market_cache`) and refreshed every 12 hours. Expiry does not delete the row: if CoinGecko is unreachable, the API returns the last snapshot from the past 7 days with `stale: true`. Older rows are not served, so the error surfaces only when nothing that recent exists. The in-memory L1 cache follows the same 12-hour refresh.
 - Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`, `avalanche` → `avalanche-2`).
 
 ### protocol-metrics `[MVP]`
 - `GET /protocol-metrics/projects/:slug` — fundamentals for curated projects via a resolver that tries **stablecoin supply** (USDC/USDT), **protocol** entities (DeFi, infrastructure), and **chain DeFi TVL** for L1/L2 networks.
-- Protocol snapshots include TVL trends/history (365-day retention), fees/revenue/DEX volume charts, chain/token breakdown, mcap, exploit incidents, and an **on-chain valuation model** (`protocol-valuation.ts`, methodology `CW-Valuation-v1`). `valuation.compositeBreakdown` lists each composite component that applies to the entity type (`fundamentals`, `security`, `governance`, `value`, `feeSustainability`) with its 0–100 score (or null) and effective share; scored shares sum to 1 and `Σ score × share = compositeScore`.
+- Protocol snapshots include TVL trends/history (365-day retention), fees/revenue/DEX volume charts (730-day retention so one-year growth can compare the trailing year with the year before it), chain/token breakdown, market cap, exploit incidents, and an **on-chain valuation model** (`protocol-valuation.ts`, methodology `CW-Valuation-v1`). Protocol market cap comes from DeFi Llama when the protocol reports it. Otherwise, and for chain snapshots, market cap comes from DeFi Llama’s coin market-cap endpoint (`coins.llama.fi/mcaps`, keyed by the CoinGecko id), with CoinGecko `simple/price` as the fallback. Governance diversification and the security score apply to protocols; a chain’s hack index mixes in exchange and custody losses, so it is not used as the network security score. `valuation.compositeBreakdown` lists each composite component that applies to the entity type (`fundamentals`, `security`, `governance`, `value`, `feeSustainability`) with its 0–100 score (or null) and effective share; scored shares sum to 1 and `Σ score × share = compositeScore`. **Bitcoin** is the exception: `CW-Reserve-v1` scores security budget (annual fees ÷ market cap), dilution (issuance from the subsidy schedule ÷ circulating supply), and settlement (market cap ÷ trailing-year on-chain volume from Blockchain.com). Fee/TVL and revenue/TVL stay on the snapshot and are not part of that composite. Snapshot version `10` invalidates the previous Bitcoin fee-yield composite.
 - Valuation computes annualized fees/revenue, revenue capture rate, revenue growth (30d/1y), fee sustainability, governance-quality proxy (chain diversification), security score, composite score, and P/S — using `lib/safe-math/` guards (no divide-by-zero).
 - **Stablecoin** snapshots (USDC, USDT) use DeFi Llama stablecoin supply data: circulating supply history and supply-by-chain breakdown — not protocol TVL.
-- Chain snapshots include TVL trends/history plus network-wide DEX volume, fees paid, and revenue captured (`/overview/fees/{chain}?dataType=dailyRevenue`). Overview calls set `excludeTotalDataChartBreakdown=true` so chart history still arrives without the protocol-level breakdown payload. Snapshot version `7` invalidates caches that omitted chain revenue.
+- Chain snapshots include TVL trends/history plus network-wide DEX volume, fees paid, and revenue captured (`/overview/fees/{chain}?dataType=dailyRevenue`). Overview calls set `excludeTotalDataChartBreakdown=true` so chart history still arrives without the protocol-level breakdown payload. Bitcoin also loads spot price (`coins.llama.fi/prices`) and one year of estimated USD settlement volume (`api.blockchain.info/charts/estimated-transaction-volume-usd`). Snapshot version `10` invalidates caches that scored Bitcoin with fee/TVL.
 - Ordered fallback targets per slug (`metrics-target.ts`); explicit unavailable list for assets with no feed.
-- Cached in PostgreSQL (`protocol_metrics_cache`) for 3 hours with in-memory L1 cache and stale DB fallback.
+- Cached in PostgreSQL (`protocol_metrics_cache`) and refreshed every 12 hours. Expiry does not delete the row: if DeFi Llama is unreachable, the API returns the last snapshot from the past 7 days with `stale: true`. Older rows are not served.
 
 ### governance — launch requirement
 - Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`

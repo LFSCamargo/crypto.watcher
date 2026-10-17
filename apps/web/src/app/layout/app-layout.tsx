@@ -11,6 +11,10 @@ import { PageGridBackground } from '../../components/layout/page-grid-background
 import { useRouteFocus } from '../../components/layout/use-route-focus'
 import { CommandPalette } from '../../components/search/command-palette'
 import { useCommandPalette } from '../../components/search/use-command-palette'
+import { MarketCacheWarmup } from '../../modules/market/components/market-cache-warmup'
+import { curatedProjects } from '../../modules/projects/lib/curated-projects'
+
+const marketSlugs = curatedProjects.map((project) => project.slug)
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -30,6 +34,7 @@ export function AppLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-background">
+      <MarketCacheWarmup slugs={marketSlugs} />
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
@@ -43,8 +48,8 @@ export function AppLayout() {
         ref={mainRef}
         tabIndex={-1}
         className={cn(
-          'relative z-10 min-h-[calc(100dvh-4rem)] w-full flex-1 outline-none',
-          isFullWidthPage ? 'pb-0 pt-0' : 'container-wide pb-28 pt-8 lg:pb-12',
+          'relative z-10 min-h-[calc(100dvh-4rem)] w-full min-w-0 flex-1 [overflow-wrap:anywhere] pb-[calc(7rem+env(safe-area-inset-bottom))] outline-none lg:pb-12',
+          isFullWidthPage ? 'pt-0 lg:pb-0' : 'container-wide pt-8',
         )}
       >
         {isDocsPage || isBlogPage ? (

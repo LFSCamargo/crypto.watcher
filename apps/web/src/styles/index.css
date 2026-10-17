@@ -183,11 +183,30 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
   html {
     scroll-behavior: smooth;
+    /* Always a vertical scrollport so wheel drivers can attach. */
+    overflow-y: scroll;
+  }
+
+  /*
+   * Hide every scrollbar without display:none. Logitech Options and Rapoo
+   * drivers drop wheel events on a scrollbar that is display:none.
+   */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -303,5 +322,72 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Landing motion shares glass easing; decoration never blocks content. */
+@layer components {
+  .landing-enter {
+    animation: landing-enter 320ms var(--ease-glass) both;
+  }
+
+  @keyframes landing-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .landing-motion .animate-highlight-draw {
+    animation-duration: 480ms;
+    animation-delay: 160ms;
+  }
+
+  .landing-motion .animate-hero-scan {
+    animation-duration: 1600ms;
+    animation-delay: 0ms;
+    animation-iteration-count: 1;
+  }
+
+  .landing-motion .animate-stamp {
+    animation-duration: 320ms;
+    animation-delay: 800ms;
+  }
+
+  .landing-motion .animate-bar-fill {
+    animation-duration: 480ms;
+  }
+
+  .landing-motion .animate-shake {
+    animation-duration: 320ms;
+  }
+
+  .landing-motion .animate-radar-ping {
+    animation-timing-function: var(--ease-glass);
+  }
+
+  .landing-motion .animate-border-spin {
+    animation-duration: 16s;
+  }
+
+  .landing-motion .animate-float {
+    animation-duration: 8s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-motion *,
+    .landing-enter {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .landing-motion .animate-hero-scan,
+    .landing-motion .animate-coin-drop {
+      opacity: 0;
+    }
   }
 }

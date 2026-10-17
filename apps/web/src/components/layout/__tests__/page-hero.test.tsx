@@ -26,6 +26,9 @@ describe('PageHero', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Project catalog')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Request a review' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Request a review' }).parentElement,
+    ).toHaveClass('flex-col', 'sm:flex-row')
     const stats = screen.getByRole('list', { name: 'Browse projects at a glance' })
     expect(within(stats).getByText('100')).toBeInTheDocument()
   })

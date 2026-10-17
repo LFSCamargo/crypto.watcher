@@ -52,6 +52,8 @@ export const ProtocolMetricsSnapshotSchema = z
     website: z.string().nullable(),
     chains: z.array(z.string()),
     mcap: z.number().nullable(),
+    priceUsd: z.number().nullable(),
+    settlementVolume1yUsd: z.number().nullable(),
     tvl: z.number(),
     tvlChange24h: z.number().nullable(),
     tvlChange7d: z.number().nullable(),

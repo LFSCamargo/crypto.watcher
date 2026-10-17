@@ -135,7 +135,50 @@ describe('ProtocolValuationSection', () => {
     expect(screen.getByText('Network revenue (annualized)')).toBeInTheDocument()
     expect(screen.getByText('$800.00M')).toBeInTheDocument()
     expect(screen.getByText('Network revenue capture')).toBeInTheDocument()
-    expect(screen.queryByText('P/S ratio')).not.toBeInTheDocument()
+    expect(screen.getByText('P/S ratio')).toBeInTheDocument()
+  })
+
+  it('renders Bitcoin with a reserve score instead of fee yield', () => {
+    renderWithProviders(
+      <ProtocolValuationSection
+        data={{
+          ...baseSnapshot,
+          slug: 'bitcoin',
+          entityType: 'chain',
+          valuation: {
+            feesAnnualizedUsd: 5_160_000,
+            revenueAnnualizedUsd: 1_220_000,
+            revenueCaptureRate: 23.6,
+            revenueGrowth30d: 126,
+            revenueGrowth1y: -52.9,
+            feeSustainabilityScore: 20,
+            governanceQualityScore: null,
+            securityScore: null,
+            compositeScore: 46,
+            revenueToTvlRatio: 0.03,
+            feeToTvlRatio: 0.1,
+            priceToSalesRatio: 1_339_894,
+            compositeBreakdown: [
+              { component: 'securityBudget', score: 1, share: 1 / 3 },
+              { component: 'dilution', score: 59, share: 1 / 3 },
+              { component: 'settlement', score: 78, share: 1 / 3 },
+            ],
+            methodologyVersion: 'CW-Reserve-v1',
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByText('Reserve valuation')).toBeInTheDocument()
+    expect(screen.getByText(/Composite 46\/100/)).toBeInTheDocument()
+    expect(screen.getByText('Security budget')).toBeInTheDocument()
+    expect(screen.getByText('Dilution')).toBeInTheDocument()
+    expect(screen.getByText('Settlement')).toBeInTheDocument()
+    expect(screen.getByText('Fee / TVL')).toBeInTheDocument()
+    expect(screen.getByText('Revenue / TVL')).toBeInTheDocument()
+    expect(screen.getByText(/not part of the reserve score/i)).toBeInTheDocument()
+    expect(screen.queryByText('Fee sustainability')).not.toBeInTheDocument()
+    expect(screen.queryByText('Network fee valuation')).not.toBeInTheDocument()
   })
 
   it('explains when valuation data is not available yet', () => {

@@ -1,4 +1,5 @@
 import { HttpError } from '../../core/http/validation'
+import { resolveCoingeckoId } from '../market/coingecko-ids'
 import {
   metricsTargetKey,
   resolveMetricsTargets,
@@ -18,6 +19,7 @@ import {
   toMs,
 } from './protocol-metrics-extractors'
 import {
+  isWithinProtocolMetricsRetention,
   PROTOCOL_METRICS_CACHE_TTL_MS,
   ProtocolMetricsCache,
 } from './protocol-metrics.cache'
@@ -27,10 +29,16 @@ import {
 } from './protocol-metrics.repository'
 import type { ExploitRecord, ProtocolMetricsSnapshot } from './protocol-metrics.types'
 import { PROTOCOL_METRICS_SNAPSHOT_VERSION } from './protocol-metrics.types'
+import { isBitcoinReserveSlug } from './bitcoin-reserve-valuation'
 import { computeProtocolValuation } from './protocol-valuation'
 
 const DEFILLAMA_BASE_URL = 'https://api.llama.fi'
 const DEFILLAMA_STABLECOINS_URL = 'https://stablecoins.llama.fi'
+const COINGECKO_PRICE_URL = 'https://api.coingecko.com/api/v3/simple/price'
+const LLAMA_MCAP_URL = 'https://coins.llama.fi/mcaps'
+const LLAMA_PRICE_URL = 'https://coins.llama.fi/prices/current'
+const BITCOIN_SETTLEMENT_URL =
+  'https://api.blockchain.info/charts/estimated-transaction-volume-usd?timespan=1year&format=json'
 
 type DefiLlamaTvlPoint = {
   date: number
@@ -149,9 +157,13 @@ function attachValuation(
   snapshot: Omit<ProtocolMetricsSnapshot, 'valuation'>,
 ): ProtocolMetricsSnapshot {
   const valuation = computeProtocolValuation({
+    slug: snapshot.slug,
     entityType: snapshot.entityType,
     tvl: snapshot.tvl,
     mcap: snapshot.mcap,
+    priceUsd: snapshot.priceUsd,
+    settlementVolume1yUsd: snapshot.settlementVolume1yUsd,
+    asOf: Date.parse(snapshot.cachedAt),
     fees30d: snapshot.fees30d,
     revenue30d: snapshot.revenue30d,
     feesHistory: snapshot.feesHistory,
@@ -233,6 +245,8 @@ export function buildStablecoinMetricsSnapshot(
     website: stablecoin.url ?? null,
     chains: chainBreakdown.map((item) => item.chain),
     mcap: null,
+    priceUsd: null,
+    settlementVolume1yUsd: null,
     ...trends,
     ...emptyFinancials(),
     chainBreakdown,
@@ -249,7 +263,12 @@ export function buildChainMetricsSnapshot(
   dex: DefiLlamaDexSummary | null = null,
   fees: DefiLlamaFeesSummary | null = null,
   revenue: DefiLlamaFeesSummary | null = null,
+  marketCap: number | null = null,
   cachedAt = new Date(),
+  reserve: { priceUsd: number | null; settlementVolume1yUsd: number | null } = {
+    priceUsd: null,
+    settlementVolume1yUsd: null,
+  },
 ): ProtocolMetricsSnapshot | null {
   const tvlHistory = normalizeChainTvlHistory(history)
   if (tvlHistory.length === 0) return null
@@ -265,7 +284,9 @@ export function buildChainMetricsSnapshot(
     category: 'Chain',
     website: null,
     chains: [chainId],
-    mcap: null,
+    mcap: marketCap,
+    priceUsd: reserve.priceUsd,
+    settlementVolume1yUsd: reserve.settlementVolume1yUsd,
     ...trends,
     ...emptyFinancials(),
     ...extractDexVolume(dex),
@@ -309,7 +330,10 @@ export function buildProtocolMetricsSnapshot(
     category: protocol.category ?? null,
     website: protocol.url ?? null,
     chains: protocol.chains ?? [],
-    mcap: typeof protocol.mcap === 'number' ? protocol.mcap : null,
+    mcap:
+      typeof protocol.mcap === 'number' && protocol.mcap > 0 ? protocol.mcap : null,
+    priceUsd: null,
+    settlementVolume1yUsd: null,
     ...trends,
     chainBreakdown: extractChainBreakdown(protocol.currentChainTvls),
     tokenComposition: extractTokenComposition(protocol.tokensInUsd),
@@ -333,7 +357,98 @@ export function buildProtocolMetricsSnapshot(
 }
 
 function memoryCacheKey(slug: string): string {
-  return `protocol-metrics:v7:${slug}`
+  return `protocol-metrics:v${PROTOCOL_METRICS_SNAPSHOT_VERSION}:${slug}`
+}
+
+function positiveMarketCap(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null
+}
+
+async function fetchMarketCapUsd(
+  fetchImpl: typeof fetch,
+  slug: string,
+): Promise<number | null> {
+  const coinId = resolveCoingeckoId(slug)
+  if (!coinId) return null
+
+  const fromLlama = await fetchLlamaMarketCap(fetchImpl, coinId)
+  if (fromLlama != null) return fromLlama
+  return fetchCoinGeckoMarketCap(fetchImpl, coinId)
+}
+
+async function fetchLlamaMarketCap(
+  fetchImpl: typeof fetch,
+  coinId: string,
+): Promise<number | null> {
+  try {
+    const response = await fetchImpl(LLAMA_MCAP_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coins: [`coingecko:${coinId}`] }),
+    })
+    if (!response.ok) return null
+    const payload = (await response.json()) as Record<string, { mcap?: number }>
+    return positiveMarketCap(payload[`coingecko:${coinId}`]?.mcap)
+  } catch {
+    return null
+  }
+}
+
+async function fetchCoinGeckoMarketCap(
+  fetchImpl: typeof fetch,
+  coinId: string,
+): Promise<number | null> {
+  const params = new URLSearchParams({
+    ids: coinId,
+    vs_currencies: 'usd',
+    include_market_cap: 'true',
+  })
+  const payload = await fetchJsonSafe<Record<string, { usd_market_cap?: number }>>(
+    fetchImpl,
+    `${COINGECKO_PRICE_URL}?${params}`,
+  )
+  return positiveMarketCap(payload?.[coinId]?.usd_market_cap)
+}
+
+function positivePrice(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null
+}
+
+async function fetchBitcoinPriceUsd(fetchImpl: typeof fetch): Promise<number | null> {
+  const payload = await fetchJsonSafe<{
+    coins?: Record<string, { price?: number }>
+  }>(fetchImpl, `${LLAMA_PRICE_URL}/coingecko:bitcoin`)
+  return positivePrice(payload?.coins?.['coingecko:bitcoin']?.price)
+}
+
+async function fetchBitcoinSettlementVolume1y(
+  fetchImpl: typeof fetch,
+): Promise<number | null> {
+  const payload = await fetchJsonSafe<{ values?: { x?: number; y?: number }[] }>(
+    fetchImpl,
+    BITCOIN_SETTLEMENT_URL,
+  )
+  const points = payload?.values
+  if (!Array.isArray(points) || points.length === 0) return null
+
+  let total = 0
+  for (const point of points) {
+    if (typeof point.y === 'number' && Number.isFinite(point.y) && point.y > 0) {
+      total += point.y
+    }
+  }
+  return total > 0 ? total : null
+}
+
+async function fetchBitcoinReserveContext(fetchImpl: typeof fetch): Promise<{
+  priceUsd: number | null
+  settlementVolume1yUsd: number | null
+}> {
+  const [priceUsd, settlementVolume1yUsd] = await Promise.all([
+    fetchBitcoinPriceUsd(fetchImpl),
+    fetchBitcoinSettlementVolume1y(fetchImpl),
+  ])
+  return { priceUsd, settlementVolume1yUsd }
 }
 
 function overviewUrl(
@@ -454,28 +569,46 @@ export class ProtocolMetricsService {
     }
 
     if (target.type === 'chain') {
-      const [history, dex, fees, revenue] = await Promise.all([
+      const [history, dex, fees, revenue, marketCap, reserve] = await Promise.all([
         fetchChainHistory(this.fetchImpl, target.id),
         fetchChainDexOverview(this.fetchImpl, target.id),
         fetchChainFeesOverview(this.fetchImpl, target.id, 'dailyFees'),
         fetchChainFeesOverview(this.fetchImpl, target.id, 'dailyRevenue'),
+        fetchMarketCapUsd(this.fetchImpl, slug),
+        isBitcoinReserveSlug(slug)
+          ? fetchBitcoinReserveContext(this.fetchImpl)
+          : Promise.resolve({ priceUsd: null, settlementVolume1yUsd: null }),
       ])
       if (!history || history.length === 0) return null
-      return buildChainMetricsSnapshot(slug, target.id, history, dex, fees, revenue)
+      return buildChainMetricsSnapshot(
+        slug,
+        target.id,
+        history,
+        dex,
+        fees,
+        revenue,
+        marketCap,
+        new Date(),
+        reserve,
+      )
     }
 
     const feesUrl = `${DEFILLAMA_BASE_URL}/summary/fees/${encodeURIComponent(target.id)}?dataType=dailyFees`
     const revenueUrl = `${DEFILLAMA_BASE_URL}/summary/fees/${encodeURIComponent(target.id)}?dataType=dailyRevenue`
 
-    const [protocol, fees, revenue, dex] = await Promise.all([
+    const [protocol, fees, revenue, dex, marketCap] = await Promise.all([
       fetchProtocol(this.fetchImpl, target.id),
       fetchJsonSafe<DefiLlamaFeesSummary>(this.fetchImpl, feesUrl),
       fetchJsonSafe<DefiLlamaFeesSummary>(this.fetchImpl, revenueUrl),
       fetchProtocolDexSummary(this.fetchImpl, target.id),
+      fetchMarketCapUsd(this.fetchImpl, slug),
     ])
 
     if (!protocol) return null
-    return buildProtocolMetricsSnapshot(slug, target.id, protocol, fees, revenue, dex)
+    const snapshot = buildProtocolMetricsSnapshot(slug, target.id, protocol, fees, revenue, dex)
+    if (!snapshot || snapshot.mcap != null || marketCap == null) return snapshot
+    const { valuation: _ignored, ...rest } = snapshot
+    return attachValuation({ ...rest, mcap: marketCap })
   }
 
   private async fetchFromDefiLlama(slug: string): Promise<ProtocolMetricsSnapshot> {
@@ -499,7 +632,9 @@ export class ProtocolMetricsService {
       return snapshot
     } catch (error) {
       const staleInDb = await this.repository.getAny(slug)
-      if (staleInDb) return this.enrichSnapshot({ ...staleInDb, stale: true })
+      if (staleInDb && isWithinProtocolMetricsRetention(staleInDb.cachedAt)) {
+        return this.enrichSnapshot({ ...staleInDb, stale: true })
+      }
 
       if (error instanceof HttpError) throw error
       throw new HttpError(502, 'Unable to fetch protocol metrics right now')

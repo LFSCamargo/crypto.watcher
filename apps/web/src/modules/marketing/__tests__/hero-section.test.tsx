@@ -63,6 +63,16 @@ describe('HeroSection', () => {
     )
   })
 
+  it('keeps the sonar off small screens', () => {
+    stubReducedMotion(false)
+    renderWithProviders(<HeroSection />)
+    const stage = document.querySelector('[data-hero-stage]')
+    expect(stage).toHaveClass('hidden', 'lg:flex')
+    expect(stage).toContainElement(
+      screen.getByRole('figure', { name: /Illustrative report preview/ }),
+    )
+  })
+
   it('links every radar asset to its reference assessment', () => {
     stubReducedMotion(false)
     renderWithProviders(<HeroSection />)

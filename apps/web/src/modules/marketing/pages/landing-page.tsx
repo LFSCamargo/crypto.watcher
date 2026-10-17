@@ -9,7 +9,7 @@ import { CTASection } from '../components/cta-section'
 
 export function LandingPage() {
   return (
-    <>
+    <div className="landing-motion min-w-0">
       <HeroSection />
       <AssetTicker />
       <MethodologySection />
@@ -18,6 +18,6 @@ export function LandingPage() {
       <GovernanceSection />
       <ResourcesSection />
       <CTASection />
-    </>
+    </div>
   )
 }

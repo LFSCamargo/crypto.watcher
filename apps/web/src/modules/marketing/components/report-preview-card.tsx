@@ -67,7 +67,7 @@ export function ReportPreviewCard() {
                 className="h-full origin-left animate-bar-fill rounded-full bg-chart-1 motion-reduce:animate-none"
                 style={{
                   width: `${finding.score}%`,
-                  animationDelay: `${0.4 + index * 0.18}s`,
+                  animationDelay: `${0.16 + index * 0.08}s`,
                 }}
               />
             </div>

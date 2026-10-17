@@ -16,11 +16,16 @@ function parseMarketResponse(raw: unknown): MarketSnapshot {
 
 async function fetchProjectMarketDirect(slug: string, coingeckoId: string): Promise<MarketSnapshot> {
   const cached = readLocalMarketCache(slug)
-  if (cached) return cached
+  if (cached && !cached.stale) return cached
 
-  const snapshot = await fetchCoinGeckoMarket(slug, coingeckoId)
-  writeLocalMarketCache(slug, snapshot)
-  return snapshot
+  try {
+    const snapshot = await fetchCoinGeckoMarket(slug, coingeckoId)
+    writeLocalMarketCache(slug, snapshot)
+    return snapshot
+  } catch (error) {
+    if (cached) return { ...cached, stale: true }
+    throw error
+  }
 }
 
 export async function fetchProjectMarket(slug: string): Promise<MarketSnapshot> {
@@ -31,23 +36,28 @@ export async function fetchProjectMarket(slug: string): Promise<MarketSnapshot> 
     )
   }
 
+  const cached = readLocalMarketCache(slug)
+  if (cached && !cached.stale) return cached
+
   try {
     const response = await apiFetch<MarketSnapshot>(`/market/projects/${slug}`)
-    return parseMarketResponse(response)
+    const snapshot = parseMarketResponse(response)
+    writeLocalMarketCache(slug, snapshot)
+    return snapshot
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('API 404')) {
+    if (cached) return { ...cached, stale: true }
+
+    const apiMissing = error instanceof Error && error.message.startsWith('API 404')
+    if (apiMissing || isApiUnavailable(error)) {
       try {
         return await fetchProjectMarketDirect(slug, coingeckoId)
-      } catch {
-        throw new MarketUnavailableError()
+      } catch (directError) {
+        if (apiMissing) throw new MarketUnavailableError()
+        throw directError
       }
     }
 
-    if (!isApiUnavailable(error)) {
-      throw error
-    }
-
-    return fetchProjectMarketDirect(slug, coingeckoId)
+    throw error
   }
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { DAY_MS } from '../protocol-metrics-changes'
 import {
   PROTOCOL_METRICS_CACHE_TTL_MS,
+  PROTOCOL_METRICS_RETENTION_MS,
   ProtocolMetricsCache,
 } from '../protocol-metrics.cache'
 import type { ProtocolMetricsRepository } from '../protocol-metrics.repository'
@@ -220,7 +221,7 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
     )
 
     service['memory'].set(
-      'protocol-metrics:v7:aave',
+      'protocol-metrics:v10:aave',
       cached!,
       PROTOCOL_METRICS_CACHE_TTL_MS,
     )
@@ -256,20 +257,26 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
         status: 404,
         json: async () => ({}),
       })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ 'coingecko:aave': { mcap: 2_400_000_000 } }),
+      })
 
     const repository = createRepositoryMock()
     const service = new ProtocolMetricsService(fetchImpl, repository)
 
     const snapshot = await service.getProjectProtocolMetrics('aave')
 
-    expect(fetchImpl).toHaveBeenCalledTimes(4)
+    expect(fetchImpl).toHaveBeenCalledTimes(5)
+    expect(snapshot.mcap).toBe(2_400_000_000)
     expect(repository.upsert).toHaveBeenCalledOnce()
     expect(snapshot.slug).toBe('aave')
     expect(snapshot.entityType).toBe('protocol')
     expect(snapshot.fees24h).toBe(100_000)
 
     await service.getProjectProtocolMetrics('aave')
-    expect(fetchImpl).toHaveBeenCalledTimes(4)
+    expect(fetchImpl).toHaveBeenCalledTimes(5)
   })
 
   it('uses chain TVL when resolving layer-1 slugs', async () => {
@@ -299,13 +306,19 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
         status: 200,
         json: async () => ({ total24h: 5_100_000, totalDataChart: [[now, 5_100_000]] }),
       })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ 'coingecko:ethereum': { mcap: 400_000_000_000 } }),
+      })
     const repository = createRepositoryMock()
     const service = new ProtocolMetricsService(fetchImpl, repository)
 
     const snapshot = await service.getProjectProtocolMetrics('ethereum')
 
-    expect(fetchImpl).toHaveBeenCalledTimes(4)
+    expect(fetchImpl).toHaveBeenCalledTimes(5)
     expect(snapshot.entityType).toBe('chain')
+    expect(snapshot.mcap).toBe(400_000_000_000)
     expect(snapshot.tvl).toBe(39_000_000_000)
     expect(snapshot.dexVolume24h).toBe(880_000_000)
     expect(snapshot.fees24h).toBe(7_500_000)
@@ -319,6 +332,81 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
       ]),
     )
     expect(repository.upsert).toHaveBeenCalledOnce()
+  })
+
+  it('loads Bitcoin reserve inputs from settlement volume and price', async () => {
+    const now = Math.floor(Date.now() / 1000)
+    const json = (body: unknown) => ({
+      ok: true,
+      status: 200,
+      json: async () => body,
+    })
+    const fetchImpl = vi.fn(async (input: URL | RequestInfo) => {
+      const url = String(input)
+      if (url.includes('historicalChainTvl')) {
+        return json([
+          { date: now - 86_400, tvl: 8_000_000_000 },
+          { date: now, tvl: 8_200_000_000 },
+        ])
+      }
+      if (url.includes('/overview/dexs/')) {
+        return json({ total24h: 1 })
+      }
+      if (url.includes('dataType=dailyFees')) {
+        return json({
+          total24h: 20_000,
+          total30d: 500_000,
+          totalDataChart: [[now, 20_000]],
+        })
+      }
+      if (url.includes('dataType=dailyRevenue')) {
+        return json({
+          total24h: 4_000,
+          total30d: 100_000,
+          totalDataChart: [[now, 4_000]],
+        })
+      }
+      if (url.includes('coins.llama.fi/mcaps')) {
+        return json({ 'coingecko:bitcoin': { mcap: 1_000_000_000_000 } })
+      }
+      if (url.includes('coins.llama.fi/prices')) {
+        return json({ coins: { 'coingecko:bitcoin': { price: 50_000 } } })
+      }
+      if (url.includes('estimated-transaction-volume-usd')) {
+        return json({
+          values: [
+            { x: now - 86_400, y: 50_000_000 },
+            { x: now, y: 60_000_000 },
+          ],
+        })
+      }
+      return json({})
+    })
+    const repository = createRepositoryMock()
+    const service = new ProtocolMetricsService(
+      fetchImpl as unknown as typeof fetch,
+      repository,
+    )
+
+    const snapshot = await service.getProjectProtocolMetrics('bitcoin')
+
+    expect(snapshot.entityType).toBe('chain')
+    expect(snapshot.mcap).toBe(1_000_000_000_000)
+    expect(snapshot.priceUsd).toBe(50_000)
+    expect(snapshot.settlementVolume1yUsd).toBe(110_000_000)
+    expect(snapshot.valuation?.methodologyVersion).toBe('CW-Reserve-v1')
+    expect(snapshot.valuation?.compositeBreakdown.map((entry) => entry.component)).toEqual(
+      ['securityBudget', 'dilution', 'settlement'],
+    )
+    expect(fetchImpl.mock.calls.map(([url]) => String(url))).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('estimated-transaction-volume-usd'),
+        expect.stringContaining('coins.llama.fi/prices'),
+      ]),
+    )
+    expect(
+      fetchImpl.mock.calls.some(([url]) => String(url).includes('estimated-transaction-volume-usd')),
+    ).toBe(true)
   })
 
   it('uses stablecoin supply data for tether', async () => {
@@ -376,5 +464,29 @@ describe('ProtocolMetricsService.getProjectProtocolMetrics', () => {
     expect(snapshot.tvl).toBe(12_600_000_000)
     expect(snapshot.stale).toBe(true)
     expect(repository.getAny).toHaveBeenCalledWith('aave')
+  })
+
+  it('rejects a database snapshot older than a week when DeFi Llama fails', async () => {
+    const now = Date.now()
+    const ancient = buildProtocolMetricsSnapshot(
+      'aave',
+      'aave',
+      mockProtocolPayload(now),
+      null,
+      null,
+      null,
+      new Date(now - PROTOCOL_METRICS_RETENTION_MS - 86_400_000),
+    )
+    const repository = createRepositoryMock({
+      getAny: vi.fn().mockResolvedValue(ancient),
+    })
+    const service = new ProtocolMetricsService(
+      vi.fn().mockResolvedValue({ ok: false, status: 502, json: async () => ({}) }),
+      repository,
+    )
+
+    await expect(service.getProjectProtocolMetrics('aave')).rejects.toMatchObject({
+      statusCode: 404,
+    })
   })
 })

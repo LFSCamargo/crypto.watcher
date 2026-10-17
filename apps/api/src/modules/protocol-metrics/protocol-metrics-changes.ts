@@ -1,7 +1,11 @@
 export const DAY_MS = 24 * 60 * 60 * 1000
-/** Trailing window retained in API snapshots — supports 1Y chart ranges. */
+/** Trailing window retained for TVL charts — supports the 1Y range. */
 export const TVL_HISTORY_DAYS = 365
-export const METRIC_HISTORY_DAYS = 365
+/**
+ * Fee, revenue, and volume history. Two years are required so the valuation
+ * can compare the trailing year with the year before it.
+ */
+export const METRIC_HISTORY_DAYS = 730
 
 export function computePercentChange(
   current: number,

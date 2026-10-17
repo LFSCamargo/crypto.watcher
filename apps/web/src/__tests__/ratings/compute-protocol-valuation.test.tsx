@@ -59,4 +59,29 @@ describe('client-side protocol valuation enrich', () => {
     expect(hasDisplayableValuation(enriched.valuation)).toBe(true)
     expect(enriched.valuation?.feeToTvlRatio).toBeGreaterThan(0)
   })
+
+  it('scores Bitcoin as a reserve when the API omits valuation', () => {
+    const valuation = computeProtocolValuationFromSnapshot({
+      ...baseSnapshot,
+      slug: 'bitcoin',
+      defillamaId: 'chain:Bitcoin',
+      name: 'Bitcoin',
+      mcap: 1_000_000_000_000,
+      priceUsd: 50_000,
+      settlementVolume1yUsd: 20_000_000_000,
+      feesHistory: Array.from({ length: 365 }, (_, index) => ({
+        timestamp: Date.parse('2026-10-17T00:00:00.000Z') - (364 - index) * 86_400_000,
+        value: 10_000,
+      })),
+      cachedAt: '2026-10-17T00:00:00.000Z',
+    })
+
+    expect(valuation?.methodologyVersion).toBe('CW-Reserve-v1')
+    expect(valuation?.compositeBreakdown.map((entry) => entry.component)).toEqual([
+      'securityBudget',
+      'dilution',
+      'settlement',
+    ])
+    expect(valuation?.feeToTvlRatio).toBeGreaterThan(0)
+  })
 })

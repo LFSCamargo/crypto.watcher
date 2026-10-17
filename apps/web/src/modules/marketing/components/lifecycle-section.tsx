@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import { RiPauseLine, RiPlayLine } from '@remixicon/react'
 import { Button, type Tone } from '../../../components/ui'
 import { cn } from '../../../lib/utils'
@@ -35,7 +35,7 @@ export function LifecycleSection() {
   const [playing, setPlaying] = useState(!reducedMotion)
   const trackRef = useRef<HTMLDivElement>(null)
   const inView = useInView(trackRef, { amount: 0.4 })
-  const touring = playing && inView
+  const touring = playing && inView && !reducedMotion
 
   useEffect(() => {
     if (!touring) return
@@ -74,15 +74,16 @@ export function LifecycleSection() {
               type="button"
               size="sm"
               variant="ghost"
-              className="gap-1.5 rounded-full"
+              className="min-h-11 gap-1.5 rounded-full"
+              disabled={!!reducedMotion}
               onClick={() => setPlaying((value) => !value)}
             >
-              {playing ? (
+              {playing && !reducedMotion ? (
                 <RiPauseLine aria-hidden className="h-4 w-4" />
               ) : (
                 <RiPlayLine aria-hidden className="h-4 w-4" />
               )}
-              {playing ? 'Pause tour' : 'Play tour'}
+              {playing && !reducedMotion ? 'Pause tour' : 'Play tour'}
             </Button>
           </div>
 
@@ -143,7 +144,7 @@ export function LifecycleSection() {
                     <span
                       aria-hidden
                       className={cn(
-                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-500 ease-glass md:hidden',
+                        'relative z-20 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-4 transition-[background-color,transform] duration-[320ms] ease-glass md:hidden',
                         reached
                           ? nodeTone[item.tone]
                           : 'bg-background text-muted-foreground ring-border',
@@ -194,12 +195,9 @@ export function LifecycleSection() {
             aria-label={`Step ${active + 1} of ${lifecycleSteps.length}: ${step.title}`}
             className="mt-6 overflow-hidden rounded-3xl border border-border bg-background p-6 md:p-8"
           >
-            <motion.div
+            <div
               key={active}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center"
+              className="landing-enter grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center"
             >
               <div className="space-y-2">
                 <p
@@ -227,7 +225,7 @@ export function LifecycleSection() {
                   </div>
                 ))}
               </dl>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

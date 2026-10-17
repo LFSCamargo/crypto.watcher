@@ -11,6 +11,13 @@ import {
   sumSeriesInWindow,
   weightedAverage,
 } from '../../../lib/safe-math/safe-math'
+import {
+  BITCOIN_RESERVE_METHODOLOGY,
+  isBitcoinReserveSlug,
+  scoreDilution,
+  scoreSecurityBudget,
+  scoreSettlement,
+} from './bitcoin-reserve-valuation'
 import type {
   ChainTvlBreakdown,
   CompositeBreakdownEntry,
@@ -211,9 +218,13 @@ export function computeProtocolValuationFromSnapshot(
   snapshot: ProtocolMetricsSnapshot,
 ): ProtocolValuation | null {
   const input = {
+    slug: snapshot.slug,
     entityType: snapshot.entityType,
     tvl: snapshot.tvl,
     mcap: snapshot.mcap,
+    priceUsd: snapshot.priceUsd ?? null,
+    settlementVolume1yUsd: snapshot.settlementVolume1yUsd ?? null,
+    asOf: Date.parse(snapshot.cachedAt),
     fees30d: snapshot.fees30d,
     revenue30d: snapshot.revenue30d,
     feesHistory: snapshot.feesHistory,
@@ -319,25 +330,43 @@ export function computeProtocolValuationFromSnapshot(
     priceToSalesRatio,
   )
 
-  const compositeComponents: CompositeInput[] = [
-    { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
-    {
-      component: 'security',
-      score: securityScore,
-      weight: input.entityType === 'protocol' ? 0.3 : 0,
-    },
-    {
-      component: 'governance',
-      score: governanceQualityScore,
-      weight: input.entityType === 'stablecoin' ? 0 : 0.15,
-    },
-    { component: 'value', score: valueScore, weight: 0.2 },
-    {
-      component: 'feeSustainability',
-      score: feeSustainabilityScore,
-      weight: input.entityType === 'chain' ? 0.35 : 0,
-    },
-  ]
+  const reserveModel = isBitcoinReserveSlug(input.slug)
+  const asOf = Number.isFinite(input.asOf) ? input.asOf : Date.now()
+  const securityBudgetScore = reserveModel
+    ? scoreSecurityBudget(feesAnnualizedUsd, input.mcap)
+    : null
+  const dilutionScore = reserveModel
+    ? scoreDilution(input.mcap, input.priceUsd, asOf)
+    : null
+  const settlementScore = reserveModel
+    ? scoreSettlement(input.mcap, input.settlementVolume1yUsd)
+    : null
+
+  const compositeComponents: CompositeInput[] = reserveModel
+    ? [
+        { component: 'securityBudget', score: securityBudgetScore, weight: 1 },
+        { component: 'dilution', score: dilutionScore, weight: 1 },
+        { component: 'settlement', score: settlementScore, weight: 1 },
+      ]
+    : [
+        { component: 'fundamentals', score: fundamentalsScore, weight: 0.35 },
+        {
+          component: 'security',
+          score: securityScore,
+          weight: input.entityType === 'protocol' ? 0.3 : 0,
+        },
+        {
+          component: 'governance',
+          score: governanceQualityScore,
+          weight: input.entityType === 'protocol' ? 0.15 : 0,
+        },
+        { component: 'value', score: valueScore, weight: 0.2 },
+        {
+          component: 'feeSustainability',
+          score: feeSustainabilityScore,
+          weight: input.entityType === 'chain' ? 0.35 : 0,
+        },
+      ]
   const compositeScore = weightedAverage(
     compositeComponents.map(({ score, weight }) => ({ value: score, weight })),
   )
@@ -366,7 +395,9 @@ export function computeProtocolValuationFromSnapshot(
     revenueToTvlRatio,
     feeToTvlRatio,
     priceToSalesRatio,
-    methodologyVersion: PROTOCOL_VALUATION_METHODOLOGY,
+    methodologyVersion: reserveModel
+      ? BITCOIN_RESERVE_METHODOLOGY
+      : PROTOCOL_VALUATION_METHODOLOGY,
   }
 }
 

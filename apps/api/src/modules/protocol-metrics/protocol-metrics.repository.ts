@@ -1,4 +1,5 @@
 import { db } from '../../core/db'
+import { PROTOCOL_METRICS_RETENTION_MS } from './protocol-metrics.cache'
 import type { ProtocolMetricsSnapshot } from './protocol-metrics.types'
 import { PROTOCOL_METRICS_SNAPSHOT_VERSION } from './protocol-metrics.types'
 
@@ -13,6 +14,8 @@ function parseSnapshot(raw: unknown): ProtocolMetricsSnapshot | null {
     ...snapshot,
     entityType: snapshot.entityType ?? 'protocol',
     mcap: snapshot.mcap ?? null,
+    priceUsd: snapshot.priceUsd ?? null,
+    settlementVolume1yUsd: snapshot.settlementVolume1yUsd ?? null,
     chainBreakdown: snapshot.chainBreakdown ?? [],
     tokenComposition: snapshot.tokenComposition ?? [],
     feesHistory: snapshot.feesHistory ?? [],
@@ -39,6 +42,7 @@ export const protocolMetricsRepository = {
       .selectFrom('protocol_metrics_cache')
       .select(['snapshot'])
       .where('slug', '=', slug)
+      .where('fetched_at', '>=', new Date(Date.now() - PROTOCOL_METRICS_RETENTION_MS))
       .executeTakeFirst()
 
     return row ? parseSnapshot(row.snapshot) : null

@@ -14,6 +14,8 @@ export function normalizeProtocolMetricsSnapshot(
     ...snapshot,
     entityType: snapshot.entityType ?? 'protocol',
     mcap: snapshot.mcap ?? null,
+    priceUsd: snapshot.priceUsd ?? null,
+    settlementVolume1yUsd: snapshot.settlementVolume1yUsd ?? null,
     chainBreakdown: snapshot.chainBreakdown ?? EMPTY_PROTOCOL_METRICS.chainBreakdown,
     tokenComposition:
       snapshot.tokenComposition ?? EMPTY_PROTOCOL_METRICS.tokenComposition,
