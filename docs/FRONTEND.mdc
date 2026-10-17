@@ -76,19 +76,18 @@ apps/
     │   │   │   ├── store.ts         # Zustand slice
     │   │   │   ├── routes.tsx
     │   │   │   └── __tests__/
-    │   │   ├── marketing/           # Public landing page: hero (radar + animated report preview), methodology, lifecycle, references, governance, resources, CTA [MVP]
-    │   │   │   ├── components/hero-radar.tsx # Radar sweep; asset chips ping as it passes and link to reference pages
+    │   │   ├── marketing/           # Public landing page: hero (radar with a scope core), methodology, lifecycle, references, governance, resources, CTA [MVP]
+    │   │   │   ├── components/hero-radar.tsx # Yellow gradient scope; lower grades sit closer in and drift along the rings
     │   │   │   ├── components/radar-asset-preview.tsx # Hover card: reference grade, live metrics, revenue/fee sparklines, composite breakdown
-    │   │   │   ├── components/asset-preview-hover.tsx # Shared hover card used by the radar, ticker, and rating ladder
+    │   │   │   ├── components/asset-preview-hover.tsx # Shared hover card; a slim thumb shows when the card scrolls
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
-    │   │   │   ├── components/asset-ticker.tsx # md+ passing tape (wheel-scrubs on hover); small screens use a snap banner carousel
+    │   │   │   ├── components/asset-ticker.tsx # Passing tape on every screen; the wheel scrubs it while hovered
     │   │   │   ├── hooks/use-auto-scroll-tape.ts # Tokens keep passing; hover maps the wheel onto the row
     │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
     │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA); listed coins open the radar preview
     │   │   │   ├── components/lifecycle-track.tsx # SVG review timeline: cubic route, stations, traveling marker
     │   │   │   ├── components/reveal.tsx, spotlight-card.tsx # Scroll reveal; pointer-following card glow
-    │   │   │   ├── lib/             # lifecycle-steps.ts (tour copy), grade-ladder.ts (grade buckets)
-    │   │   │   └── hooks/use-count-up.ts # Eased score count-up (instant under reduced motion)
+    │   │   │   └── lib/             # lifecycle-steps.ts (tour copy), grade-ladder.ts (grade buckets)
     │   │   ├── docs/                # Product docs pages              [MVP]
     │   │   ├── blog/                # News & launch articles (MD)     [MVP]
     │   │   │   ├── content/         # Markdown article sources
@@ -237,12 +236,12 @@ apps/
 
 ### Platform & UX
 - Uber-inspired light theme (cream/yellow/black), Raleway font, fully rounded Shadcn components; blueprint grid background on all pages. `[MVP]`
-- Global shell: skip link → glass header (Projects, Governance, Resources menu — the review queue is a tab inside Projects | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a centered floating glass pill keeps Projects and Governance in a row with Menu. Scrolling compacts it to icons; a tap pins it open so the next tap navigates or opens the sheet (resources, account actions and theme). All links come from `components/layout/navigation.ts`. `[MVP]`
+- Global shell: skip link → glass header (Projects, Governance, Resources menu — the review queue is a tab inside Projects | ⌘K search + theme toggle + auth/account menu) → focusable `main#main-content` (focus moves there on client navigation) → footer with Product/Resources/Account groups and a request CTA. Below `lg`, a centered floating glass pill keeps Home, Projects and Governance in a row with Menu. A single foreground pill slides behind the selected tab. Only that tab shows its label; scrolling hides that label too. A tap shows it again so the next tap navigates or opens the sheet (resources, account actions and theme). All links come from `components/layout/navigation.ts`. `[MVP]`
 - Scrollbars stay hidden in every browser (`scrollbar-width: none`, zero-size `::-webkit-scrollbar`). The bar is not `display: none`, so Logitech and Rapoo wheel drivers still scroll the page and nested regions. `[MVP]`
 - Liquid-glass design language (see `docs/redesign/DESIGN.md`): `--glass-*` tokens with `.glass-nav`, `.glass-card`, `.glass-card-flat` and `.glass-panel` surfaces; alpha tuned for WCAG AA text contrast; opaque fallback under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; at most three blurred layers on screen. Semantic `info`, `chart-1..5` and `*-strong` status text tokens. Landing palette `--tone-{amber,coral,violet,sky,teal,pink}` (+ `-strong` AA text variants) used via `ToneIcon` (`components/ui/tone-icon.tsx`) for resource/menu/methodology tiles and section eyebrows. Framer Motion honors `prefers-reduced-motion` via `MotionConfig`. `[MVP]`
-- Landing motion uses glass easing and 160/240/320 ms chrome transitions, with short staggered reveals and a single report scan. Reduced motion shows final content immediately, stops decorative loops and count-up, and keeps lifecycle selection manual (the 4-second tour runs only while visible). Mobile reference banners use manual snap scrolling; grade bars use a contained horizontal scrollport with 44px targets. `[MVP]`
+- Landing motion uses glass easing and 160/240/320 ms chrome transitions, with short staggered reveals. The hero sonar center is a counter-rotating reticle with expanding blooms, not a sample report card. Reduced motion shows final content immediately, stops decorative loops, and keeps lifecycle selection manual (the 4-second tour runs only while visible). The reference tape is the same passing row on phones and desktops. Grade bars use a contained horizontal scrollport with 44px targets. `[MVP]`
 - All shell routes and the footer reserve bottom-pill clearance plus the device safe area below `lg`. Page hero actions stack on phones; docs/blog sheets remain within the available width. `[MVP]`
-- Command palette search (debounced, race-conditioned) over council projects (listed first, tagged "Council") and reference assessments (tagged "Reference"). `[MVP]`
+- Command palette search (debounced, race-conditioned) over council projects (listed first, tagged "Council") and reference assessments (tagged "Reference"). Below `lg` it opens beneath the header. The header and mobile tab bar stay above the overlay. `[MVP]`
 - Toasts via Sonner, icons via Remix Icon, forms via React Hook Form. `[MVP]`
 - Error reporting via Sentry. `[MVP]`
 - Embeddable score widgets/badges. `[Phase 3]`
@@ -398,7 +397,9 @@ interface SessionState {
 }
 
 // store/command-palette.ts — the single global project search (⌘K, header and hero
-// buttons all open the same CommandPalette; there is no second inline search)
+// buttons all open the same CommandPalette; there is no second inline search).
+// Below `md` the header shows a magnifying glass that becomes a close mark while
+// the palette is open. An empty query lists the top reference projects.
 interface CommandPaletteState {
   open: boolean
   setOpen: (open: boolean) => void
