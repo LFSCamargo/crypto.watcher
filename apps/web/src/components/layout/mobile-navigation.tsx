@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react'
+import { motion } from 'framer-motion'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { RiAddLine, RiLogoutBoxRLine, RiMenuLine, RiUserLine } from '@remixicon/react'
@@ -15,13 +16,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet'
-import { primaryNavItems, resourceNavItems } from './navigation'
+import { mobileNavItems, resourceNavItems } from './navigation'
 import { useCompactHeader } from './use-compact-header'
 
 const pillMotion = 'duration-500 ease-glass motion-reduce:transition-none'
 
 const barItemClass =
-  'flex h-full shrink-0 flex-row items-center justify-center rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+  'flex h-full shrink-0 flex-row items-center justify-center gap-1 rounded-full px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function MobileNavigation() {
   const [open, setOpen] = useState(false)
@@ -54,16 +55,13 @@ export function MobileNavigation() {
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
       className={cn(
-        'glass-nav glass-pill fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex -translate-x-1/2 items-center justify-center overflow-hidden rounded-full transition-[width,height,padding]',
+        'glass-nav glass-pill fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-[70] flex h-11 w-fit max-w-[calc(100%-2rem)] -translate-x-1/2 items-center justify-center gap-0.5 overflow-hidden rounded-full p-1 transition-[width]',
         pillMotion,
         'lg:hidden',
-        compact
-          ? 'h-12 w-fit max-w-[calc(100%-2rem)] gap-0.5 p-1'
-          : 'h-16 w-fit max-w-[calc(100%-2rem)] gap-1 p-1.5',
       )}
     >
       <div className="flex h-full items-center justify-center gap-1">
-        {primaryNavItems.map((item) => (
+        {mobileNavItems.map((item) => (
           <NavLink
             key={item.href}
             to={item.href}
@@ -71,23 +69,34 @@ export function MobileNavigation() {
             className={({ isActive }) =>
               cn(
                 barItemClass,
-                compact ? 'gap-0 px-3' : 'gap-1.5 px-3.5',
-                isActive
-                  ? 'bg-foreground text-background'
-                  : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground',
+                'relative',
+                isActive ? 'text-background' : 'text-foreground/75 hover:text-foreground',
               )
             }
           >
-            <item.icon className="h-5 w-5 shrink-0" aria-hidden />
-            <span
-              className={cn(
-                'overflow-hidden whitespace-nowrap transition-[max-width,opacity]',
-                pillMotion,
-                compact ? 'max-w-0 opacity-0' : 'max-w-36 opacity-100',
-              )}
-            >
-              {item.label}
-            </span>
+            {({ isActive }) => (
+              <>
+                {isActive ? (
+                  <motion.span
+                    layoutId="mobile-tab-indicator"
+                    aria-hidden
+                    data-tab-indicator
+                    className="absolute inset-0 rounded-full bg-foreground"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  />
+                ) : null}
+                <item.icon className="relative z-10 h-5 w-5 shrink-0" aria-hidden />
+                <span
+                  className={cn(
+                    'relative z-10 overflow-hidden whitespace-nowrap transition-[max-width,opacity]',
+                    pillMotion,
+                    isActive && !compact ? 'max-w-36 opacity-100' : 'max-w-0 opacity-0',
+                  )}
+                >
+                  {item.label}
+                </span>
+              </>
+            )}
           </NavLink>
         ))}
 
@@ -98,16 +107,14 @@ export function MobileNavigation() {
               aria-label="Open menu"
               className={cn(
                 barItemClass,
-                compact ? 'gap-0 px-3' : 'gap-1.5 px-3.5',
-                'text-muted-foreground hover:bg-foreground/5 hover:text-foreground',
+                'text-foreground/75 hover:text-foreground',
               )}
             >
-              <RiMenuLine className="h-5 w-5 shrink-0" aria-hidden />
+              <RiMenuLine className="h-4 w-4 shrink-0" aria-hidden />
               <span
                 className={cn(
-                  'overflow-hidden whitespace-nowrap transition-[max-width,opacity]',
+                  'max-w-0 overflow-hidden whitespace-nowrap opacity-0',
                   pillMotion,
-                  compact ? 'max-w-0 opacity-0' : 'max-w-36 opacity-100',
                 )}
               >
                 Menu

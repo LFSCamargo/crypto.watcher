@@ -46,7 +46,7 @@ describe('MobileNavigation', () => {
     const bar = screen.getByRole('navigation', { name: 'Mobile' })
     expect(bar).toHaveClass('glass-pill', 'rounded-full', '-translate-x-1/2')
     expect(bar.className).not.toMatch(/inset-x-0|grid-cols-4/)
-    expect(within(bar).getAllByRole('link')).toHaveLength(2)
+    expect(within(bar).getAllByRole('link')).toHaveLength(3)
     expect(within(bar).getByRole('button', { name: 'Open menu' })).toBeInTheDocument()
     expect(within(bar).getByRole('link', { name: 'Projects' })).toHaveClass(
       'flex-row',
@@ -58,11 +58,15 @@ describe('MobileNavigation', () => {
     renderNav()
     const bar = screen.getByRole('navigation', { name: 'Mobile' })
     expect(bar).toHaveAttribute('data-size', 'expanded')
-    expect(bar).toHaveClass('overflow-hidden', 'items-center')
+    expect(bar).toHaveClass('h-11', 'overflow-hidden', 'items-center')
+    expect(within(bar).getByText('Projects')).toHaveClass('opacity-100')
+    expect(within(bar).getByText('Home')).toHaveClass('opacity-0')
+    expect(within(bar).getByText('Menu')).toHaveClass('opacity-0')
 
     scrollTo(400)
     expect(bar).toHaveAttribute('data-size', 'compact')
-    expect(within(bar).getByText('Governance')).toHaveClass('opacity-0')
+    expect(bar).toHaveClass('h-11')
+    expect(within(bar).getByText('Projects')).toHaveClass('max-w-0', 'opacity-0')
 
     fireEvent.click(within(bar).getByRole('link', { name: 'Governance' }))
     expect(bar).toHaveAttribute('data-size', 'expanded')
@@ -81,9 +85,12 @@ describe('MobileNavigation', () => {
   it('keeps projects, analysis and governance one tap away', () => {
     renderNav()
     const bar = screen.getByRole('navigation', { name: 'Mobile' })
-    for (const label of ['Projects', 'Governance']) {
+    for (const label of ['Home', 'Projects', 'Governance']) {
       expect(within(bar).getByRole('link', { name: label })).toBeInTheDocument()
     }
+    expect(within(bar).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/')
+    expect(within(bar).getAllByRole('link').filter((link) => link.querySelector('[data-tab-indicator]'))).toHaveLength(1)
+    expect(within(bar).getByRole('link', { name: 'Home' }).className).not.toMatch(/bg-/)
     expect(within(bar).getByRole('link', { name: 'Projects' })).toHaveAttribute(
       'aria-current',
       'page',

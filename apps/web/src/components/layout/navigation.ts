@@ -3,6 +3,7 @@ import {
   RiCoinsLine,
   RiFileTextLine,
   RiGovernmentLine,
+  RiHomeLine,
   RiNewsLine,
   RiQuestionLine,
   RiScales3Line,
@@ -35,6 +36,12 @@ export const IN_ANALYSIS_HREF = '/app?view=in-analysis'
 export const primaryNavItems: NavItem[] = [
   { href: '/app', label: 'Projects', icon: RiStackLine, end: true },
   { href: '/app/governance', label: 'Governance', icon: RiScales3Line },
+]
+
+/** Phone tab bar. Home is the landing page; the desktop header stays on Projects and Governance. */
+export const mobileNavItems: NavItem[] = [
+  { href: '/', label: 'Home', icon: RiHomeLine, end: true },
+  ...primaryNavItems,
 ]
 
 export const resourceNavItems: ResourceItem[] = [
