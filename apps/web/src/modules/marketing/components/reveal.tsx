@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { cn } from '../../../lib/utils'
 
 interface RevealProps {
   children: ReactNode
@@ -12,7 +13,7 @@ export function Reveal({ children, delay = 0, className }: RevealProps) {
   const reducedMotion = useReducedMotion()
   return (
     <motion.div
-      className={className}
+      className={cn('min-w-0', className)}
       initial={reducedMotion ? false : { opacity: 0, y: 16 }}
       animate={reducedMotion ? { opacity: 1, y: 0 } : undefined}
       whileInView={{ opacity: 1, y: 0 }}

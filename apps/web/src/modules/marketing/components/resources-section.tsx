@@ -51,7 +51,7 @@ export function ResourcesSection() {
           />
         </Reveal>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-3">
           {latestPost && (
             <Reveal className="lg:col-span-2 lg:row-span-2">
               <SpotlightCard
@@ -100,7 +100,7 @@ export function ResourcesSection() {
                           to={`/blog/${post.slug}`}
                           className="group flex items-center justify-between gap-4 py-3 text-sm"
                         >
-                          <span className="font-semibold group-hover:underline">
+                          <span className="min-w-0 font-semibold group-hover:underline">
                             {post.title}
                           </span>
                           <span className="shrink-0 text-xs text-muted-foreground">
@@ -170,7 +170,7 @@ export function ResourcesSection() {
             </SpotlightCard>
           </Reveal>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             {deepDives.map((item, index) => (
               <Reveal key={item.href} delay={0.15 + index * 0.05}>
                 <Link
