@@ -6,56 +6,11 @@ import { resolveCreditRatingFromSafetyScore } from '../../../lib/ratings/credit-
 import { cn } from '../../../lib/utils'
 import {
   curatedProjects,
-  projectCategories,
   sortCuratedProjectsByRating,
 } from '../../projects/lib/curated-projects'
 import { AssetPreviewHover } from './asset-preview-hover'
 
 const tickerAssets = sortCuratedProjectsByRating(curatedProjects).slice(0, 24)
-const bannerAssets = tickerAssets.slice(0, 10)
-
-function BannerCarousel() {
-  return (
-    <div className="border-y border-border bg-card/40 py-4 md:hidden">
-      <ul
-        aria-label="Reference banners"
-        className="mx-auto flex max-w-full snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none]"
-      >
-        {bannerAssets.map((project) => {
-          const rating = resolveCreditRatingFromSafetyScore(project.score)
-          return (
-            <li key={project.slug} className="w-[min(78%,18rem)] shrink-0 snap-center">
-              <Link
-                to={`/app/reference/${project.slug}`}
-                aria-label={`${project.name} reference assessment`}
-                className="glass-card flex items-center gap-3 rounded-3xl px-3 py-3"
-              >
-                <ProjectIcon
-                  symbol={project.symbol}
-                  name={project.name}
-                  slug={project.slug}
-                  className="h-11 w-11"
-                />
-                <span className="min-w-0 flex-1 text-left">
-                  <span className="block truncate font-semibold">{project.name}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {project.symbol} · {projectCategories[project.category]}
-                  </span>
-                </span>
-                <span className="text-right">
-                  <span className="block font-bold tabular-nums">{project.score}</span>
-                  <span className="text-xs font-bold text-muted-foreground">
-                    {rating.sp}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-}
 
 function TickerRow({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
   return (
@@ -99,7 +54,7 @@ function TickerRow({ onOpenChange }: { onOpenChange: (open: boolean) => void }) 
   )
 }
 
-/** Mouse-only tape of reference grades; the rating ladder offers the accessible version. */
+/** Passing tape of reference grades on every screen. The rating ladder is the accessible list. */
 export function AssetTicker() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const openCount = useRef(0)
@@ -110,20 +65,17 @@ export function AssetTicker() {
   }
 
   return (
-    <>
-      <BannerCarousel />
-      <div
-        ref={tape.ref}
-        data-ticker
-        data-preview-open={previewOpen ? 'true' : 'false'}
-        aria-hidden="true"
-        className="relative hidden overflow-x-auto overscroll-x-contain border-y border-border bg-card/50 py-4 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)] md:block"
-      >
-        <div className="flex w-max">
-          <TickerRow onOpenChange={onOpenChange} />
-          <TickerRow onOpenChange={onOpenChange} />
-        </div>
+    <div
+      ref={tape.ref}
+      data-ticker
+      data-preview-open={previewOpen ? 'true' : 'false'}
+      aria-hidden="true"
+      className="relative overflow-x-auto overscroll-x-contain border-y border-border bg-card/50 py-4 [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]"
+    >
+      <div className="flex w-max">
+        <TickerRow onOpenChange={onOpenChange} />
+        <TickerRow onOpenChange={onOpenChange} />
       </div>
-    </>
+    </div>
   )
 }

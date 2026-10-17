@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { AssetTicker } from '../components/asset-ticker'
@@ -21,17 +21,12 @@ describe('AssetTicker', () => {
     expect(screen.queryAllByRole('link').some((link) => tape?.contains(link))).toBe(false)
   })
 
-  it('shows a contained banner carousel instead of the sonar on small screens', () => {
-    renderWithProviders(<AssetTicker />)
-    const banners = screen.getByRole('list', { name: 'Reference banners' })
-    expect(banners).toHaveClass('overflow-x-auto', 'snap-x', 'max-w-full')
-    const links = within(banners).getAllByRole('link')
-    expect(links.length).toBeGreaterThan(3)
-    expect(links.length).toBeLessThan(16)
-    for (const link of links) {
-      expect(link.getAttribute('href')).toMatch(/^\/app\/reference\//)
-      expect(link).toHaveAccessibleName(/reference assessment/)
-    }
+  it('uses the same passing tape on small screens', () => {
+    const { container } = renderWithProviders(<AssetTicker />)
+    const tapes = container.querySelectorAll('[data-ticker]')
+    expect(tapes).toHaveLength(1)
+    expect(tapes[0]).not.toHaveClass('hidden')
+    expect(screen.queryByRole('list', { name: 'Reference banners' })).not.toBeInTheDocument()
   })
 
   it('opens the radar-style preview when a coin avatar is hovered', async () => {
