@@ -22,18 +22,15 @@ export function Logo({
 }: LogoProps & { size?: keyof typeof sizeToClass }) {
   return (
     <span className="flex items-center gap-2.5">
-      <picture>
-        <source srcSet="/logo.webp" type="image/webp" />
-        <img
-          src="/logo.png"
-          alt="Crypto Watcher"
-          className={cn(sizeToClass[size], 'object-contain', className)}
-          draggable={false}
-        />
-      </picture>
+      <img
+        src="/logo.png"
+        alt="Crypto Watcher"
+        className={cn(sizeToClass[size], 'object-contain', className)}
+        draggable={false}
+      />
       {showWordmark && (
         <span className={cn('text-2xl font-bold tracking-tight', wordmarkClassName)}>
-          Crypto<span className="text-primary-strong">Watcher</span>
+          Crypto<span className="text-primary">Watcher</span>
         </span>
       )}
     </span>
