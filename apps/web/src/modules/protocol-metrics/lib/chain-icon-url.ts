@@ -54,8 +54,18 @@ function normalizeChainSlug(chainName: string): string {
     .replace(/^-|-$/g, '')
 }
 
-/** DeFi Llama chain icon URL for bar charts and legends. */
+/**
+ * Chains whose DefiLlama icon is unusable. These use the curated logo in
+ * `src/public/icons/` instead.
+ */
+const LOCAL_CHAIN_ICONS: Record<string, string> = {
+  Base: 'base',
+}
+
+/** Curated chain logo when we have one, otherwise the DefiLlama chain icon. */
 export function chainIconUrl(chainName: string): string {
+  const localSlug = LOCAL_CHAIN_ICONS[chainName]
+  if (localSlug) return `/icons/${localSlug}.png`
   const slug = CHAIN_ICON_SLUGS[chainName] ?? normalizeChainSlug(chainName)
   return `https://icons.llamao.fi/icons/chains/rsz_${slug}.jpg`
 }

@@ -5,7 +5,7 @@ import { BreakdownBarChart } from '../components/breakdown-bar-chart'
 
 describe('BreakdownBarChart', () => {
   it('renders chain bars and legend rows', () => {
-    renderWithProviders(
+    const { container } = renderWithProviders(
       <BreakdownBarChart
         title="TVL by chain"
         items={[
@@ -21,6 +21,9 @@ describe('BreakdownBarChart', () => {
     expect(screen.getAllByText('Ethereum').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Base').length).toBeGreaterThan(0)
     expect(screen.getByText('71.1% · $2000000000')).toBeInTheDocument()
+    const sources = [...container.querySelectorAll('img')].map((img) => img.getAttribute('src'))
+    expect(sources.filter((src) => src === '/icons/base.png')).toHaveLength(2)
+    expect(sources.some((src) => src?.includes('rsz_base'))).toBe(false)
   })
 
   it('renders token composition with symbol labels', () => {

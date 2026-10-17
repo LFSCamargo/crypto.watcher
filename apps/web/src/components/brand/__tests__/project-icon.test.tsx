@@ -10,6 +10,13 @@ describe('ProjectIcon', () => {
     expect(image).toHaveAttribute('src', '/icons/bitcoin.png')
   })
 
+  it('keeps the Base mark inset on a white circle', () => {
+    render(<ProjectIcon symbol="BASE" name="Base" slug="base" />)
+
+    const image = screen.getByRole('img', { name: 'Base' })
+    expect(image).toHaveClass('rounded-full', 'bg-white', 'object-cover')
+  })
+
   it('puts dark transparent logos such as Aptos on a white backdrop', () => {
     render(<ProjectIcon symbol="APT" name="Aptos" slug="aptos" />)
     expect(screen.getByRole('img', { name: 'Aptos' })).toHaveClass('bg-white')

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { cn } from '../../../lib/utils'
+import { iconBackdropClass } from '../../projects/lib/project-icon-url'
 import { chainIconUrl } from '../lib/chain-icon-url'
 
 const CHART_HEIGHT_WIDE = 200
@@ -44,7 +45,11 @@ function BreakdownIcon({
         loading="lazy"
         draggable={false}
         onError={() => setErrored(true)}
-        className={cn('shrink-0 rounded-full object-cover', sizeClass)}
+        className={cn(
+          'shrink-0 rounded-full object-cover',
+          iconBackdropClass(chainIconUrl(label)),
+          sizeClass,
+        )}
       />
     )
   }
