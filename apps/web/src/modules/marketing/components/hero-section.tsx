@@ -4,7 +4,6 @@ import { Button } from '../../../components/ui'
 import { useCommandPaletteStore } from '../../../store/command-palette'
 import { useSession } from '../../../store/session'
 import { HeroRadar } from './hero-radar'
-import { ReportPreviewCard } from './report-preview-card'
 import { SectionGlow } from './section-glow'
 
 const trustPoints = [
@@ -34,6 +33,15 @@ export function HeroSection() {
             Expert-governed crypto risk reviews
           </p>
 
+          <img
+            src="/logo.png"
+            alt=""
+            width={120}
+            height={120}
+            draggable={false}
+            className="object-contain xl:hidden drop-shadow-[0_0_12px_hsl(var(--primary)/0.65)]"
+          />
+
           <h1 id="hero-title" className="heading-1 mb-5 text-balance">
             Is this crypto project{' '}
             <span className="relative isolate inline-block px-3 text-primary-foreground">
@@ -58,9 +66,7 @@ export function HeroSection() {
             className="flex h-14 w-full max-w-xl items-center gap-3 rounded-full border border-foreground/10 bg-background/80 px-5 text-left text-muted-foreground shadow-sm transition-[border-color,box-shadow] duration-[240ms] ease-glass hover:border-tone-amber/60 hover:shadow-[0_0_0_4px_hsl(var(--tone-amber)/0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
           >
             <RiSearchLine className="h-5 w-5 shrink-0 text-foreground" aria-hidden />
-            <span className="flex-1 truncate">
-              Search a project — try Bitcoin, Uniswap or Solana
-            </span>
+            <span className="flex-1 truncate">Search for a project</span>
             <kbd
               aria-hidden
               className="hidden rounded-md border border-border bg-secondary px-2 py-0.5 text-xs font-semibold sm:inline-flex"
@@ -107,9 +113,8 @@ export function HeroSection() {
           data-hero-stage
           className="relative hidden justify-center lg:flex lg:justify-end"
         >
-          <div className="relative w-full max-w-md">
+          <div className="relative aspect-square w-full max-w-md xl:max-w-lg">
             <HeroRadar />
-            <ReportPreviewCard />
           </div>
         </div>
       </div>

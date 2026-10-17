@@ -370,6 +370,85 @@
     animation-timing-function: var(--ease-glass);
   }
 
+  /* Yellow scope. Light mode uses dark amber so the rings stay visible on cream. */
+  .radar-beam {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      hsl(var(--tone-amber-strong) / 0.12) 8deg,
+      hsl(var(--tone-amber-strong) / 0.55) 14deg,
+      transparent 18deg
+    );
+    -webkit-mask-image: radial-gradient(closest-side, #000 6%, transparent 68%);
+    mask-image: radial-gradient(closest-side, #000 6%, transparent 68%);
+  }
+
+  .dark .radar-beam {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      hsl(var(--primary) / 0.28) 8deg,
+      hsl(var(--primary) / 0.92) 15deg,
+      transparent 20deg
+    );
+  }
+
+  .radar-glow {
+    background: radial-gradient(
+      circle,
+      hsl(var(--tone-amber-strong) / 0.2) 0%,
+      hsl(var(--tone-amber-strong) / 0.08) 28%,
+      transparent 64%
+    );
+  }
+
+  .dark .radar-glow {
+    background: radial-gradient(
+      circle,
+      hsl(var(--primary) / 0.38) 0%,
+      hsl(var(--primary) / 0.14) 30%,
+      transparent 66%
+    );
+  }
+
+  .radar-ring {
+    border: 1px solid hsl(var(--tone-amber-strong) / 0.72);
+    background: transparent;
+  }
+
+  .dark .radar-ring {
+    border-color: hsl(var(--primary) / 0.8);
+    background: transparent;
+  }
+
+  .radar-hair-y {
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      hsl(var(--tone-amber-strong) / 0.62),
+      transparent
+    );
+  }
+
+  .radar-hair-x {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--tone-amber-strong) / 0.62),
+      transparent
+    );
+  }
+
+  .dark .radar-hair-y {
+    background: linear-gradient(to bottom, transparent, hsl(var(--primary) / 0.88), transparent);
+  }
+
+  .dark .radar-hair-x {
+    background: linear-gradient(to right, transparent, hsl(var(--primary) / 0.88), transparent);
+  }
+
   .landing-motion .animate-border-spin {
     animation-duration: 16s;
   }

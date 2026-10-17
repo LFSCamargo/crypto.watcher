@@ -158,7 +158,7 @@ export function RadarAssetPreview({ slug }: { slug: string }) {
   const profile = getProjectReviewProfile(project)
 
   return (
-    <div className="space-y-4 text-left">
+    <div className="space-y-2.5 text-left">
       <div className="flex items-start gap-3">
         <img
           src={`/icons/${project.slug}.png`}

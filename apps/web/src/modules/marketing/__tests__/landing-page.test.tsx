@@ -55,11 +55,13 @@ describe('LandingPage', () => {
     )
   })
 
-  it('labels the report preview as illustrative', () => {
+  it('keeps the hero sonar free of the sample report card', () => {
     renderLanding()
-    const preview = screen.getByRole('figure', { name: /Illustrative report preview/ })
-    expect(within(preview).getByText(/Illustrative example/)).toBeInTheDocument()
-    expect(within(preview).getByText('/ 100')).toBeInTheDocument()
+    const hero = screen.getByRole('region', { name: /Is this crypto project safe/ })
+    expect(hero.querySelector('[data-radar-core]')).toBeTruthy()
+    expect(
+      within(hero).queryByRole('figure', { name: /Illustrative report preview/ }),
+    ).not.toBeInTheDocument()
   })
 
   it('explains the review lifecycle in order', () => {

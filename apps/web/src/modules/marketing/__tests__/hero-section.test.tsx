@@ -1,4 +1,4 @@
-import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HeroSection } from '../components/hero-section'
@@ -17,13 +17,6 @@ function stubReducedMotion(matches: boolean) {
   )
 }
 
-function animatedScore() {
-  const preview = screen.getByRole('figure', { name: /Illustrative report preview/ })
-  const score = preview.querySelector('[data-score]')
-  if (!score) throw new Error('Animated score not rendered')
-  return score
-}
-
 describe('HeroSection', () => {
   beforeEach(() => {
     vi.stubGlobal(
@@ -38,29 +31,21 @@ describe('HeroSection', () => {
     useCommandPaletteStore.setState({ open: false })
   })
 
-  it('counts the example score up to its final value', async () => {
+  it('puts a decorative scope in the middle of the sonar', () => {
     stubReducedMotion(false)
     renderWithProviders(<HeroSection />)
-    expect(Number(animatedScore().textContent)).toBeLessThan(82)
-    await waitFor(() => expect(animatedScore()).toHaveTextContent('82'), {
-      timeout: 4000,
+    const stage = document.querySelector('[data-hero-stage]')
+    const core = stage?.querySelector('[data-radar-core]')
+    expect(core?.querySelector('img')?.getAttribute('src')).toBe('/logo.png')
+    expect(core?.querySelector('.animate-sonar-bloom')).toBeTruthy()
+    expect(core?.querySelector('.animate-reticle')).toBeTruthy()
+    expect(stage?.querySelector('.animate-radar-drift')).toBeTruthy()
+    expect(stage?.querySelector('[data-keep-upright]')).toHaveStyle({
+      transform: 'rotate(-42deg)',
     })
-  })
-
-  it('shows the final score immediately when motion is reduced', () => {
-    stubReducedMotion(true)
-    renderWithProviders(<HeroSection />)
-    expect(animatedScore()).toHaveTextContent('82')
-  })
-
-  it('announces the final score instead of the counting digits', () => {
-    stubReducedMotion(false)
-    renderWithProviders(<HeroSection />)
-    const preview = screen.getByRole('figure', { name: /Illustrative report preview/ })
-    expect(animatedScore()).toHaveAttribute('aria-hidden', 'true')
-    expect(within(preview).getByText('Example score: 82 out of 100')).toHaveClass(
-      'sr-only',
-    )
+    expect(
+      screen.queryByRole('figure', { name: /Illustrative report preview/ }),
+    ).not.toBeInTheDocument()
   })
 
   it('keeps the sonar off small screens', () => {
@@ -68,9 +53,7 @@ describe('HeroSection', () => {
     renderWithProviders(<HeroSection />)
     const stage = document.querySelector('[data-hero-stage]')
     expect(stage).toHaveClass('hidden', 'lg:flex')
-    expect(stage).toContainElement(
-      screen.getByRole('figure', { name: /Illustrative report preview/ }),
-    )
+    expect(stage?.querySelector('[data-radar-core]')).toBeTruthy()
   })
 
   it('links every radar asset to its reference assessment', () => {
@@ -78,10 +61,15 @@ describe('HeroSection', () => {
     renderWithProviders(<HeroSection />)
     const assets = screen.getByRole('list', { name: 'Featured reference assessments' })
     const links = within(assets).getAllByRole('link')
-    expect(links).toHaveLength(6)
+    expect(links.length).toBeGreaterThan(10)
     expect(within(assets).getByRole('link', { name: /Bitcoin/ })).toHaveAttribute(
       'href',
       '/app/reference/bitcoin',
+    )
+    const bitcoin = within(assets).getByRole('link', { name: /Bitcoin/ }).closest('li')
+    const watched = within(assets).getByRole('link', { name: /Polygon/ }).closest('li')
+    expect(Number(watched?.getAttribute('data-radius'))).toBeLessThan(
+      Number(bitcoin?.getAttribute('data-radius')),
     )
     for (const link of links) {
       expect(link.getAttribute('href')).toMatch(/^\/app\/reference\/[a-z0-9-]+$/)
@@ -93,9 +81,22 @@ describe('HeroSection', () => {
     stubReducedMotion(false)
     const user = userEvent.setup()
     renderWithProviders(<HeroSection />)
-    await user.hover(screen.getByRole('link', { name: 'Uniswap reference assessment' }))
+    const link = screen.getByRole('link', { name: 'Uniswap reference assessment' })
+    await user.hover(link)
+    expect(link.closest('li')).toHaveAttribute('data-paused', 'true')
+    expect(link.closest('li')?.querySelector('.animate-radar-drift')).toHaveClass(
+      '[animation-play-state:paused]',
+    )
     expect(await screen.findByRole('heading', { name: 'Uniswap' })).toBeInTheDocument()
     expect(screen.getByRole('group', { name: 'Reference index' })).toHaveTextContent('93')
+
+    const scroller = document.querySelector('[data-preview-scroll]') as HTMLElement
+    Object.defineProperty(scroller, 'scrollHeight', { configurable: true, value: 640 })
+    Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 220 })
+    Object.defineProperty(scroller, 'scrollTop', { configurable: true, value: 80 })
+    fireEvent.scroll(scroller)
+    const indicator = document.querySelector('[data-scroll-indicator]')
+    expect(indicator?.querySelector('div')?.getAttribute('style')).toMatch(/top: .+%/)
   })
 
   it('opens the global search instead of an inline search field', async () => {

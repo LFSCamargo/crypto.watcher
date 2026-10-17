@@ -143,6 +143,22 @@ export default {
         'radar-sweep': {
           to: { transform: 'rotate(360deg)' },
         },
+        'sonar-bloom': {
+          '0%': { transform: 'scale(0.12)', opacity: '0.8' },
+          '70%': { opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '0' },
+        },
+        reticle: {
+          to: { transform: 'rotate(-360deg)' },
+        },
+        'radar-drift': {
+          '0%, 100%': { transform: 'rotate(-8deg)' },
+          '50%': { transform: 'rotate(8deg)' },
+        },
+        'radar-upright': {
+          '0%, 100%': { transform: 'rotate(8deg)' },
+          '50%': { transform: 'rotate(-8deg)' },
+        },
         'radar-ping': {
           '0%': {
             scale: '1.18',
@@ -215,6 +231,10 @@ export default {
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'radar-sweep': 'radar-sweep 6s linear infinite',
         'radar-ping': 'radar-ping 6s ease-out infinite',
+        'sonar-bloom': 'sonar-bloom 6s var(--ease-glass) infinite',
+        reticle: 'reticle 18s linear infinite',
+        'radar-drift': 'radar-drift 14s ease-in-out infinite',
+        'radar-upright': 'radar-upright 14s ease-in-out infinite',
         'hero-scan': 'hero-scan 4.5s var(--ease-glass) 0.2s infinite both',
         'bar-fill': 'bar-fill 0.9s var(--ease-glass) both',
         'bar-fill-y': 'bar-fill-y 1.2s var(--ease-glass) 0.2s both',
