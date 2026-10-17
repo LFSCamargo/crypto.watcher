@@ -18,6 +18,15 @@ describe('MethodologySection', () => {
     }
   })
 
+  it('explains what each review seat checks', () => {
+    render(<MethodologySection />)
+    const card = screen.getByRole('article', { name: 'Vetted governor council' })
+
+    expect(within(card).getAllByRole('listitem')).toHaveLength(6)
+    expect(within(card).getByText('Smart contract security')).toBeInTheDocument()
+    expect(within(card).getByText(/upgrade keys, admin powers, and audits/i)).toBeInTheDocument()
+  })
+
   it('lets visitors try to buy a better score and keeps it unchanged', async () => {
     const user = userEvent.setup()
     render(<MethodologySection />)
@@ -32,5 +41,8 @@ describe('MethodologySection', () => {
     await user.click(button)
     expect(within(card).getByRole('status')).toHaveTextContent(/Still 82 after 3 tries/)
     expect(within(card).getByText('82', { selector: '[data-score]' })).toBeInTheDocument()
+    expect(card.querySelector('[data-score-dial]')).toBeTruthy()
+    expect(card.querySelectorAll('[data-coin]')).toHaveLength(3)
+    expect(card.querySelector('[data-score]')?.className).not.toMatch(/shake/)
   })
 })

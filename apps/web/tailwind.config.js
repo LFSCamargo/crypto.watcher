@@ -212,6 +212,31 @@ export default {
           '65%': { transform: 'translateY(0) scale(1)', opacity: '1' },
           '100%': { transform: 'translateY(0) scale(0.2)', opacity: '0' },
         },
+        'coin-deflect': {
+          '0%': { transform: 'translate(0, 8px) scale(0.55)', opacity: '0' },
+          '16%': { opacity: '1' },
+          '46%': { transform: 'translate(0, -56px) scale(1)', opacity: '1' },
+          '100%': {
+            transform: 'translate(var(--toss-x), 8px) scale(0.4)',
+            opacity: '0',
+          },
+        },
+        'score-hold': {
+          '0%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.55)' },
+          '100%': { boxShadow: '0 0 0 16px hsl(var(--primary) / 0)' },
+        },
+        'seat-live': {
+          '0%, 10%': {
+            borderColor: 'hsl(var(--primary) / 0.85)',
+            backgroundColor: 'hsl(var(--primary) / 0.14)',
+            boxShadow: 'inset 0 0 0 1px hsl(var(--primary) / 0.35)',
+          },
+          '18%, 100%': {
+            borderColor: 'hsl(var(--border))',
+            backgroundColor: 'hsl(var(--background) / 0.5)',
+            boxShadow: 'inset 0 0 0 0 hsl(var(--primary) / 0)',
+          },
+        },
         'step-progress': {
           from: { transform: 'scaleX(0)' },
           to: { transform: 'scaleX(1)' },
@@ -244,6 +269,9 @@ export default {
         float: 'float 6s ease-in-out infinite',
         shake: 'shake 0.5s var(--ease-glass)',
         'coin-drop': 'coin-drop 0.9s var(--ease-glass) both',
+        'coin-deflect': 'coin-deflect 0.9s var(--ease-glass) both',
+        'score-hold': 'score-hold 0.7s var(--ease-glass) both',
+        'seat-live': 'seat-live 9s linear infinite',
         'step-progress': 'step-progress var(--step-duration, 4s) linear both',
         'border-spin': 'border-spin 8s linear infinite',
       },

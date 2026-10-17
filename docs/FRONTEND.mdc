@@ -83,7 +83,7 @@ apps/
     │   │   │   ├── components/section-glow.tsx # Decorative toned radial glows behind each section
     │   │   │   ├── components/asset-ticker.tsx # Passing tape on every screen; the wheel scrubs it while hovered
     │   │   │   ├── hooks/use-auto-scroll-tape.ts # Tokens keep passing; hover maps the wheel onto the row
-    │   │   │   ├── components/*-card.tsx # Methodology bento: council orbit, report anatomy, "try to buy a score", evidence chat
+    │   │   │   ├── components/*-card.tsx # Methodology bento: council seats, report anatomy, locked-score dial, evidence chat
     │   │   │   ├── components/rating-ladder.tsx # Grade histogram (B→AAA); listed coins open the radar preview
     │   │   │   ├── components/lifecycle-track.tsx # SVG review timeline: cubic route, stations, traveling marker
     │   │   │   ├── components/reveal.tsx, spotlight-card.tsx # Scroll reveal; pointer-following card glow

@@ -497,7 +497,8 @@
     }
 
     .landing-motion .animate-hero-scan,
-    .landing-motion .animate-coin-drop {
+    .landing-motion .animate-coin-drop,
+    .landing-motion .animate-coin-deflect {
       opacity: 0;
     }
   }
