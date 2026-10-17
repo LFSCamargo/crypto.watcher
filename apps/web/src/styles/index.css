@@ -449,6 +449,38 @@
     background: linear-gradient(to right, transparent, hsl(var(--primary) / 0.88), transparent);
   }
 
+  @media (max-width: 1023px) {
+    [data-search-panel][data-state='open'] {
+      animation: search-panel-in 240ms var(--ease-glass) both !important;
+    }
+
+    [data-search-panel][data-state='closed'] {
+      animation: search-panel-out 160ms var(--ease-glass) both !important;
+    }
+  }
+
+  @keyframes search-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes search-panel-out {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
   .landing-motion .animate-border-spin {
     animation-duration: 16s;
   }

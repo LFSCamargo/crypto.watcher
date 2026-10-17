@@ -41,7 +41,11 @@ export function AppLayout() {
       <RouteSeo />
       <PageGridBackground />
       <CommandPalette open={open} onOpenChange={setOpen} />
-      <AppHeader onOpenSearch={() => setOpen(true)} />
+      <AppHeader
+        searchOpen={open}
+        onOpenSearch={() => setOpen(true)}
+        onCloseSearch={() => setOpen(false)}
+      />
 
       <main
         id="main-content"

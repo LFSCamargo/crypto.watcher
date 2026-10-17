@@ -1,11 +1,34 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RiSearchLine } from '@remixicon/react'
+import { RiCloseLine, RiSearchLine } from '@remixicon/react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { useProjects } from '../../modules/projects/hooks/use-projects'
-import { buildProjectSearchResults } from '../../modules/projects/lib/search-projects'
+import {
+  curatedProjects,
+  sortCuratedProjectsByRating,
+} from '../../modules/projects/lib/curated-projects'
+import {
+  buildProjectSearchResults,
+  type ProjectSearchResult,
+} from '../../modules/projects/lib/search-projects'
 import { ProjectSearchResults } from '../../modules/projects/components/project-search-results'
 import { useDebouncedValue } from '../../lib/utils'
+
+const TOP_PROJECT_COUNT = 5
+
+function topProjectSuggestions(): ProjectSearchResult[] {
+  return sortCuratedProjectsByRating(curatedProjects)
+    .slice(0, TOP_PROJECT_COUNT)
+    .map((project) => ({
+      key: `top-${project.slug}`,
+      title: project.name,
+      subtitle: `${project.symbol} · ${project.score}/100`,
+      kind: 'reference' as const,
+      to: `/app/reference/${project.slug}`,
+      symbol: project.symbol,
+      slug: project.slug,
+    }))
+}
 
 interface CommandPaletteProps {
   open: boolean
@@ -51,7 +74,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   }, [debouncedQuery])
 
   const results = useMemo(
-    () => buildProjectSearchResults(resolvedQuery, liveProjects),
+    () =>
+      resolvedQuery
+        ? buildProjectSearchResults(resolvedQuery, liveProjects)
+        : topProjectSuggestions(),
     [resolvedQuery, liveProjects],
   )
 
@@ -89,26 +115,42 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0 [&>button]:hidden">
+      <DialogContent
+        data-search-panel
+        className="z-50 max-w-xl gap-0 overflow-hidden p-0 [&>button]:hidden max-lg:left-3 max-lg:right-3 max-lg:top-[4.75rem] max-lg:w-auto max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0"
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Search projects</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center gap-3 border-b border-border px-4 transition-colors focus-within:border-primary/30">
-          <RiSearchLine className="h-5 w-5 shrink-0 text-muted-foreground" />
+        <div className="flex items-center gap-2 border-b border-border px-3 transition-colors focus-within:border-primary/30 sm:gap-3 sm:px-4">
+          <RiSearchLine className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
           <input
             ref={inputRef}
             aria-label="Search crypto projects"
             autoComplete="off"
-            className="h-14 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="h-11 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground sm:h-14"
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search projects by name or symbol..."
             value={query}
           />
+          <button
+            type="button"
+            className="rounded-full p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            aria-label="Close search"
+            onClick={() => onOpenChange(false)}
+          >
+            <RiCloseLine className="h-5 w-5" />
+          </button>
           <kbd className="hidden rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground sm:inline">
             ESC
           </kbd>
         </div>
+        {!resolvedQuery ? (
+          <p className="px-4 pb-0 pt-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Top projects
+          </p>
+        ) : null}
         <ProjectSearchResults
           results={results}
           query={resolvedQuery}

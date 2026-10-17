@@ -152,4 +152,23 @@ describe('AppHeader', () => {
       '/',
     )
   })
+
+  it('turns the mobile search control into a close button while search is open', async () => {
+    const user = userEvent.setup()
+    const onOpenSearch = vi.fn()
+    const onCloseSearch = vi.fn()
+    renderWithProviders(
+      <ThemeProvider>
+        <AppHeader
+          onOpenSearch={onOpenSearch}
+          onCloseSearch={onCloseSearch}
+          searchOpen
+        />
+      </ThemeProvider>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Close search' }))
+    expect(onCloseSearch).toHaveBeenCalledTimes(1)
+    expect(onOpenSearch).not.toHaveBeenCalled()
+  })
 })

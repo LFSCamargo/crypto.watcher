@@ -72,7 +72,7 @@ export function ProjectSearchResults({
           </button>
         </li>
       ))}
-      {!trimmedQuery && (
+      {!trimmedQuery && results.length === 0 && (
         <li className="px-3 py-8 text-center text-sm text-muted-foreground">
           {emptyQueryMessage}
         </li>

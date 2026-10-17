@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { RiAddLine, RiSearchLine } from '@remixicon/react'
+import { RiAddLine, RiCloseLine, RiSearchLine } from '@remixicon/react'
 import { AuthControls } from '../../modules/auth/components/auth-controls'
 import { useSession } from '../../store/session'
 import { cn } from '../../lib/utils'
@@ -14,14 +14,20 @@ const pillMotion = 'duration-500 ease-glass motion-reduce:transition-none'
 
 interface AppHeaderProps {
   onOpenSearch: () => void
+  searchOpen?: boolean
+  onCloseSearch?: () => void
 }
 
-export function AppHeader({ onOpenSearch }: AppHeaderProps) {
+export function AppHeader({
+  onOpenSearch,
+  searchOpen = false,
+  onCloseSearch,
+}: AppHeaderProps) {
   const isSignedIn = useSession((state) => Boolean(state.user))
   const { compact, expand, onPointerEnter, onPointerLeave } = useCompactHeader()
 
   return (
-    <header className="pointer-events-none sticky top-0 z-40 px-3 pt-3 sm:px-4">
+    <header className="pointer-events-none sticky top-0 z-[70] px-2 pt-2 sm:px-4 sm:pt-3">
       <div
         data-size={compact ? 'compact' : 'expanded'}
         onClick={compact ? expand : undefined}
@@ -30,7 +36,9 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
         className={cn(
           'glass-nav glass-pill pointer-events-auto mx-auto flex items-center rounded-full transition-[max-width,height,padding,gap]',
           pillMotion,
-          compact ? 'h-12 max-w-4xl gap-2 px-2' : 'h-16 max-w-7xl gap-3 px-3 sm:px-5',
+          compact
+            ? 'h-11 max-w-4xl gap-1.5 px-1.5'
+            : 'h-12 max-w-7xl gap-2 px-2 sm:h-16 sm:gap-3 sm:px-5',
         )}
       >
         <Link
@@ -40,9 +48,9 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
           <Logo
             size="sm"
             wordmarkClassName={cn(
-              'hidden overflow-hidden whitespace-nowrap transition-[max-width,opacity] sm:inline-block',
+              'inline-block overflow-hidden whitespace-nowrap text-xs transition-[max-width,opacity] sm:text-2xl',
               pillMotion,
-              compact ? 'max-w-0 opacity-0' : 'max-w-[14rem] opacity-100',
+              compact ? 'max-w-0 opacity-0' : 'max-w-[7rem] opacity-100 sm:max-w-[14rem]',
             )}
           />
         </Link>
@@ -73,7 +81,7 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
 
         <div
           className={cn(
-            'ml-auto hidden flex-1 justify-end transition-[max-width] md:flex',
+            'ml-auto hidden min-w-0 flex-1 justify-end transition-[max-width] md:flex',
             pillMotion,
             compact ? 'md:max-w-10' : 'md:max-w-xs xl:max-w-sm',
           )}
@@ -117,10 +125,10 @@ export function AppHeader({ onOpenSearch }: AppHeaderProps) {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            onClick={onOpenSearch}
-            aria-label="Search projects"
+            onClick={searchOpen ? onCloseSearch : onOpenSearch}
+            aria-label={searchOpen ? 'Close search' : 'Search projects'}
           >
-            <RiSearchLine className="h-5 w-5" />
+            {searchOpen ? <RiCloseLine className="h-5 w-5" /> : <RiSearchLine className="h-5 w-5" />}
           </Button>
           {isSignedIn ? (
             <Button
