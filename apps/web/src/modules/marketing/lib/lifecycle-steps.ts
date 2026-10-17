@@ -1,15 +1,5 @@
 import type { Tone } from '../../../components/ui'
 
-export const lifecycleToneColor = (tone: Tone): string =>
-  ({
-    amber: 'hsl(var(--tone-amber))',
-    coral: 'hsl(var(--tone-coral))',
-    violet: 'hsl(var(--tone-violet))',
-    sky: 'hsl(var(--tone-sky))',
-    teal: 'hsl(var(--tone-teal))',
-    pink: 'hsl(var(--tone-pink))',
-  })[tone]
-
 export interface LifecycleStep {
   title: string
   tone: Tone

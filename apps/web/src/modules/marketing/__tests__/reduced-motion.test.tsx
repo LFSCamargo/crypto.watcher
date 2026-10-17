@@ -52,6 +52,9 @@ it('suspends the four-second lifecycle tour outside the viewport', () => {
   motionState.reduced = false
   const { rerender } = render(<LifecycleSection />)
   act(() => {
+    screen.getByRole('button', { name: 'Play tour' }).click()
+  })
+  act(() => {
     vi.advanceTimersByTime(4000)
   })
   expect(screen.getByRole('region', { name: /^Step 2 of 5/ })).toBeInTheDocument()

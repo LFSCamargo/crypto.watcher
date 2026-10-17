@@ -41,11 +41,18 @@ describe('LifecycleSection', () => {
     )
   })
 
-  it('tours the steps on its own once visible and can be paused', () => {
+  it('stays manual until the tour is started and can be paused', () => {
     vi.useFakeTimers()
     vi.stubGlobal('IntersectionObserver', IntersectingObserver)
     render(<LifecycleSection />)
 
+    act(() => {
+      vi.advanceTimersByTime(8000)
+    })
+    expect(detail()).toHaveAccessibleName('Step 1 of 5: Review requested')
+    act(() => {
+      screen.getByRole('button', { name: 'Play tour' }).click()
+    })
     act(() => {
       vi.advanceTimersByTime(4100)
     })
@@ -61,37 +68,17 @@ describe('LifecycleSection', () => {
     expect(screen.getByRole('button', { name: 'Play tour' })).toBeInTheDocument()
   })
 
-  it('draws the active step farther along a vector track', async () => {
+  it('navigates through every stage and stops at the boundaries', async () => {
     const user = userEvent.setup()
-    const { container } = render(<LifecycleSection />)
-    const track = container.querySelector('[data-lifecycle-track]')
-    expect(track?.tagName.toLowerCase()).toBe('svg')
-    expect(track?.querySelectorAll('[data-station]')).toHaveLength(5)
-
-    const progress = track?.querySelector('[data-track-progress]')
-    const start = Number(progress?.getAttribute('stroke-dashoffset'))
-    const startX = track?.querySelector('[data-track-marker]')?.getAttribute('data-x')
-    expect(start).toBeGreaterThan(0)
-    expect(track?.querySelector('[data-station="0"]')).toHaveAttribute(
-      'data-reached',
-      'true',
-    )
-    expect(track?.querySelector('[data-station="4"]')).toHaveAttribute(
-      'data-reached',
-      'false',
-    )
-
-    await user.click(screen.getByRole('button', { name: 'Score shown' }))
-
-    expect(Number(progress?.getAttribute('stroke-dashoffset'))).toBeLessThan(start)
-    expect(Number(progress?.getAttribute('stroke-dashoffset'))).toBe(0)
-    expect(track?.querySelector('[data-track-marker]')?.getAttribute('data-x')).not.toBe(
-      startX,
-    )
-    expect(track?.querySelector('[data-station="4"]')).toHaveAttribute(
-      'data-reached',
-      'true',
-    )
+    render(<LifecycleSection />)
+    expect(screen.getByRole('button', { name: 'Previous stage' })).toBeDisabled()
+    for (let index = 0; index < 4; index += 1) {
+      await user.click(screen.getByRole('button', { name: 'Next stage' }))
+    }
+    expect(detail()).toHaveAccessibleName('Step 5 of 5: Score shown')
+    expect(screen.getByRole('button', { name: 'Next stage' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Previous stage' }))
+    expect(detail()).toHaveAccessibleName('Step 4 of 5: Report published')
   })
 
   it('stops the tour when the reader picks a step', async () => {
@@ -99,6 +86,7 @@ describe('LifecycleSection', () => {
     const user = userEvent.setup()
     render(<LifecycleSection />)
 
+    await user.click(screen.getByRole('button', { name: 'Play tour' }))
     await user.click(screen.getByRole('button', { name: 'Score shown' }))
     expect(screen.getByRole('button', { name: 'Play tour' })).toBeInTheDocument()
     expect(detail()).toHaveAccessibleName('Step 5 of 5: Score shown')

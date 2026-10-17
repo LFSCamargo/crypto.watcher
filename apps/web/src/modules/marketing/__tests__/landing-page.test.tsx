@@ -69,7 +69,7 @@ describe('LandingPage', () => {
     const lifecycle = screen.getByRole('list', { name: 'Review lifecycle' })
     const steps = within(lifecycle)
       .getAllByRole('listitem')
-      .map((item) => within(item).getByRole('heading').textContent)
+      .map((item) => within(item).getByRole('button').getAttribute('aria-label'))
     expect(steps).toEqual([
       'Review requested',
       'In analysis',
