@@ -3,7 +3,9 @@
 # Used by Coolify and local prod smoke tests: docker compose up -d --build
 #
 # web is not bound to host :80 (Coolify's proxy uses it). In Coolify, point your
-# domain at the web service on container port 80. Local smoke test without Coolify:
+# domain at the web service on container port 80. Do not add a networks: block —
+# a custom network isolates this stack and Coolify's proxy cannot reach it.
+# Local smoke test without Coolify:
 #   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 #
 # Set env in Coolify (or root `.env` locally). The web container serves the SPA
@@ -24,8 +26,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - internal
 
   api:
     build:
@@ -52,8 +52,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - internal
     expose:
       - '3000'
 
@@ -72,12 +70,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    networks:
-      - internal
-
-networks:
-  internal:
-    driver: bridge
 
 volumes:
   pgdata:

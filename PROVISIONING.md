@@ -117,7 +117,9 @@ docker compose up -d --build
    when `VITE_*` build args change).
 5. Leave `VITE_API_URL` empty — production builds call the API at `/api/*` (nginx
    proxy); SPA routes like `/auth/reset-password` stay on the web app.
-6. Postgres and API stay on the internal network; do not publish them publicly.
+6. Do not add a `networks:` block. Coolify attaches its proxy to the stack
+   automatically; a custom network isolates the containers and the proxy times out.
+   Postgres and API have no published ports.
 7. **Profile avatars:** stored as base64 or HTTPS URLs in `users.avatar_url`, hard-capped
    at **256 KB** per row (Zod + Express + nginx + PostgreSQL `CHECK`). Monitor Postgres
    disk on your host; Coolify/managed Postgres should have alerts on volume usage.
@@ -179,7 +181,7 @@ Work through this before exposing the app on the public internet.
 
 - [ ] TLS terminated at Nginx (or Coolify’s proxy); force HTTPS redirects.
 - [ ] Secrets supplied as platform env vars, not copied into the image or repo.
-- [ ] Postgres and API on internal Docker networks; only web/API ports published as needed.
+- [ ] No custom `networks:` block in `docker-compose.yml` (Coolify’s proxy must join the stack). Postgres and API ports are not published.
 - [ ] Observability (Sentry, Better Stack, etc.) configured with **server-side** DSNs/tokens — not `VITE_` unless intentionally public.
 
 ---
