@@ -143,6 +143,21 @@ describe('AppHeader', () => {
     expect(pill()).toHaveAttribute('data-size', 'compact')
   })
 
+  it('keeps the sticky header available when the account menu opens while scrolled', async () => {
+    const user = userEvent.setup()
+    useSession.setState({ user: member })
+    renderHeader()
+    scrollTo(400)
+
+    await user.click(await screen.findByRole('button', { name: 'Account menu for ada' }))
+
+    expect(await screen.findByRole('menuitem', { name: 'Profile' })).toBeVisible()
+    expect(screen.getByRole('banner')).toBeVisible()
+    expect(pill()).toHaveAttribute('data-size', 'expanded')
+    expect(document.body).not.toHaveAttribute('data-scroll-locked')
+    expect(screen.getByRole('menu')).toHaveClass('z-[80]')
+  })
+
   it('keeps the search and home link names when compact', () => {
     renderHeader()
     scrollTo(400)

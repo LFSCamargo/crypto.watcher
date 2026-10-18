@@ -117,7 +117,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         data-search-panel
-        className="z-50 max-w-xl gap-0 overflow-hidden p-0 [&>button]:hidden max-lg:left-3 max-lg:right-3 max-lg:top-[4.75rem] max-lg:w-auto max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0"
+        className="z-50 max-w-xl gap-0 overflow-hidden p-0 [&>button]:hidden max-lg:left-3 max-lg:right-3 max-md:top-[4.75rem] md:max-lg:top-24 max-lg:w-auto max-lg:max-w-none max-lg:translate-x-0 max-lg:translate-y-0"
       >
         <DialogHeader className="sr-only">
           <DialogTitle>Search projects</DialogTitle>

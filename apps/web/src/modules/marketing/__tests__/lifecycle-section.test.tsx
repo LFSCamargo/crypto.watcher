@@ -24,6 +24,17 @@ describe('LifecycleSection', () => {
     vi.unstubAllGlobals()
   })
 
+  it('keeps stage tabs numbered-only through tablet width', () => {
+    render(<LifecycleSection />)
+    const firstTab = screen.getByRole('button', { name: 'Review requested' })
+    const title = within(firstTab).getByText('Review requested')
+
+    expect(firstTab).toHaveClass('min-h-12')
+    expect(firstTab.className).not.toMatch(/md:min-h-24|md:flex-col/)
+    expect(title).toHaveClass('hidden', 'lg:block')
+    expect(title).not.toHaveClass('md:block')
+  })
+
   it('shows who acts and what you see for the chosen step', async () => {
     const user = userEvent.setup()
     render(<LifecycleSection />)

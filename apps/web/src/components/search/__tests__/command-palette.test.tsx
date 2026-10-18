@@ -13,7 +13,8 @@ describe('CommandPalette', () => {
     renderWithProviders(<CommandPalette open onOpenChange={() => undefined} />)
 
     expect(screen.getByRole('dialog', { name: 'Search projects' })).toHaveClass(
-      'max-lg:top-[4.75rem]',
+      'max-md:top-[4.75rem]',
+      'md:max-lg:top-24',
       'max-lg:translate-y-0',
     )
     expect(screen.getByRole('button', { name: 'Close search' })).toBeInTheDocument()

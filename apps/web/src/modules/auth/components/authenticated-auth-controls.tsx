@@ -41,7 +41,10 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
   }
 
   return (
-    <DropdownMenu>
+    // Non-modal so the menu does not lock body scroll. That lock sets
+    // overflow:hidden and position:relative on body, which unpins the sticky
+    // header and drops its glass fill once the page is scrolled.
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -66,7 +69,7 @@ export function AuthenticatedAuthControls({ user }: { user: SessionUser }) {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="z-[80]">
         <DropdownMenuLabel>
           <p className="truncate text-sm font-semibold">{displayName}</p>
           {user.email ? (

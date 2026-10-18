@@ -89,7 +89,7 @@ export function LifecycleSection() {
                   aria-controls="lifecycle-detail"
                   onClick={() => selectStep(index)}
                   className={cn(
-                    'relative flex min-h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none md:min-h-24 md:flex-col md:items-start lg:flex-row lg:items-center',
+                    'relative flex min-h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none lg:min-h-16 lg:justify-start',
                     index === active
                       ? 'border-tone-sky/40 bg-tone-sky/10 text-tone-sky-strong'
                       : 'border-transparent text-muted-foreground hover:border-border hover:bg-background',
@@ -98,7 +98,7 @@ export function LifecycleSection() {
                   <span aria-hidden className="font-mono text-sm font-semibold">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <span className="hidden text-sm font-semibold leading-snug md:block">
+                  <span className="hidden text-sm font-semibold leading-snug lg:block">
                     {item.title}
                   </span>
                   {index === active && touring && (
