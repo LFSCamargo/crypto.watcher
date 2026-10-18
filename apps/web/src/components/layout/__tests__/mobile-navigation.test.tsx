@@ -54,7 +54,7 @@ describe('MobileNavigation', () => {
     )
   })
 
-  it('compacts to icons on scroll, then expands on the first tap so the next tap navigates', () => {
+  it('navigates on the first tap while the bar is compact', () => {
     renderNav()
     const bar = screen.getByRole('navigation', { name: 'Mobile' })
     expect(bar).toHaveAttribute('data-size', 'expanded')
@@ -65,15 +65,7 @@ describe('MobileNavigation', () => {
 
     scrollTo(400)
     expect(bar).toHaveAttribute('data-size', 'compact')
-    expect(bar).toHaveClass('h-11')
     expect(within(bar).getByText('Projects')).toHaveClass('max-w-0', 'opacity-0')
-
-    fireEvent.click(within(bar).getByRole('link', { name: 'Governance' }))
-    expect(bar).toHaveAttribute('data-size', 'expanded')
-    expect(within(bar).getByRole('link', { name: 'Governance' })).not.toHaveAttribute(
-      'aria-current',
-      'page',
-    )
 
     fireEvent.click(within(bar).getByRole('link', { name: 'Governance' }))
     expect(within(bar).getByRole('link', { name: 'Governance' })).toHaveAttribute(
@@ -95,6 +87,13 @@ describe('MobileNavigation', () => {
       'aria-current',
       'page',
     )
+  })
+
+  it('hides the tabs while the menu sheet is open', async () => {
+    renderNav()
+    const bar = screen.getByRole('navigation', { name: 'Mobile' })
+    await openMenu()
+    expect(bar).toHaveClass('invisible', 'pointer-events-none')
   })
 
   it('reveals every resource and guest account action in the menu sheet', async () => {

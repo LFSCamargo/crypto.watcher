@@ -49,7 +49,7 @@ apps/
     │   │   │   ├── navigation.ts    # Primary/resource/footer link registry (single source)
     │   │   │   ├── app-header.tsx   # Floating glass pill: Primary nav, Resources menu, search, auth
     │   │   │   ├── use-compact-header.ts # Pill state: compact on scroll, expands on hover/click/top
-    │   │   │   ├── mobile-navigation.tsx # Centered glass pill; compacts to icons on scroll, tap pins it open + sheet
+    │   │   │   ├── mobile-navigation.tsx # Centered glass pill; compact hides labels, one tap navigates, bar hides while the menu is open
     │   │   │   ├── app-footer.tsx   # Link groups + request CTA + disclaimer
     │   │   │   ├── footer-link-group.tsx
     │   │   │   ├── resources-menu.tsx

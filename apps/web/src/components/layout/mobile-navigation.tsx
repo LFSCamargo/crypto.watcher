@@ -1,5 +1,4 @@
-import { useState, type MouseEvent } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { RiAddLine, RiLogoutBoxRLine, RiMenuLine, RiUserLine } from '@remixicon/react'
@@ -30,15 +29,8 @@ export function MobileNavigation() {
   const user = useSession((state) => state.user)
   const { signInHref, signUpHref } = useAuthLinks()
   const logout = useLogout()
-  const { compact, expand, onPointerEnter, onPointerLeave } = useCompactHeader()
+  const { compact } = useCompactHeader()
   const close = () => setOpen(false)
-
-  function expandBeforeAction(event: MouseEvent<HTMLElement>) {
-    if (!compact) return
-    event.preventDefault()
-    event.stopPropagation()
-    expand()
-  }
 
   const handleSignOut = async () => {
     await logout.mutateAsync()
@@ -51,13 +43,11 @@ export function MobileNavigation() {
     <nav
       aria-label="Mobile"
       data-size={compact ? 'compact' : 'expanded'}
-      onClickCapture={expandBeforeAction}
-      onPointerEnter={onPointerEnter}
-      onPointerLeave={onPointerLeave}
       className={cn(
         'glass-nav glass-pill fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-[70] flex h-11 w-fit max-w-[calc(100%-2rem)] -translate-x-1/2 items-center justify-center gap-0.5 overflow-hidden rounded-full p-1 transition-[width]',
         pillMotion,
         'lg:hidden',
+        open && 'invisible pointer-events-none',
       )}
     >
       <div className="flex h-full items-center justify-center gap-1">
@@ -77,12 +67,10 @@ export function MobileNavigation() {
             {({ isActive }) => (
               <>
                 {isActive ? (
-                  <motion.span
-                    layoutId="mobile-tab-indicator"
+                  <span
                     aria-hidden
                     data-tab-indicator
                     className="absolute inset-0 rounded-full bg-foreground"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 ) : null}
                 <item.icon className="relative z-10 h-5 w-5 shrink-0" aria-hidden />
