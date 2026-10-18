@@ -28,10 +28,17 @@ function MarketList({ label, slugs }: { label: string; slugs: readonly string[] 
 }
 
 /** Schedules the background market warmup once, on the first render of the shell. */
-export function MarketCacheWarmup({ slugs }: { slugs: readonly string[] }) {
+export function MarketCacheWarmup({
+  slugs,
+  showProgress = import.meta.env.DEV,
+}: {
+  slugs: readonly string[]
+  /** The loading card is a development aid. Production keeps the worker silent. */
+  showProgress?: boolean
+}) {
   const progress = useMarketCacheWorker(slugs)
   const finished = progress.phase === 'done' && progress.remaining.length === 0
-  if (progress.phase === 'idle' || progress.total === 0 || finished) return null
+  if (!showProgress || progress.phase === 'idle' || progress.total === 0 || finished) return null
 
   const percent = Math.round((progress.saved.length / progress.total) * 100)
 

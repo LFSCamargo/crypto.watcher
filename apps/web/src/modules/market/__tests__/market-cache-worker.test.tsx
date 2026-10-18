@@ -146,6 +146,22 @@ describe('market cache worker', () => {
     )
   })
 
+  it('keeps saving markets without the loading panel outside development', () => {
+    vi.stubGlobal('Worker', MockWorker)
+
+    renderWithProviders(<MarketCacheWarmup showProgress={false} slugs={['bitcoin']} />)
+
+    act(() => {
+      MockWorker.latest?.emit({ type: 'snapshot', snapshot: snapshot('bitcoin', 1) })
+    })
+
+    expect(readLocalMarketCache('bitcoin')?.price).toBe(1)
+    expect(screen.queryByText('Saving market prices')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('progressbar', { name: 'Market prices saved locally' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('does not ask the worker for a token that is already saved', () => {
     writeLocalMarketCache('bitcoin', snapshot('bitcoin', 42000))
     vi.stubGlobal('Worker', MockWorker)

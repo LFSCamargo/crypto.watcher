@@ -111,7 +111,7 @@ apps/
     │   │   │   └── __tests__/
     │   │   ├── scoring/             # Expert score display/visualization   [MVP]
     │   │   ├── market/              # Price chart + change badges      [MVP]
-    │   │   │   ├── components/     # market-cache-warmup.tsx (schedules the background worker)
+    │   │   │   ├── components/     # market-cache-warmup.tsx (background worker; loading card is dev-only)
     │   │   │   ├── hooks/          # use-market-price.ts, use-market-cache-worker.ts
     │   │   │   ├── lib/            # local cache + progressive loader
     │   │   │   └── workers/        # market-cache.worker.ts
