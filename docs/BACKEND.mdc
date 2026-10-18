@@ -44,6 +44,7 @@ apps/
     ├── src/
     │   ├── app.ts                   # Express app, middleware, routes
     │   ├── main.ts                  # Node HTTP listener
+    │   ├── jobs/                    # catalog-refresh.ts — 12h market + protocol metrics warmup [MVP]
     │   ├── core/                    # Cross-cutting infrastructure
     │   │   ├── db/                  # Kysely instance, types, migrations
     │   │   │   ├── migrations/
@@ -140,6 +141,7 @@ apps/
 ### market `[MVP]`
 - `GET /market/projects/:slug` — USD spot price, 24h/7d/1m/1y change, and up to 1 year of chart history for curated reference slugs.
 - Data sourced from CoinGecko (free public API). A successful snapshot is stored in PostgreSQL (`market_cache`) and refreshed every 12 hours. Expiry does not delete the row: if CoinGecko is unreachable, the API returns the last snapshot from the past 7 days with `stale: true`. Older rows are not served, so the error surfaces only when nothing that recent exists. The in-memory L1 cache follows the same 12-hour refresh.
+- A catalog job (`jobs/catalog-refresh.ts`) runs when the API process starts and then every 12 hours. It refreshes stale `market_cache` rows one CoinGecko chart at a time (1.5s gap after each fetch) and stale `protocol_metrics_cache` rows one DeFi Llama snapshot at a time. Rows that are still fresh are skipped.
 - Slug → CoinGecko ID mapping with overrides for assets whose slug differs (e.g. `xrp` → `ripple`, `avalanche` → `avalanche-2`).
 
 ### protocol-metrics `[MVP]`
@@ -149,7 +151,7 @@ apps/
 - **Stablecoin** snapshots (USDC, USDT) use DeFi Llama stablecoin supply data: circulating supply history and supply-by-chain breakdown — not protocol TVL.
 - Chain snapshots include TVL trends/history plus network-wide DEX volume, fees paid, and revenue captured (`/overview/fees/{chain}?dataType=dailyRevenue`). Overview calls set `excludeTotalDataChartBreakdown=true` so chart history still arrives without the protocol-level breakdown payload. Bitcoin also loads spot price (`coins.llama.fi/prices`) and one year of estimated USD settlement volume (`api.blockchain.info/charts/estimated-transaction-volume-usd`). Snapshot version `10` invalidates caches that scored Bitcoin with fee/TVL.
 - Ordered fallback targets per slug (`metrics-target.ts`); explicit unavailable list for assets with no feed.
-- Cached in PostgreSQL (`protocol_metrics_cache`) and refreshed every 12 hours. Expiry does not delete the row: if DeFi Llama is unreachable, the API returns the last snapshot from the past 7 days with `stale: true`. Older rows are not served.
+- Cached in PostgreSQL (`protocol_metrics_cache`) and refreshed every 12 hours by the same catalog job as market prices. Expiry does not delete the row: if DeFi Llama is unreachable, the API returns the last snapshot from the past 7 days with `stale: true`. Older rows are not served.
 
 ### governance — launch requirement
 - Read/serve on-chain proposals, votes and outcomes from the Governor. `[MVP]`
